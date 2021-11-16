@@ -1,1 +1,1 @@
-# ECE1782
+# Tiny Universe Simulator (TUS)
