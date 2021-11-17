@@ -12,7 +12,7 @@ clean:
 # cpu_sim
 
 prepare_cpu_sim:
-	mkdir -p build/cpu_sim;
+	mkdir -p build/cpu_sim
 	cmake -S src/cpu_sim -B build/cpu_sim
 .PHONY: prepare_cpu_sim
 
@@ -26,19 +26,24 @@ run_cpu_sim: cpu_sim
 	./build/cpu_sim/cpu_sim
 .PHONY: run_cpu_sim
 
-# gpu
+# tus
 
-gpu:
-	./compile_cuda.sh main
-	@echo "=== gpu is successfully built ==="
+prepare_tus:
+	mkdir -p build/tus
+	cmake -S src/tus -B build/tus
+.PHONY: prepare_tus
+
+tus: prepare_tus
+	$(MAKE) -C build/tus all
+	@echo "=== tus is successfully built ==="
 	@echo ""
-.PHONY: gpu
+.PHONY: tus
 
-run_gpu: gpu
-	./build/gpu/main
-.PHONY: run_gpu
+run_tus: tus
+	./build/tus/tus
+.PHONY: run_tus
 
 # all
 
-all: cpu_sim gpu
+all: cpu_sim tus
 .PHONY: all
