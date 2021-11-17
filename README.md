@@ -1,12 +1,30 @@
 # Tiny Universe Simulator (TUS)
 
-## To Compile
+## Executables
+
+### tus (main project)
+- The GPU simulator written in CUDA
+- Located in ./src/tus/
+
+### cpu_sim
+- The CPU simulator
+- Located in ./src/cpu_sim
+
+
+## Makefile
+
+### tus
 ```
-nvcc main.cu -o main -res-usage
-nvcc main.cu -o main -res-usage -D NDEBUG
+# Compile only
+make tus
+# Compile and run
+make run_tus
 ```
 
-## To Run
+### cpu_sim
 ```
-./main
+# Compile only
+make cpu_sim
+# Compile and run
+make run_cpu_sim
 ```
