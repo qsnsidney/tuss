@@ -1,5 +1,9 @@
 # Tiny Universe Simulator (TUS)
 
+## Algorithm
+Paper reference:  
+[Fast Simulations of Gravitational Many-body Problem on RV770 GPU] (https://arxiv.org/pdf/0904.3659.pdf)
+
 ## Executables
 
 ### tus (main project)
