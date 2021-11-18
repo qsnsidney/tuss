@@ -5,10 +5,10 @@ include(CTest)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-file(GLOB SOURCES
-    ./*.h
-    ./*.cpp
+file(GLOB core_SRC
+     "*.h"
+     "*.cpp"
 )
-add_library(core_lib ${SOURCES})
+add_library(core_lib ${core_SRC})
 
 add_subdirectory(tests)
