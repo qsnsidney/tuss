@@ -2,7 +2,7 @@
 
 ## Algorithm
 Paper reference:  
-[Fast Simulations of Gravitational Many-body Problem on RV770 GPU] (https://arxiv.org/pdf/0904.3659.pdf)
+[Fast Simulations of Gravitational Many-body Problem on RV770 GPU](https://arxiv.org/pdf/0904.3659.pdf)
 
 ## Executables
 
