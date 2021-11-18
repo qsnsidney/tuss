@@ -59,5 +59,7 @@ run_tus: tus
 
 # all
 
+# tus is at the last, so others can still be built even
+# when no nvcc is available.
 all: test_core cpu_sim tus
 .PHONY: all
