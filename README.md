@@ -14,6 +14,9 @@ Paper reference:
 - The CPU simulator
 - Located in ./src/cpu_sim
 
+### core
+- The core common code
+- Shared with cpu_sim
 
 ## Makefile
 
@@ -31,4 +34,10 @@ make run_tus
 make cpu_sim
 # Compile and run
 make run_cpu_sim
+```
+
+### core
+```
+# Compile and test
+make test_core
 ```
