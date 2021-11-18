@@ -9,6 +9,20 @@ clean:
 	rm -rf build/
 .PHONY: clean
 
+# core
+
+prepare_core:
+	mkdir -p build/core
+	cmake -S src/core -B build/core
+.PHONY: prepare_core
+
+test_core: prepare_core
+	$(MAKE) -C build/core all
+	$(MAKE) -C build/core test
+	@echo "=== core is successfully tested ==="
+	@echo ""
+.PHONY: test_core
+
 # cpu_sim
 
 prepare_cpu_sim:
@@ -45,5 +59,5 @@ run_tus: tus
 
 # all
 
-all: cpu_sim tus
+all: test_core cpu_sim tus
 .PHONY: all
