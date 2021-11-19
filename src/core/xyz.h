@@ -8,7 +8,7 @@ namespace CORE
     template <typename T>
     struct XYZ_BASE
     {
-        using TYPE = T;
+        using value_type = T;
 
         T x;
         T y;

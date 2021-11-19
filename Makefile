@@ -11,7 +11,7 @@ clean:
 
 prepare:
 	cmake -B build
-	@echo === successfully prepared ===
+	@echo [=== cmake is successfully prepared ===]
 	@echo 
 .PHONY: prepare
 
@@ -20,7 +20,7 @@ prepare:
 test_core: prepare
 	$(MAKE) -C build core_tests
 	$(MAKE) -C build test ARGS="-R '^core_tests_'"
-	@echo === core is successfully tested ===
+	@echo [=== core is successfully tested ===]
 	@echo 
 .PHONY: test_core
 
@@ -28,7 +28,7 @@ test_core: prepare
 
 cpu_sim: prepare
 	$(MAKE) -C build cpu_sim
-	@echo === cpu_sim is successfully built ===
+	@echo [=== cpu_sim is successfully built ===]
 	@echo 
 .PHONY: cpu_sim
 
@@ -46,7 +46,7 @@ NVCC_TEST := $(notdir $(NVCC_RESULT))
 ifeq ($(NVCC_TEST),nvcc) # NVCC exists
 tus: prepare
 	$(MAKE) -C build tus
-	@echo === tus is successfully built ===
+	@echo [=== tus is successfully built ===]
 	@echo 
 .PHONY: tus
 
@@ -56,7 +56,7 @@ run_tus: tus
 .PHONY: run_tus
 else # NVCC does not exist
 tus: prepare
-	@echo === tus is not supported ===
+	@echo [=== tus is not supported ===]
 	@echo 
 .PHONY: tus
 

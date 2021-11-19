@@ -5,7 +5,7 @@
 
 namespace
 {
-    template <typename T = CORE::XYZ::TYPE>
+    template <typename T = CORE::XYZ::value_type>
     T str_to_floating(const std::string &str)
     {
         if constexpr (std::is_same_v<T, float>)
