@@ -176,8 +176,8 @@ __global__ void calculate_acceleration(unsigned nbody, data_t_3d *location, data
 
 int main(int argc, char *argv[])
 {
-    CORE::VEL v{1.0, 2.0, 3.0};
-    v *= 2.0;
+    CORE::VEL v{1.0f, 2.0f, 3.0f};
+    v *= 2.0f;
     std::cout << v << std::endl;
 
     /* Get Dimension */
