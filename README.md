@@ -16,9 +16,21 @@ Paper reference:
 
 ### core
 - The core common code
-- Shared with cpu_sim
+- core_lib
+- Located in ./src/core
+
+### bicgen
+- Bodies Initial Condition GENerator
+- Located in ./scripts/bicgen
+- `python3 -m scripts.bicgen`
 
 ## Makefile
+
+### all
+```
+# Compile all and run test_core
+make
+```
 
 ### tus
 ```
