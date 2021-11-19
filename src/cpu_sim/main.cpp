@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     std::cout << "u=" << u << std::endl;
     std::cout << "v=" << v << std::endl;
     std::cout << "w=" << w << std::endl;
-    std::cout << "This is not good" << std::endl;
+    std::cout << "This is very good" << std::endl;
 
     return 0;
 }
