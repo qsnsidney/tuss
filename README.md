@@ -1,5 +1,10 @@
 # Tiny Universe Simulator (TUS)
 
+[![Build Status][actions-badge]][actions-url]
+
+[actions-badge]: https://github.com/qsnsidney/ECE1782/actions/workflows/makefile-src.yml/badge.svg
+[actions-url]: https://github.com/qsnsidney/ECE1782/actions?query=workflow%3Amakefile-src
+
 ## Algorithm
 Paper reference:  
 [Fast Simulations of Gravitational Many-body Problem on RV770 GPU](https://arxiv.org/pdf/0904.3659.pdf)
