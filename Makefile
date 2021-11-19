@@ -40,10 +40,9 @@ run_cpu_sim: cpu_sim
 NVCC_RESULT := $(shell which nvcc)
 NVCC_TEST := $(notdir $(NVCC_RESULT))
 
-ifeq ($(NVCC_TEST),nvcc) # NVCC exists
-
 # tus
 
+ifeq ($(NVCC_TEST),nvcc) # NVCC exists
 tus: prepare
 	$(MAKE) -C build tus
 	@echo === tus is successfully built ===
@@ -53,17 +52,17 @@ tus: prepare
 run_tus: tus
 	./build/tus/tus
 .PHONY: run_tus
+else # NVCC does not exist
+tus: prepare
+	@echo === tus is not supported ===
+	@echo 
+.PHONY: tus
+
+run_tus: tus
+.PHONY: run_tus
+endif
 
 # all
 
 all: test_core cpu_sim tus
 .PHONY: all
-
-else # NVCC does not exist
-
-# all
-
-all: test_core cpu_sim
-.PHONY: all
-
-endif
