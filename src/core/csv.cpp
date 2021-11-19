@@ -1,6 +1,7 @@
 #include "csv.h"
 
 #include <regex>
+#include <fstream>
 
 namespace
 {
@@ -44,5 +45,11 @@ namespace CORE
             csv_contents.emplace_back(p, v);
         }
         return csv_contents;
+    }
+
+    std::vector<POS_VEL_PAIR> parse_body_ic_from_csv(const std::string &csv_file_path)
+    {
+        std::ifstream csv_file_ifstream(csv_file_path);
+        return parse_body_ic_from_csv(csv_file_ifstream);
     }
 }
