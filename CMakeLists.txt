@@ -6,6 +6,7 @@ include(CTest)
 add_subdirectory(src/core core)
 add_subdirectory(src/cpu_sim cpu_sim)
 
+message(WARNING ${CMAKE_CUDA_COMPILER})
 if(CMAKE_CUDA_COMPILER)
     add_subdirectory(src/tus tus)
 else()
