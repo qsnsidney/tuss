@@ -3,35 +3,31 @@
 
 # Default target executed when no arguments are given to make.
 default_target: all
-.PHONY : default_target
+.PHONY: default_target
 
 clean:
 	rm -rf build/
 .PHONY: clean
 
+prepare:
+	cmake -B build
+	@echo "=== successfully prepared ==="
+	@echo ""
+.PHONY: prepare
+
 # core
 
-prepare_core:
-	mkdir -p build/core
-	cmake -S src/core -B build/core
-.PHONY: prepare_core
-
-test_core: prepare_core
-	$(MAKE) -C build/core all
-	$(MAKE) -C build/core test
+test_core: prepare
+	$(MAKE) -C build core_tests
+	$(MAKE) -C build test ARGS="-R '^core_tests_'"
 	@echo "=== core is successfully tested ==="
 	@echo ""
 .PHONY: test_core
 
 # cpu_sim
 
-prepare_cpu_sim:
-	mkdir -p build/cpu_sim
-	cmake -S src/cpu_sim -B build/cpu_sim
-.PHONY: prepare_cpu_sim
-
-cpu_sim: prepare_cpu_sim
-	$(MAKE) -C build/cpu_sim all
+cpu_sim: prepare
+	$(MAKE) -C build cpu_sim
 	@echo "=== cpu_sim is successfully built ==="
 	@echo ""
 .PHONY: cpu_sim
@@ -40,15 +36,16 @@ run_cpu_sim: cpu_sim
 	./build/cpu_sim/cpu_sim
 .PHONY: run_cpu_sim
 
+# Check whether NVCC exists
+NVCC_RESULT := $(shell which nvcc)
+NVCC_TEST := $(notdir $(NVCC_RESULT))
+
+ifeq ($(NVCC_TEST),nvcc) # NVCC exists
+
 # tus
 
-prepare_tus:
-	mkdir -p build/tus
-	cmake -S src/tus -B build/tus
-.PHONY: prepare_tus
-
-tus: prepare_tus
-	$(MAKE) -C build/tus all
+tus: prepare
+	$(MAKE) -C build tus
 	@echo "=== tus is successfully built ==="
 	@echo ""
 .PHONY: tus
@@ -59,7 +56,14 @@ run_tus: tus
 
 # all
 
-# tus is at the last, so others can still be built even
-# when no nvcc is available.
 all: test_core cpu_sim tus
 .PHONY: all
+
+else # NVCC does not exist
+
+# all
+
+all: test_core cpu_sim
+.PHONY: all
+
+endif
