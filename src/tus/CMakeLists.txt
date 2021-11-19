@@ -6,6 +6,6 @@ file(GLOB tus_SRC
     "*.cu"
 )
 
-add_executable(tus ${tus_SRC}})
+add_executable(tus ${tus_SRC})
 target_include_directories(tus PRIVATE ../core/)
 target_link_libraries(tus core_lib)
