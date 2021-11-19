@@ -21,5 +21,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: make
-      run: make
+    - name: make test_core
+      run: make test_core
+    - name: make cpu_sim
+      run: make cpu_sim
+    - name: make tus
+      run: make tus
