@@ -32,6 +32,7 @@ cpu_sim: prepare
 	@echo 
 .PHONY: cpu_sim
 
+# TODO: move run_cpu_sim to a separete .sh if passing arguments
 run_cpu_sim: cpu_sim
 	./build/cpu_sim/cpu_sim
 .PHONY: run_cpu_sim
@@ -49,6 +50,7 @@ tus: prepare
 	@echo 
 .PHONY: tus
 
+# TODO: move run_tus to a separete .sh if passing arguments
 run_tus: tus
 	./build/tus/tus
 .PHONY: run_tus
@@ -58,6 +60,7 @@ tus: prepare
 	@echo 
 .PHONY: tus
 
+# TODO: move run_tus to a separete .sh if passing arguments
 run_tus: tus
 .PHONY: run_tus
 endif
