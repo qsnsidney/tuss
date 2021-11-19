@@ -2,6 +2,8 @@
 
 #include <ostream>
 
+#include "universe.h"
+
 namespace CORE
 {
     /// XYZ_BASE type
@@ -16,7 +18,7 @@ namespace CORE
     };
 
     /// Use this type
-    using XYZ = XYZ_BASE<float>;
+    using XYZ = XYZ_BASE<UNIVERSE::floating_value_type>;
 
     /// Operators
 
