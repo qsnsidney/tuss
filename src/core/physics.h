@@ -17,6 +17,7 @@ namespace CORE
     };
     struct POS : public XYZ
     {
+        static POS updated(POS, VEL, ACC, DT);
     };
 
     using POS_VEL_PAIR = std::pair<POS, VEL>;
