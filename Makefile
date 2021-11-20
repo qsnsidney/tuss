@@ -19,7 +19,7 @@ prepare:
 
 test_core: prepare
 	$(MAKE) -C build core_tests
-	$(MAKE) -C build test ARGS="-R '^core_tests_'"
+	$(MAKE) -C build test ARGS="-R '^core_tests_' ${ARGS}"
 	@echo [=== core is successfully tested ===]
 	@echo 
 .PHONY: test_core

@@ -57,4 +57,8 @@ make run_cpu_sim
 ```
 # Compile and test
 make test_core
+# With more verbose output
+make test_core ARGS=-V
+# See more options available
+make test_core ARGS=-h
 ```

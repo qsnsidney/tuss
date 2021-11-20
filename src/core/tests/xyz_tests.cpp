@@ -3,7 +3,9 @@
 
 using namespace CORE;
 
-void test_equal()
+UTST_MAIN();
+
+UTST_TEST(xyz_equal)
 {
     XYZ a{1.0, 2.0, 3.0};
     XYZ b{1.0, 2.0, 3.0};
@@ -11,7 +13,7 @@ void test_equal()
     UTST_ASSERT_EQUAL(a, b);
 }
 
-void test_add()
+UTST_TEST(xyz_add)
 {
     XYZ a{1.0, 2.0, 3.0};
     XYZ b{11.0, 12.0, 13.0};
@@ -23,10 +25,4 @@ void test_add()
 
     XYZ d = a + b;
     UTST_ASSERT_EQUAL(sum, d);
-}
-
-int main(int argc, char *argv[])
-{
-    test_equal();
-    test_add();
 }

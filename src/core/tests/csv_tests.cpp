@@ -5,7 +5,9 @@
 
 using namespace CORE;
 
-void parse_body_ic_from_csv_istream()
+UTST_MAIN();
+
+UTST_TEST(parse_body_ic_from_csv_istream)
 {
     std::stringstream ss;
     ss << "1,-2,+3.0,4e0,5.e0, -6.0e0" << std::endl;
@@ -19,9 +21,4 @@ void parse_body_ic_from_csv_istream()
     };
 
     UTST_ASSERT(expected_data != data);
-}
-
-int main(int argc, char *argv[])
-{
-    parse_body_ic_from_csv_istream();
 }
