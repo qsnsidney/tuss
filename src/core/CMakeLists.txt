@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 file(GLOB core_SRC
-     "*.h"
      "*.cpp"
 )
 add_library(core_lib ${core_SRC})
+target_include_directories(core_lib PUBLIC ${CMAKE_SOURCE_DIR})
 
 add_subdirectory(tests)

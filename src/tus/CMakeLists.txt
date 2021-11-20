@@ -9,11 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Work around issues for CMake older than ver 3.18
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --std=c++17")
 
-file(GLOB tus_SRC
-    "*.h"
+file(GLOB_RECURSE tus_SRC
     "*.cu"
 )
 
 add_executable(tus ${tus_SRC})
+target_include_directories(tus PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(tus PRIVATE ../core/)
 target_link_libraries(tus core_lib)
