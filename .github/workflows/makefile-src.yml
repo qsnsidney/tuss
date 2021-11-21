@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: make test_core
       run: make test_core
-    - name: make cpu_sim
-      run: make cpu_sim
+    - name: make cpusim
+      run: make cpusim
     - name: make tus
       run: make tus

@@ -1,6 +1,6 @@
 #include "engine.h"
 
-namespace CPU_SIM
+namespace CPUSIM
 {
     ENGINE::~ENGINE()
     {

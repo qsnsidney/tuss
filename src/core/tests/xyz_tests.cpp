@@ -87,3 +87,9 @@ UTST_TEST(xyz_divide)
     XYZ c = a / m;
     UTST_ASSERT_EQUAL(res, c);
 }
+
+UTST_TEST(xyz_norm_square)
+{
+    XYZ a{1.0, 2.0, 3.0};
+    UTST_ASSERT_EQUAL(14.0f, a.norm_square());
+}

@@ -24,18 +24,17 @@ test_core: prepare
 	@echo 
 .PHONY: test_core
 
-# cpu_sim
+# cpusim
 
-cpu_sim: prepare
-	$(MAKE) -C build cpu_sim
-	@echo [=== cpu_sim is successfully built ===]
+cpusim: prepare
+	$(MAKE) -C build cpusim_all
+	@echo [=== cpusim is successfully built ===]
 	@echo 
-.PHONY: cpu_sim
+.PHONY: cpusim
 
-# TODO: move run_cpu_sim to a separete .sh if passing arguments
-run_cpu_sim: cpu_sim
-	./build/cpu_sim/cpu_sim
-.PHONY: run_cpu_sim
+run_cpusim: cpusim
+	./build/cpusim/cpusim_exe ${ARGS}
+.PHONY: run_cpusim
 
 # Check whether NVCC exists
 NVCC_RESULT := $(shell which nvcc)
@@ -45,14 +44,13 @@ NVCC_TEST := $(notdir $(NVCC_RESULT))
 
 ifeq ($(NVCC_TEST),nvcc) # NVCC exists
 tus: prepare
-	$(MAKE) -C build tus
+	$(MAKE) -C build tus_exe
 	@echo [=== tus is successfully built ===]
 	@echo 
 .PHONY: tus
 
-# TODO: move run_tus to a separete .sh if passing arguments
 run_tus: tus
-	./build/tus/tus
+	./build/tus/tus_exe ${ARGS}
 .PHONY: run_tus
 else # NVCC does not exist
 tus: prepare
@@ -67,5 +65,5 @@ endif
 
 # all
 
-all: test_core cpu_sim tus
+all: test_core cpusim tus
 .PHONY: all

@@ -15,9 +15,9 @@ Paper reference:
 - The GPU simulator written in CUDA
 - Located in ./src/tus/
 
-### cpu_sim
+### cpusim
 - The CPU simulator
-- Located in ./src/cpu_sim
+- Located in ./src/cpusim
 
 ### core
 - The core common code
@@ -43,14 +43,18 @@ make
 make tus
 # Compile and run
 make run_tus
+# Run with arguments
+make run_tus ARGS="any_args"
 ```
 
-### cpu_sim
+### cpusim
 ```
 # Compile only
-make cpu_sim
+make cpusim
 # Compile and run
-make run_cpu_sim
+make run_cpusim
+# Run with arguments
+make run_cpusim ARGS="any_args"
 ```
 
 ### core
