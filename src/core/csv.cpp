@@ -30,15 +30,15 @@ namespace CORE
 
         while (std::getline(csv_istream, row_str))
         {
-            std::cmatch m;
-            std::regex_match(row_str.c_str(), m, row_regex);
+            std::smatch m;
+            std::regex_match(row_str, m, row_regex);
             if (m.size() != 7)
             {
                 // Invalid csv
                 /// TODO: print some warning messages
                 return {};
             }
-            
+
             POS p{str_to_floating(m[1]), str_to_floating(m[2]), str_to_floating(m[3])};
             VEL v{str_to_floating(m[4]), str_to_floating(m[5]), str_to_floating(m[6])};
 
