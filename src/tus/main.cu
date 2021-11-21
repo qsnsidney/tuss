@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     /// Haiqi: I think it should be "main [num_body] [simulation_end_time] [num_iteration] or [step_size]". or we simply let step_size = 1
     if (argc != 3)
     {
-        printf("Error: The number of arguments is not exactly 2\n");
+        printf("Error: The number of arguments is %d, but not exactly 2\n", argc);
         return 0;
     }
     unsigned nBody = atoi(argv[1]);
