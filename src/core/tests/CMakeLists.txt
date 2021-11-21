@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7.0)
 project(core_tests)
 
 include_directories(..)
-link_libraries(core_lib)
+link_libraries(core)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

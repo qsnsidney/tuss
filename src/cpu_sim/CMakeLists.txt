@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 include_directories(${CMAKE_SOURCE_DIR} ../core)
-link_libraries(core_lib)
+link_libraries(core)
 
 file(GLOB_RECURSE cpu_sim_lib_SRC
     "*.cpp"
