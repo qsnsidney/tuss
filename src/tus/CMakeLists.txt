@@ -16,4 +16,4 @@ file(GLOB_RECURSE tus_SRC
 add_executable(tus ${tus_SRC})
 target_include_directories(tus PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(tus PRIVATE ../core ../cpu_sim)
-target_link_libraries(tus core cpu_sim_lib)
+target_link_libraries(tus core cpu_sim)

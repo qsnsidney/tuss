@@ -27,13 +27,13 @@ test_core: prepare
 # cpu_sim
 
 cpu_sim: prepare
-	$(MAKE) -C build cpu_sim
+	$(MAKE) -C build cpu_sim_all
 	@echo [=== cpu_sim is successfully built ===]
 	@echo 
 .PHONY: cpu_sim
 
 run_cpu_sim: cpu_sim
-	./build/cpu_sim/cpu_sim ${ARGS}
+	./build/cpu_sim/cpu_sim_exe ${ARGS}
 .PHONY: run_cpu_sim
 
 # Check whether NVCC exists

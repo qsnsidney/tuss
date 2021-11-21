@@ -10,7 +10,10 @@ link_libraries(core)
 file(GLOB_RECURSE cpu_sim_lib_SRC
     "*.cpp"
 )
-add_library(cpu_sim_lib ${cpu_sim_lib_SRC})
+add_library(cpu_sim ${cpu_sim_lib_SRC})
 
-add_executable(cpu_sim main.cc)
-target_link_libraries(cpu_sim cpu_sim_lib)
+add_executable(cpu_sim_exe main.cc)
+target_link_libraries(cpu_sim_exe cpu_sim)
+
+add_custom_target(cpu_sim_all)
+add_dependencies(cpu_sim_all cpu_sim cpu_sim_exe)
