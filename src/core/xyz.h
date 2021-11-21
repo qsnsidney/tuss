@@ -20,7 +20,41 @@ namespace CORE
     /// Use this type
     using XYZ = XYZ_BASE<UNIVERSE::floating_value_type>;
 
-    /// Operators
+    /// Operators declaration
+
+    template <typename T>
+    bool operator==(const XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs);
+    template <typename T>
+    bool operator!=(const XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs);
+
+    template <typename T>
+    XYZ_BASE<T> &operator+=(XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs);
+    template <typename T>
+    XYZ_BASE<T> operator+(const XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs);
+
+    template <typename T>
+    XYZ_BASE<T> &operator-=(XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs);
+    template <typename T>
+    XYZ_BASE<T> operator-(const XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs);
+    template <typename T>
+    XYZ_BASE<T> operator-(const XYZ_BASE<T> &data);
+
+    template <typename T>
+    XYZ_BASE<T> &operator*=(XYZ_BASE<T> &lhs, T multiplier);
+    template <typename T>
+    XYZ_BASE<T> operator*(const XYZ_BASE<T> &lhs, T multiplier);
+    template <typename T>
+    XYZ_BASE<T> operator*(T multiplier, const XYZ_BASE<T> &rhs);
+
+    template <typename T>
+    XYZ_BASE<T> &operator/=(XYZ_BASE<T> &lhs, T divisor);
+    template <typename T>
+    XYZ_BASE<T> operator/(const XYZ_BASE<T> &lhs, T divisor);
+
+    template <typename T>
+    std::ostream &operator<<(std::ostream &os, const XYZ_BASE<T> &data);
+
+    /// Implementation
 
     template <typename T>
     bool operator==(const XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs)
