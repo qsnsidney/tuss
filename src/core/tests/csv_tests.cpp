@@ -20,5 +20,5 @@ UTST_TEST(parse_body_ic_from_csv_istream)
         {{11.0, 12.0, 13.0}, {14.0, 15.0, 16.0}},
     };
 
-    UTST_ASSERT(expected_data != data);
+    UTST_ASSERT(expected_data == data);
 }

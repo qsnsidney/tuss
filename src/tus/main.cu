@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "physics.h"
+#include "csv.h"
 
 // Comment out this line to enable debug mode
 // #define NDEBUG
@@ -116,6 +117,18 @@ __host__ void random_initialize_mass(data_t *input_array, size_t size, data_t ra
     }
 }
 
+__host__ void parse_ic(data_t_3d *input_v, data_t_3d *input_x, std::vector<CORE::POS_VEL_PAIR>& ic)
+{
+    for (size_t i = 0; i < ic.size(); i++)
+    {   
+        CORE::POS p = ic[i].first;
+        CORE::VEL v = ic[i].second;
+        
+        input_x[i] = make_data_t_3d((data_t)p.x, (data_t)p.y, (data_t)p.z);
+        input_v[i] = make_data_t_3d((data_t)v.x, (data_t)v.y, (data_t)v.z);
+    }
+}
+
 // WARNING: this function has hardcoded assumption on float vs double
 __device__ data_t power_norm(data_t_3d a, data_t_3d b)
 {
@@ -183,16 +196,19 @@ int main(int argc, char *argv[])
     /* Get Dimension */
     /// TODO: Add more arguments for input and output
     /// Haiqi: I think it should be "main [num_body] [simulation_end_time] [num_iteration] or [step_size]". or we simply let step_size = 1
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("Error: The number of arguments is not exactly 1\n");
+        printf("Error: The number of arguments is not exactly 2\n");
         return 0;
     }
     unsigned nBody = atoi(argv[1]);
     // temporarily assign them to MARCO
     unsigned simulation_time = SIM_TIME;
     unsigned step_size = STEP_SIZE;
-
+    
+    /* CSV files of initial conditions */
+    std::string csv_path(argv[2]);
+    
     srand(time(NULL));
     size_t vector_size = sizeof(data_t_3d) * nBody;
     size_t data_size = sizeof(data_t) * nBody;
@@ -207,12 +223,17 @@ int main(int argc, char *argv[])
     host_malloc_helper((void **)&h_V, vector_size);
     host_malloc_helper((void **)&h_output_X, vector_size);
     host_malloc_helper((void **)&h_M, data_size);
-
+    
     /*
      *   input randome initialize
      */
-    random_initialize_vector(h_X, nBody, RANDOM_RANGE);
-    random_initialize_vector(h_V, nBody, RANDOM_RANGE);
+    
+    auto ic = CORE::parse_body_ic_from_csv(csv_path);   
+    parse_ic(h_V, h_X, ic);
+    
+    /*
+     *   input randome initialize
+     */
     random_initialize_mass(h_M, nBody, RANDOM_RANGE);
 
     /*
@@ -225,7 +246,7 @@ int main(int argc, char *argv[])
      */
     data_t_3d **d_X, **d_A, **d_V;
     unsigned src_index = 0;
-    unsigned dest_index = 0;
+    unsigned dest_index = 1;
     d_X = (data_t_3d **)malloc(2 * sizeof(data_t_3d *));
     gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size));
     gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size));
