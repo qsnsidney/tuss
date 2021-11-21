@@ -44,13 +44,13 @@ NVCC_TEST := $(notdir $(NVCC_RESULT))
 
 ifeq ($(NVCC_TEST),nvcc) # NVCC exists
 tus: prepare
-	$(MAKE) -C build tus
+	$(MAKE) -C build tus_exe
 	@echo [=== tus is successfully built ===]
 	@echo 
 .PHONY: tus
 
 run_tus: tus
-	./build/tus/tus ${ARGS}
+	./build/tus/tus_exe ${ARGS}
 .PHONY: run_tus
 else # NVCC does not exist
 tus: prepare
