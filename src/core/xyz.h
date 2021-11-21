@@ -10,11 +10,13 @@ namespace CORE
     template <typename T>
     struct XYZ_BASE
     {
-        using value_type = T;
-
         T x;
         T y;
         T z;
+
+        using value_type = T;
+
+        T norm_square() const;
     };
 
     /// Use this type
@@ -55,6 +57,12 @@ namespace CORE
     std::ostream &operator<<(std::ostream &os, const XYZ_BASE<T> &data);
 
     /// Implementation
+
+    template <typename T>
+    T XYZ_BASE<T>::norm_square() const
+    {
+        return x * x + y * y + z * z;
+    }
 
     template <typename T>
     bool operator==(const XYZ_BASE<T> &lhs, const XYZ_BASE<T> &rhs)

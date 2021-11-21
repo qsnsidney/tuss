@@ -26,3 +26,9 @@ UTST_TEST(xyz_add)
     XYZ d = a + b;
     UTST_ASSERT_EQUAL(sum, d);
 }
+
+UTST_TEST(xyz_norm_square)
+{
+    XYZ a{1.0, 2.0, 3.0};
+    UTST_ASSERT_EQUAL(14.0f, a.norm_square());
+}
