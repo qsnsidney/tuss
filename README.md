@@ -43,6 +43,8 @@ make
 make tus
 # Compile and run
 make run_tus
+# Run with arguments
+make run_tus ARGS="any_args"
 ```
 
 ### cpu_sim
@@ -51,6 +53,8 @@ make run_tus
 make cpu_sim
 # Compile and run
 make run_cpu_sim
+# Run with arguments
+make run_cpu_sim ARGS="any_args"
 ```
 
 ### core

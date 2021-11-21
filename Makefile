@@ -32,9 +32,8 @@ cpu_sim: prepare
 	@echo 
 .PHONY: cpu_sim
 
-# TODO: move run_cpu_sim to a separete .sh if passing arguments
 run_cpu_sim: cpu_sim
-	./build/cpu_sim/cpu_sim
+	./build/cpu_sim/cpu_sim ${ARGS}
 .PHONY: run_cpu_sim
 
 # Check whether NVCC exists
@@ -50,9 +49,8 @@ tus: prepare
 	@echo 
 .PHONY: tus
 
-# TODO: move run_tus to a separete .sh if passing arguments
 run_tus: tus
-	./build/tus/tus
+	./build/tus/tus ${ARGS}
 .PHONY: run_tus
 else # NVCC does not exist
 tus: prepare
