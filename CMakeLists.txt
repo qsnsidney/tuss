@@ -4,7 +4,7 @@ project(ECE1782)
 include(CTest)
 
 add_subdirectory(src/core core)
-add_subdirectory(src/cpu_sim cpu_sim)
+add_subdirectory(src/cpusim cpusim)
 
 include(CheckLanguage)
 check_language(CUDA)

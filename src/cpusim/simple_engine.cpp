@@ -1,6 +1,6 @@
 #include "simple_engine.h"
 
-namespace CPU_SIM
+namespace CPUSIM
 {
     void SIMPLE_ENGINE::execute()
     {

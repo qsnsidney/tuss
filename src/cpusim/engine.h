@@ -2,7 +2,7 @@
 
 #include "physics.h"
 
-namespace CPU_SIM
+namespace CPUSIM
 {
     /// Interface
     class ENGINE

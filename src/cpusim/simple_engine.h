@@ -1,7 +1,7 @@
 #pragma once
 #include "engine.h"
 
-namespace CPU_SIM
+namespace CPUSIM
 {
     class SIMPLE_ENGINE final : ENGINE
     {
