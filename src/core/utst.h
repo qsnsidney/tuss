@@ -4,6 +4,7 @@
 #include <functional>
 #include <vector>
 #include <iostream>
+#include <tuple>
 
 /// Helpers
 
@@ -36,22 +37,34 @@ namespace CORE::UTST
     public:
         using function_type = std::function<void()>;
 
-        void register_function(std::string f_name, function_type f)
+        void register_active_function(std::string f_name, function_type f)
         {
-            registered_functions_.emplace_back(std::move(f_name), std::move(f));
+            registered_functions_.emplace_back(std::move(f_name), std::move(f), true);
+        }
+
+        void register_inactive_function(std::string f_name, function_type f)
+        {
+            registered_functions_.emplace_back(std::move(f_name), std::move(f), false);
         }
 
         void execute_functions() const
         {
-            for (const auto &[f_name, f] : registered_functions_)
+            for (const auto &[f_name, f, is_active] : registered_functions_)
             {
-                std::cout << "Running test [" << f_name << "] .." << std::endl;
-                f();
+                if (is_active)
+                {
+                    std::cout << "Running test [" << f_name << "] .." << std::endl;
+                    f();
+                }
+                else
+                {
+                    std::cout << "Not running test [" << f_name << "] .." << std::endl;
+                }
             }
         }
 
     private:
-        std::vector<std::pair<std::string, function_type> > registered_functions_;
+        std::vector<std::tuple<std::string, function_type, bool> > registered_functions_;
     };
 }
 
@@ -65,16 +78,28 @@ namespace CORE::UTST
         __utst_test_registry.execute_functions();          \
     }
 
-#define UTST_TEST(test_name)                                                                                                    \
-    static void UTST_PPCAT(__utst_test_function_, test_name)();                                                                 \
-    static struct UTST_PPCAT(__utst_test_register_struct_, test_name)                                                           \
-    {                                                                                                                           \
-        UTST_PPCAT(__utst_test_register_struct_, test_name)                                                                     \
-        ()                                                                                                                      \
-        {                                                                                                                       \
-            __utst_test_registry.register_function(UTST_STRINGIZE_NX(test_name), UTST_PPCAT(__utst_test_function_, test_name)); \
-        }                                                                                                                       \
-    } UTST_PPCAT(__utst_test_register_struct_inst_, test_name);                                                                 \
+#define UTST_TEST(test_name)                                                                                                           \
+    static void UTST_PPCAT(__utst_test_function_, test_name)();                                                                        \
+    static struct UTST_PPCAT(__utst_test_register_struct_, test_name)                                                                  \
+    {                                                                                                                                  \
+        UTST_PPCAT(__utst_test_register_struct_, test_name)                                                                            \
+        ()                                                                                                                             \
+        {                                                                                                                              \
+            __utst_test_registry.register_active_function(UTST_STRINGIZE_NX(test_name), UTST_PPCAT(__utst_test_function_, test_name)); \
+        }                                                                                                                              \
+    } UTST_PPCAT(__utst_test_register_struct_inst_, test_name);                                                                        \
+    static void UTST_PPCAT(__utst_test_function_, test_name)()
+
+#define UTST_IGNORED_TEST(test_name)                                                                                                     \
+    static void UTST_PPCAT(__utst_test_function_, test_name)();                                                                          \
+    static struct UTST_PPCAT(__utst_test_register_struct_, test_name)                                                                    \
+    {                                                                                                                                    \
+        UTST_PPCAT(__utst_test_register_struct_, test_name)                                                                              \
+        ()                                                                                                                               \
+        {                                                                                                                                \
+            __utst_test_registry.register_inactive_function(UTST_STRINGIZE_NX(test_name), UTST_PPCAT(__utst_test_function_, test_name)); \
+        }                                                                                                                                \
+    } UTST_PPCAT(__utst_test_register_struct_inst_, test_name);                                                                          \
     static void UTST_PPCAT(__utst_test_function_, test_name)()
 
 #define UTST_ASSERT(condition)                                                                                                                              \
