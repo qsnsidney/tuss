@@ -2,8 +2,8 @@
 
 [![Build Status][actions-badge]][actions-url]
 
-[actions-badge]: https://github.com/qsnsidney/ECE1782/actions/workflows/makefile-src.yml/badge.svg
-[actions-url]: https://github.com/qsnsidney/ECE1782/actions?query=workflow%3Amakefile-src
+[actions-badge]: https://github.com/qsnsidney/tuss/actions/workflows/makefile-src.yml/badge.svg
+[actions-url]: https://github.com/qsnsidney/tuss/actions?query=workflow%3Amakefile-src
 
 ## Algorithm
 Paper reference:  
