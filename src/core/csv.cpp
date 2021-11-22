@@ -21,10 +21,10 @@ namespace
 
 namespace CORE
 {
-    std::vector<POS_VEL_PAIR> parse_body_ic_from_csv(std::istream &csv_istream)
+    std::vector<BODY_IC> parse_body_ic_from_csv(std::istream &csv_istream)
     {
-        std::vector<POS_VEL_PAIR> csv_contents;
-        const std::regex row_regex("(.*),(.*),(.*),(.*),(.*),(.*),?", std::regex::optimize);
+        std::vector<BODY_IC> csv_contents;
+        const std::regex row_regex("(.*),(.*),(.*),(.*),(.*),(.*),(.*),?", std::regex::optimize);
 
         std::string row_str;
 
@@ -32,7 +32,7 @@ namespace CORE
         {
             std::smatch m;
             std::regex_match(row_str, m, row_regex);
-            if (m.size() != 7)
+            if (m.size() != 8)
             {
                 // Invalid csv
                 /// TODO: print some warning messages
@@ -41,13 +41,14 @@ namespace CORE
 
             POS p{str_to_floating(m[1]), str_to_floating(m[2]), str_to_floating(m[3])};
             VEL v{str_to_floating(m[4]), str_to_floating(m[5]), str_to_floating(m[6])};
+            MASS mass{str_to_floating(m[7])};
 
-            csv_contents.emplace_back(p, v);
+            csv_contents.emplace_back(p, v, mass);
         }
         return csv_contents;
     }
 
-    std::vector<POS_VEL_PAIR> parse_body_ic_from_csv(const std::string &csv_file_path)
+    std::vector<BODY_IC> parse_body_ic_from_csv(const std::string &csv_file_path)
     {
         std::ifstream csv_file_ifstream(csv_file_path);
         return parse_body_ic_from_csv(csv_file_ifstream);

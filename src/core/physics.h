@@ -7,6 +7,8 @@ namespace CORE
 {
     using DT = UNIVERSE::floating_value_type;
 
+    using MASS = UNIVERSE::floating_value_type;
+
     struct ACC : public XYZ
     {
     };
@@ -20,5 +22,5 @@ namespace CORE
         static POS updated(POS, VEL, ACC, DT);
     };
 
-    using POS_VEL_PAIR = std::pair<POS, VEL>;
+    using BODY_IC = std::tuple<POS, VEL, MASS>;
 }
