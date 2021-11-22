@@ -13,7 +13,7 @@ Paper reference:
 
 ### tus (main project)
 - The GPU simulator written in CUDA
-- Located in ./src/tus/
+- Located in ./src/tus
 
 ### cpusim
 - The CPU simulator
