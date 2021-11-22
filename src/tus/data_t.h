@@ -6,7 +6,12 @@
 typedef float data_t;
 typedef float3 data_t_3d;
 // WARNING: this function has hardcoded assumption on float vs double
-__host__ __device__ data_t_3d make_data_t_3d(const data_t a, const data_t b, const data_t c);
+// inline function has to be defined in the header, otherwise, how does the compiler know
+// what the inline function looks like before linker?
+__host__ __device__ inline data_t_3d make_data_t_3d(const data_t a, const data_t b, const data_t c)
+{
+    return make_float3(a, b, c);
+}
 
 __host__ __device__ data_t_3d operator+(const data_t_3d &a, const data_t_3d &b);
 

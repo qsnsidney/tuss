@@ -1,8 +1,4 @@
 #include "data_t.h"
-__host__ __device__ inline data_t_3d make_data_t_3d(const data_t a, const data_t b, const data_t c)
-{
-    return make_float3(a, b, c);
-}
 
 __host__ __device__ data_t_3d operator+(const data_t_3d &a, const data_t_3d &b)
 {
