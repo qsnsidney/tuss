@@ -11,8 +11,8 @@ UTST_MAIN();
 UTST_TEST(serialize_deserialize_body_ic_to_csv_stream)
 {
     std::vector<BODY_IC> expected_data{
-        {{1.0, -2.0, 3.0}, {4.0, 5.0, -6.0}, 7.0},
-        {{11.0, 12.0, 13.0}, {14.0, 15.0, 16.0}, 17},
+        {{{1.0, -2.0, 3.0}}, {{4.0, 5.0, -6.0}}, 7.0},
+        {{{11.0, 12.0, 13.0}}, {{14.0, 15.0, 16.0}}, 17},
     };
 
     std::stringstream ss;
@@ -79,8 +79,8 @@ double getTimeStamp()
 UTST_TEST(serialize_deserialize_body_ic_to_bin_stream)
 {
     std::vector<BODY_IC> expected_data{
-        {{1.0, -2.0, 3.0}, {4.0, 5.0, -6.0}, 7.0},
-        {{11.0, 12.0, 13.0}, {14.0, 15.0, 16.0}, 17},
+        {{{1.0, -2.0, 3.0}}, {{4.0, 5.0, -6.0}}, 7.0},
+        {{{11.0, 12.0, 13.0}}, {{14.0, 15.0, 16.0}}, 17},
     };
 
     std::stringstream ss;

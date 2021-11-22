@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project(core VERSION 0.1.0)
 include(CTest)
 
-add_compile_options(-Werror -O3)
+add_compile_options(-Werror -Wall -O3)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
