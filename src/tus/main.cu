@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     unsigned nblocks = (nBody + nthreads - 1) / nthreads;
 
     // calculate the initialia acceleration
-    calculate_acceleration<<<nblocks, nthreads> > >(nBody, d_X[src_index], d_M, d_A[src_index]);
+    calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
 
     std::cout << "Start Computation\n";
 
