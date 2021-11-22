@@ -1,4 +1,4 @@
-# Tiny Universe Simulator (TUS)
+# Tiny Universe Simulator System (TUSS)
 
 [![Build Status][actions-badge]][actions-url]
 
