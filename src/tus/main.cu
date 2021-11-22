@@ -10,6 +10,7 @@
 #include "helper.h"
 #include "data_t.h"
 #include "constant.h"
+#include "basic_kernel.h"
 
 // Comment out this line to enable debug mode
 // #define NDEBUG
@@ -41,7 +42,7 @@ int main(int argc, char *argv[])
     auto ic = CORE::parse_body_ic_from_csv(csv_path); 
     
     // TODO: get better debug message.
-    assert(ic.size() == nBody)
+    assert(ic.size() == nBody);
 
     // random initializer just for now
     srand(time(NULL));
