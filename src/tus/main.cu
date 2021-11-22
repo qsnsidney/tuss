@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include "physics.h"
-#include "csv.h"
+#include "serde.h"
 #include "helper.h"
 #include "data_t.h"
 #include "constant.h"
@@ -19,10 +19,9 @@
 #define SIM_TIME 10
 #define STEP_SIZE 1
 
-
 int main(int argc, char *argv[])
 {
-    // leave this here just for simple reference 
+    // leave this here just for simple reference
     //CORE::VEL v{1.0f, 2.0f, 3.0f};
     //v *= 2.0f;
     //std::cout << v << std::endl;
@@ -36,17 +35,17 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    /* CSV files of initial conditions */
+    /* BIN file of initial conditions */
     unsigned nBody = atoi(argv[1]);
-    std::string csv_path(argv[2]);
+    std::string bin_path(argv[2]);
     // temporarily assign them to MARCO
     unsigned simulation_time = SIM_TIME;
     unsigned step_size = STEP_SIZE;
-    
-    /* CSV files of initial conditions */
 
-    auto ic = CORE::parse_body_ic_from_csv(csv_path); 
-    
+    /* BIN file of initial conditions */
+
+    auto ic = CORE::deserialize_body_ic_from_bin(bin_path);
+
     // TODO: get better debug message.
     assert(ic.size() == nBody);
 
@@ -69,9 +68,9 @@ int main(int argc, char *argv[])
     /*
      *   input randome initialize
      */
-    
+
     parse_ic(h_V, h_X, ic);
-    
+
     /*
      *   input randome initialize
      */
@@ -112,22 +111,22 @@ int main(int argc, char *argv[])
     unsigned nblocks = (nBody + nthreads - 1) / nthreads;
 
     // calculate the initialia acceleration
-    calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
-	
+    calculate_acceleration<<<nblocks, nthreads> > >(nBody, d_X[src_index], d_M, d_A[src_index]);
+
     std::cout << "Start Computation\n";
 
     for (unsigned step = 0; step < simulation_time; step += step_size)
     {
 
         // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-        calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M,                                                          //input
-                                                      d_A[dest_index]);                                                                    // output
-        update_step<<<nblocks, nthreads>>>(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
-                                           d_X[dest_index], d_V[dest_index]);                                                              // output
-	
-	// we don't have to synchronize here but this gices a better visualization on how fast / slow the program is 	
-	std::cout << "epoch " << step << std::endl;
-	cudaDeviceSynchronize();
+        calculate_acceleration<<<nblocks, nthreads> > >(nBody, d_X[src_index], d_M,                                                          //input
+                                                        d_A[dest_index]);                                                                    // output
+        update_step<<<nblocks, nthreads> > >(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
+                                             d_X[dest_index], d_V[dest_index]);                                                              // output
+
+        // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
+        std::cout << "epoch " << step << std::endl;
+        cudaDeviceSynchronize();
 
         swap(src_index, dest_index);
     }

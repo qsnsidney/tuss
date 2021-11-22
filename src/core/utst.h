@@ -95,7 +95,7 @@ namespace UTST
             x_sstream << (x);                                                                                                                               \
             std::stringstream y_sstream;                                                                                                                    \
             y_sstream << (y);                                                                                                                               \
-            std::string msg = std::string("\nASSERT") + x_sstream.str() + std::string(" != ") + y_sstream.str() + "\n" +                                    \
+            std::string msg = std::string("\nASSERT ") + x_sstream.str() + std::string(" != ") + y_sstream.str() + "\n" +                                   \
                               std::string(__FILE__) + std::string(":") + std::to_string(__LINE__) + std::string(" in ") + std::string(__PRETTY_FUNCTION__); \
             throw std::runtime_error(msg);                                                                                                                  \
         }                                                                                                                                                   \
