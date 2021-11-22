@@ -37,9 +37,33 @@ namespace
 
 namespace CORE
 {
-    std::vector<BODY_IC> parse_body_ic_from_csv(std::istream &csv_istream)
+    void serialize_body_ic_to_csv(std::ostream &csv_ostream, const std::vector<BODY_IC> &body_ics)
+    {
+        csv_ostream << std::fixed;
+        /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
+        for (const auto &[p, v, m] : body_ics)
+        {
+            csv_ostream << p.x << ",";
+            csv_ostream << p.y << ",";
+            csv_ostream << p.z << ",";
+            csv_ostream << v.x << ",";
+            csv_ostream << v.y << ",";
+            csv_ostream << v.z << ",";
+            csv_ostream << m << "\n";
+        }
+    }
+
+    void serialize_body_ic_to_csv(const std::string &csv_file_path, const std::vector<BODY_IC> &body_ics)
+    {
+        std::ofstream csv_file_ofstream(csv_file_path);
+        UTST_ASSERT(csv_file_ofstream.is_open());
+        serialize_body_ic_to_csv(csv_file_ofstream, body_ics);
+    }
+
+    std::vector<BODY_IC> deserialize_body_ic_from_csv(std::istream &csv_istream)
     {
         std::vector<BODY_IC> body_ics;
+        /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
         const std::regex row_regex("(.*),(.*),(.*),(.*),(.*),(.*),(.*),?", std::regex::optimize);
 
         std::string row_str;
@@ -65,11 +89,11 @@ namespace CORE
         return body_ics;
     }
 
-    std::vector<BODY_IC> parse_body_ic_from_csv(const std::string &csv_file_path)
+    std::vector<BODY_IC> deserialize_body_ic_from_csv(const std::string &csv_file_path)
     {
         std::ifstream csv_file_ifstream(csv_file_path);
         UTST_ASSERT(csv_file_ifstream.is_open());
-        return parse_body_ic_from_csv(csv_file_ifstream);
+        return deserialize_body_ic_from_csv(csv_file_ifstream);
     }
 
     void serialize_body_ic_to_bin(std::ostream &bin_ostream, const std::vector<BODY_IC> &body_ics)
@@ -101,9 +125,9 @@ namespace CORE
 
     void serialize_body_ic_to_bin(const std::string &bin_file_path, const std::vector<BODY_IC> &body_ics)
     {
-        std::ofstream dest_file_ofstream(bin_file_path, std::ios::binary);
-        UTST_ASSERT(dest_file_ofstream.is_open());
-        serialize_body_ic_to_bin(dest_file_ofstream, body_ics);
+        std::ofstream bin_file_ofstream(bin_file_path, std::ios::binary);
+        UTST_ASSERT(bin_file_ofstream.is_open());
+        serialize_body_ic_to_bin(bin_file_ofstream, body_ics);
     }
 
     std::vector<BODY_IC> deserialize_body_ic_from_bin(std::istream &bin_istream)
