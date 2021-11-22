@@ -189,9 +189,10 @@ __global__ void calculate_acceleration(unsigned nbody, data_t_3d *location, data
 
 int main(int argc, char *argv[])
 {
-    CORE::VEL v{1.0f, 2.0f, 3.0f};
-    v *= 2.0f;
-    std::cout << v << std::endl;
+    // leave this here just for simple reference 
+    //CORE::VEL v{1.0f, 2.0f, 3.0f};
+    //v *= 2.0f;
+    //std::cout << v << std::endl;
 
     /* Get Dimension */
     /// TODO: Add more arguments for input and output
@@ -272,31 +273,34 @@ int main(int argc, char *argv[])
 
     // calculate the initialia acceleration
     calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
+	
+    std::cout << "Start Computation\n";
 
     for (unsigned step = 0; step < simulation_time; step += step_size)
     {
+
         // There should be more than one ways to do synchronization. I temporarily randomly choosed one
         calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M,                                                          //input
                                                       d_A[dest_index]);                                                                    // output
         update_step<<<nblocks, nthreads>>>(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
                                            d_X[dest_index], d_V[dest_index]);                                                              // output
+	
+	// we don't have to synchronize here but this gices a better visualization on how fast / slow the program is 	
+	std::cout << "epoch " << step << std::endl;
+	cudaDeviceSynchronize();
 
         swap(src_index, dest_index);
     }
-
+    cudaDeviceSynchronize();
+    std::cout << "Finished Compuation\n";
     // at end, the final data is actually at src_index because the last swap
     cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
 
     // Just for debug purpose on small inputs
     for (unsigned i = 0; i < nBody; i++)
     {
-        printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
+        //printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
     }
-
-    //for(int i = 0; i < nBody; i++){
-    //    printf("locations: tid = %d, %f, %f, %f\n", i, h_X[i].x, h_X[i].y, h_X[i].z);
-    //    printf("mass: tid = %d, %f\n", i, h_M[i]);
-    //}
 
     return 0;
 }
