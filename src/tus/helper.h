@@ -2,7 +2,7 @@
 #include <sys/time.h>
 #include "data_t.h"
 #include "physics.h"
-#include "csv.h"
+#include "serde.h"
 
 void swap(unsigned &a, unsigned &b)
 {
@@ -45,14 +45,13 @@ void host_malloc_helper(void **ptr, size_t size)
     }
 }
 
-
-__host__ void parse_ic(data_t_3d *input_v, data_t_3d *input_x, std::vector<CORE::POS_VEL_PAIR>& ic)
+__host__ void parse_ic(data_t_3d *input_v, data_t_3d *input_x, std::vector<CORE::BODY_IC> &ic)
 {
     for (size_t i = 0; i < ic.size(); i++)
-    {   
-        CORE::POS p = ic[i].first;
-        CORE::VEL v = ic[i].second;
-        
+    {
+        CORE::POS p = std::get<CORE::POS>(ic[i]);
+        CORE::VEL v = std::get<CORE::VEL>(ic[i]);
+
         input_x[i] = make_data_t_3d((data_t)p.x, (data_t)p.y, (data_t)p.z);
         input_v[i] = make_data_t_3d((data_t)v.x, (data_t)v.y, (data_t)v.z);
     }
