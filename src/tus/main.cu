@@ -8,7 +8,7 @@
 #include "physics.h"
 #include "csv.h"
 #include "helper.h"
-#include "Data_t.h"
+#include "data_t.h"
 #include "constant.h"
 
 // Comment out this line to enable debug mode

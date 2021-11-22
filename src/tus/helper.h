@@ -1,6 +1,6 @@
 #pragma once
 #include <sys/time.h>
-#include "Data_t.h"
+#include "data_t.h"
 #include "physics.h"
 #include "csv.h"
 
