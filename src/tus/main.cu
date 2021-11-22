@@ -119,9 +119,9 @@ int main(int argc, char *argv[])
     {
 
         // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-        calculate_acceleration<<<nblocks, nthreads> > >(nBody, d_X[src_index], d_M,                                                          //input
+        calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M,                                                          //input
                                                         d_A[dest_index]);                                                                    // output
-        update_step<<<nblocks, nthreads> > >(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
+        update_step<<<nblocks, nthreads>>>(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
                                              d_X[dest_index], d_V[dest_index]);                                                              // output
 
         // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
