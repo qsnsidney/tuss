@@ -29,7 +29,7 @@
  */
 #define UTST_STRINGIZE(A) UTST_STRINGIZE_NX(A)
 
-namespace UTST
+namespace CORE::UTST
 {
     class TEST_REGISTRY
     {
@@ -57,12 +57,12 @@ namespace UTST
 
 /// UTST Utilities
 
-#define UTST_MAIN()                                  \
-    static UTST::TEST_REGISTRY __utst_test_registry; \
-                                                     \
-    int main()                                       \
-    {                                                \
-        __utst_test_registry.execute_functions();    \
+#define UTST_MAIN()                                        \
+    static CORE::UTST::TEST_REGISTRY __utst_test_registry; \
+                                                           \
+    int main()                                             \
+    {                                                      \
+        __utst_test_registry.execute_functions();          \
     }
 
 #define UTST_TEST(test_name)                                                                                                    \
