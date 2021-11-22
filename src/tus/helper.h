@@ -45,7 +45,7 @@ void host_malloc_helper(void **ptr, size_t size)
     }
 }
 
-__host__ void parse_ic(data_t_3d *input_v, data_t_3d *input_x, std::vector<CORE::POS_VEL_PAIR> &ic)
+__host__ void parse_ic(data_t_3d *input_v, data_t_3d *input_x, std::vector<CORE::BODY_IC> &ic)
 {
     for (size_t i = 0; i < ic.size(); i++)
     {
