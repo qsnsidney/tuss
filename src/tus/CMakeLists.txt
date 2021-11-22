@@ -19,5 +19,5 @@ target_link_libraries(tus_exe core cpusim)
 # set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --std=c++17")
 target_compile_options(tus_exe PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
                        --std=c++17
-                       --relocatable-device-code=true
+                       # --relocatable-device-code=true
                        >)
