@@ -70,8 +70,6 @@ int main(int argc, char *argv[])
      *   input randome initialize
      */
     
-    auto ic = CORE::parse_body_ic_from_csv(csv_path);  
-    assert(ic.size() == nBody); 
     parse_ic(h_V, h_X, ic);
     
     /*
