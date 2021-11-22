@@ -61,7 +61,7 @@ UTST_TEST(xyz_multiply)
 {
     XYZ a{1.5, 0.0, -3.6};
     float m = -2.7;
-    XYZ res{1.5*m, 0.0, -3.6*m};
+    XYZ res{1.5f * m, 0.0, -3.6f * m};
 
     XYZ b = a;
     b *= m;
@@ -78,7 +78,7 @@ UTST_TEST(xyz_divide)
 {
     XYZ a{2.0, 0.0, -7.9};
     float m = -7.0;
-    XYZ res{2.0/m, 0.0, -7.9/m};
+    XYZ res{2.0f / m, 0.0, -7.9f / m};
 
     XYZ b = a;
     b /= m;

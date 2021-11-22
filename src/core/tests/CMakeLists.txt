@@ -4,6 +4,7 @@ project(core_tests)
 include_directories(..)
 link_libraries(core)
 
+add_compile_options(-Werror)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
