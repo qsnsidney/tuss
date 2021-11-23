@@ -12,7 +12,7 @@
 #include "constant.h"
 #include "basic_kernel.h"
 #include <cassert>
-
+#include "timer.h"
 // Comment out this line to enable debug mode
 // #define NDEBUG
 
@@ -42,12 +42,13 @@ int main(int argc, char *argv[])
     unsigned simulation_time = SIM_TIME;
     unsigned step_size = STEP_SIZE;
 
+    CORE::TIMER timer("cuda program");
     /* BIN file of initial conditions */
-
     auto ic = CORE::deserialize_body_ic_from_bin(bin_path);
+    timer.elapsed_previous("deserialize_body_ic_from_csv");
 
     // TODO: get better debug message.
-    assert(ic.size() == nBody);
+    assert(ic.size() >= nBody);
 
     // random initializer just for now
     srand(time(NULL));
@@ -64,17 +65,13 @@ int main(int argc, char *argv[])
     host_malloc_helper((void **)&h_V, vector_size);
     host_malloc_helper((void **)&h_output_X, vector_size);
     host_malloc_helper((void **)&h_M, data_size);
-
+    timer.elapsed_previous("allocated host side memory");
     /*
      *   input randome initialize
      */
 
-    parse_ic(h_V, h_X, ic);
-
-    /*
-     *   input randome initialize
-     */
-    random_initialize_mass(h_M, nBody, RANDOM_RANGE);
+    parse_ic(h_X, h_V, h_M, ic, nBody);
+    timer.elapsed_previous("deserialize_body_ic_from_csv");
 
     /*
      *  mass 
@@ -99,6 +96,7 @@ int main(int argc, char *argv[])
     gpuErrchk(cudaMalloc((void **)&d_V[src_index], vector_size));
     gpuErrchk(cudaMalloc((void **)&d_V[dest_index], vector_size));
 
+    timer.elapsed_previous("allocated device memory");
     /*
      *   create double buffer on device side
      */
@@ -106,12 +104,14 @@ int main(int argc, char *argv[])
     cudaMemcpy(d_X[src_index], h_X, vector_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_V[src_index], h_V, vector_size, cudaMemcpyHostToDevice);
     cudaMemcpy(d_M, h_M, data_size, cudaMemcpyHostToDevice);
+    timer.elapsed_previous("copied input data from host to device");
 
     unsigned nthreads = 256;
     unsigned nblocks = (nBody + nthreads - 1) / nthreads;
 
     // calculate the initialia acceleration
     calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
+    timer.elapsed_previous("Calculated initial acceleration");
 
     std::cout << "Start Computation\n";
 
@@ -131,10 +131,10 @@ int main(int argc, char *argv[])
         swap(src_index, dest_index);
     }
     cudaDeviceSynchronize();
-    std::cout << "Finished Compuation\n";
+    timer.elapsed_previous("Finished computation");
     // at end, the final data is actually at src_index because the last swap
     cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
-
+    timer.elapsed_previous("copied output back to host");
     // Just for debug purpose on small inputs
     for (unsigned i = 0; i < nBody; i++)
     {

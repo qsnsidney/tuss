@@ -3,7 +3,7 @@
 #include "data_t.h"
 #include "physics.h"
 #include "serde.h"
-
+#include <iostream>
 void swap(unsigned &a, unsigned &b)
 {
     unsigned temp = a;
@@ -45,14 +45,21 @@ void host_malloc_helper(void **ptr, size_t size)
     }
 }
 
-__host__ void parse_ic(data_t_3d *input_v, data_t_3d *input_x, std::vector<CORE::BODY_IC> &ic)
+__host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *input_m, std::vector<CORE::BODY_IC> &ic, size_t parse_length = 0)
 {
-    for (size_t i = 0; i < ic.size(); i++)
+    size_t length_to_parse = ic.size();
+    if(parse_length != 0){
+        assert(parse_length <= length_to_parse);
+        length_to_parse = parse_length;
+    }
+    std::cout << "parsing " << length_to_parse << " bodies\n";
+    for (size_t i = 0; i < length_to_parse; i++)
     {
         CORE::POS p = std::get<CORE::POS>(ic[i]);
         CORE::VEL v = std::get<CORE::VEL>(ic[i]);
-
+        CORE::MASS m = std::get<CORE::MASS>(ic[i]);
         input_x[i] = make_data_t_3d((data_t)p.x, (data_t)p.y, (data_t)p.z);
         input_v[i] = make_data_t_3d((data_t)v.x, (data_t)v.y, (data_t)v.z);
+        input_m[i] = (data_t)m;
     }
 }
