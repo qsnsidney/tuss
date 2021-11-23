@@ -4,7 +4,7 @@ project(core_tests)
 include_directories(..)
 link_libraries(core)
 
-add_compile_options(-Werror -Wall -Wno-missing-braces -O3)
+add_compile_options(-Werror -Wall -Wno-missing-braces -O3 -march=native)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
