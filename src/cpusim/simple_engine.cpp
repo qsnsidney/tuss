@@ -15,7 +15,7 @@ namespace
 
 namespace CPUSIM
 {
-    void SIMPLE_ENGINE::execute(int n_iter)
+    void SIMPLE_ENGINE::execute(CORE::DT dt, int n_iter)
     {
         const int n_body = body_ics().size();
 

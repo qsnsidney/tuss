@@ -14,7 +14,7 @@ namespace CPUSIM
     public:
         virtual void init(std::vector<CORE::BODY_IC> body_ics) final { body_ics_ = std::move(body_ics); }
 
-        virtual void execute(int n_iter) = 0;
+        virtual void execute(CORE::DT dt, int n_iter) = 0;
 
     protected:
         const std::vector<CORE::BODY_IC> &body_ics() const { return body_ics_; }
