@@ -9,7 +9,8 @@ def error_and_exit(err_msg):
     exit(1)
 
 THREAD_PER_BLOCK = [16,32,64,128,256]
-NBODY = [10000,20000,50000,100000,200000]
+NBODY = [10000,20000,50000,100000]
+AVG_ITERATION = 5
 CUDA_EXECUTABLE = "build/tus/tus_exe"
 GPU_TIME_PATTERN = "Subprofile \(Finished computation\) took (([0-9]*[.])?[0-9]+)"
 BENCHMARK_DATA = "benchmark/benchmark_500000.ic.bin"
@@ -35,23 +36,27 @@ for num_block in THREAD_PER_BLOCK:
     f_data.write("\n")
     f_data.write(str(num_block) + ",")
     for num_body in NBODY:
+        total_time = 0
+        for count in range(AVG_ITERATION):
+            info_msg = "RUNNING NUMBLOCK : " + str(num_block) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
+            f_stdout.write(info_msg + "\n")
+            print(info_msg)
+            command = [cuda_executable, str(num_body), benchmark_path, str(num_block)]
+            try:
+                result = subprocess.check_output(command, stderr=subprocess.STDOUT)
+            except subprocess.CalledProcessError as e:
+                print(command)
+                error_and_exit(e.output.decode('utf-8'))
 
-        f_stdout.write("NUMBLOCK : " + str(num_block) + ". NBODY : " + str(num_body) + "\n")
-
-        command = [cuda_executable, str(num_body), benchmark_path, str(num_block)]
-        try:
-            result = subprocess.check_output(command, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
-            print(command)
-            error_and_exit(e.output.decode('utf-8'))
-
-        ret = result.decode('utf-8')
-        f_stdout.write(ret + "\n") 
-        gpu_runtime_re = re.search(GPU_TIME_PATTERN, ret)
-        if not gpu_runtime_re:
-            error_and_exit("failed to find gpu runtime")
-        gpu_runtime = gpu_runtime_re.group(1)
-        f_data.write(gpu_runtime + ",")
+            ret = result.decode('utf-8')
+            f_stdout.write(ret + "\n") 
+            gpu_runtime_re = re.search(GPU_TIME_PATTERN, ret)
+            if not gpu_runtime_re:
+                error_and_exit("failed to find gpu runtime")
+            gpu_runtime = gpu_runtime_re.group(1)
+            total_time += float(gpu_runtime)
+        avg_time = total_time / AVG_ITERATION
+        f_data.write("{:.6f}".format(avg_time) + ",")
 
 f_data.close()
 f_stdout.close()
