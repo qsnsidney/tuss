@@ -1,7 +1,5 @@
 #pragma once
 
-#include "physics.h"
-
 namespace CPUSIM
 {
     /// Interface
