@@ -28,11 +28,11 @@ UTST_IGNORED_TEST(bin_to_csv_converter)
 {
     TIMER timer("bin_to_csv_converter");
 
-    std::string bin_file = "/Users/lichenliu/p/tuss/benchmark/benchmark_100000.ic.bin";
+    std::string bin_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.bin";
     BODY_STATE_VEC data = deserialize_body_state_vec_from_bin(bin_file);
     timer.elapsed_previous("deserialize_body_state_vec_from_bin");
 
-    std::string csv_file = "/Users/lichenliu/p/tuss/benchmark/benchmark_100000.csv";
+    std::string csv_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.csv";
     serialize_body_state_vec_to_csv(csv_file, data);
     timer.elapsed_previous("serialize_body_state_vec_to_csv");
 
@@ -47,11 +47,11 @@ UTST_IGNORED_TEST(csv_to_bin_converter)
 {
     TIMER timer("csv_to_bin_converter");
 
-    std::string csv_file = "/Users/lichenliu/p/tuss/benchmark/benchmark_100000.csv";
+    std::string csv_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.csv";
     BODY_STATE_VEC data = deserialize_body_state_vec_from_csv(csv_file);
     timer.elapsed_previous("deserialize_body_state_vec_from_csv");
 
-    std::string bin_file = "/Users/lichenliu/p/tuss/benchmark/benchmark_100000.ic.bin";
+    std::string bin_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.bin";
     serialize_body_state_vec_to_bin(bin_file, data);
     timer.elapsed_previous("serialize_body_state_vec_to_bin");
 
