@@ -8,16 +8,17 @@ def error_and_exit(err_msg):
     print(err_msg)
     exit(1)
 
-THREAD_PER_BLOCK = [16,32,64,128,256]
-NBODY = [10000,20000,50000,100000]
-AVG_ITERATION = 5
-CUDA_EXECUTABLE = "build/tus/tus_exe"
-GPU_TIME_PATTERN = "Subprofile \(Finished computation\) took (([0-9]*[.])?[0-9]+)"
-BENCHMARK_DATA = "benchmark/ic/benchmark_500000.ic.bin"
-BENCHMARK_OUTPUT_FILE = "gpu_benchmark.csv"
-STDOUT_OUTPUT = "benchmark.stdout"
 
 if __name__=='__main__':
+    THREAD_PER_BLOCK = [16,32,64,128,256]
+    NBODY = [10000,20000,50000,100000]
+    AVG_ITERATION = 5
+    CUDA_EXECUTABLE = "build/tus/tus_exe"
+    GPU_TIME_PATTERN = "Subprofile \(Finished computation\) took (([0-9]*[.])?[0-9]+)"
+    BENCHMARK_DATA = "benchmark/ic/benchmark_500000.ic.bin"
+    BENCHMARK_OUTPUT_FILE = "gpu_benchmark.csv"
+    STDOUT_OUTPUT = "benchmark.stdout"
+
     script_dir = os.path.dirname(os.path.realpath(__file__))
     project_home_dir = os.path.join(script_dir, "../../")
 
