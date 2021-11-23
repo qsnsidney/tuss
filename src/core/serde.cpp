@@ -37,7 +37,7 @@ namespace
 
 namespace CORE
 {
-    void serialize_body_ic_to_csv(std::ostream &csv_ostream, const std::vector<BODY_IC> &body_ics)
+    void serialize_body_ic_vec_to_csv(std::ostream &csv_ostream, const BODY_IC_VEC &body_ics)
     {
         csv_ostream << std::fixed;
         /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
@@ -53,16 +53,16 @@ namespace CORE
         }
     }
 
-    void serialize_body_ic_to_csv(const std::string &csv_file_path, const std::vector<BODY_IC> &body_ics)
+    void serialize_body_ic_vec_to_csv(const std::string &csv_file_path, const BODY_IC_VEC &body_ics)
     {
         std::ofstream csv_file_ofstream(csv_file_path);
         UTST_ASSERT(csv_file_ofstream.is_open());
-        serialize_body_ic_to_csv(csv_file_ofstream, body_ics);
+        serialize_body_ic_vec_to_csv(csv_file_ofstream, body_ics);
     }
 
-    std::vector<BODY_IC> deserialize_body_ic_from_csv(std::istream &csv_istream)
+    BODY_IC_VEC deserialize_body_ic_vec_from_csv(std::istream &csv_istream)
     {
-        std::vector<BODY_IC> body_ics;
+        BODY_IC_VEC body_ics;
         /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
         const std::regex row_regex("(.*),(.*),(.*),(.*),(.*),(.*),(.*),?", std::regex::optimize);
 
@@ -89,14 +89,14 @@ namespace CORE
         return body_ics;
     }
 
-    std::vector<BODY_IC> deserialize_body_ic_from_csv(const std::string &csv_file_path)
+    BODY_IC_VEC deserialize_body_ic_vec_from_csv(const std::string &csv_file_path)
     {
         std::ifstream csv_file_ifstream(csv_file_path);
         UTST_ASSERT(csv_file_ifstream.is_open());
-        return deserialize_body_ic_from_csv(csv_file_ifstream);
+        return deserialize_body_ic_vec_from_csv(csv_file_ifstream);
     }
 
-    void serialize_body_ic_to_bin(std::ostream &bin_ostream, const std::vector<BODY_IC> &body_ics)
+    void serialize_body_ic_vec_to_bin(std::ostream &bin_ostream, const BODY_IC_VEC &body_ics)
     {
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         const int size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
@@ -123,16 +123,16 @@ namespace CORE
         }
     }
 
-    void serialize_body_ic_to_bin(const std::string &bin_file_path, const std::vector<BODY_IC> &body_ics)
+    void serialize_body_ic_vec_to_bin(const std::string &bin_file_path, const BODY_IC_VEC &body_ics)
     {
         std::ofstream bin_file_ofstream(bin_file_path, std::ios::binary);
         UTST_ASSERT(bin_file_ofstream.is_open());
-        serialize_body_ic_to_bin(bin_file_ofstream, body_ics);
+        serialize_body_ic_vec_to_bin(bin_file_ofstream, body_ics);
     }
 
-    std::vector<BODY_IC> deserialize_body_ic_from_bin(std::istream &bin_istream)
+    BODY_IC_VEC deserialize_body_ic_vec_from_bin(std::istream &bin_istream)
     {
-        std::vector<BODY_IC> body_ics;
+        BODY_IC_VEC body_ics;
 
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         // Note: if os is not in binary mode, then size_floating_value_type might not
@@ -166,10 +166,10 @@ namespace CORE
         return body_ics;
     }
 
-    std::vector<BODY_IC> deserialize_body_ic_from_bin(const std::string &bin_file_path)
+    BODY_IC_VEC deserialize_body_ic_vec_from_bin(const std::string &bin_file_path)
     {
         std::ifstream bin_file_ifstream(bin_file_path, std::ios::binary);
         UTST_ASSERT(bin_file_ifstream.is_open());
-        return deserialize_body_ic_from_bin(bin_file_ifstream);
+        return deserialize_body_ic_vec_from_bin(bin_file_ifstream);
     }
 }

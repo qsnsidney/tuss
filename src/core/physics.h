@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tuple>
+#include <vector>
 #include "xyz.h"
 #include "universe.h"
 
@@ -29,4 +30,5 @@ namespace CORE
     };
 
     using BODY_IC = std::tuple<POS, VEL, MASS>;
+    using BODY_IC_VEC = std::vector<BODY_IC>;
 }
