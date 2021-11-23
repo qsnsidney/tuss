@@ -7,6 +7,8 @@
 
 namespace CORE
 {
+    /// Basic types
+
     using DT = UNIVERSE::floating_value_type;
 
     using MASS = UNIVERSE::floating_value_type;
@@ -29,6 +31,8 @@ namespace CORE
         static POS updated(const POS &, const VEL &, const ACC &, DT);
     };
 
-    using BODY_IC = std::tuple<POS, VEL, MASS>;
-    using BODY_IC_VEC = std::vector<BODY_IC>;
+    /// Input/output types
+
+    using BODY_STATE = std::tuple<POS, VEL, MASS>;
+    using BODY_STATE_VEC = std::vector<BODY_STATE>;
 }

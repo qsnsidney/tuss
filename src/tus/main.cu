@@ -52,8 +52,8 @@ int main(int argc, char *argv[])
 
     CORE::TIMER timer("cuda program");
     /* BIN file of initial conditions */
-    auto ic = CORE::deserialize_body_ic_vec_from_bin(bin_path);
-    timer.elapsed_previous("deserialize_body_ic_vec_from_csv");
+    auto ic = CORE::deserialize_body_state_vec_from_bin(bin_path);
+    timer.elapsed_previous("deserialize_body_state_vec_from_csv");
 
     // TODO: get better debug message.
     assert(ic.size() >= nBody);
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
      */
 
     parse_ic(h_X, h_V, h_M, ic, nBody);
-    timer.elapsed_previous("deserialize_body_ic_vec_from_csv");
+    timer.elapsed_previous("deserialize_body_state_vec_from_csv");
 
     /*
      *  mass 

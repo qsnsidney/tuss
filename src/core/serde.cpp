@@ -37,11 +37,11 @@ namespace
 
 namespace CORE
 {
-    void serialize_body_ic_vec_to_csv(std::ostream &csv_ostream, const BODY_IC_VEC &body_ics)
+    void serialize_body_state_vec_to_csv(std::ostream &csv_ostream, const BODY_STATE_VEC &body_states)
     {
         csv_ostream << std::fixed;
         /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
-        for (const auto &[p, v, m] : body_ics)
+        for (const auto &[p, v, m] : body_states)
         {
             csv_ostream << p.x << ",";
             csv_ostream << p.y << ",";
@@ -53,16 +53,16 @@ namespace CORE
         }
     }
 
-    void serialize_body_ic_vec_to_csv(const std::string &csv_file_path, const BODY_IC_VEC &body_ics)
+    void serialize_body_state_vec_to_csv(const std::string &csv_file_path, const BODY_STATE_VEC &body_states)
     {
         std::ofstream csv_file_ofstream(csv_file_path);
         UTST_ASSERT(csv_file_ofstream.is_open());
-        serialize_body_ic_vec_to_csv(csv_file_ofstream, body_ics);
+        serialize_body_state_vec_to_csv(csv_file_ofstream, body_states);
     }
 
-    BODY_IC_VEC deserialize_body_ic_vec_from_csv(std::istream &csv_istream)
+    BODY_STATE_VEC deserialize_body_state_vec_from_csv(std::istream &csv_istream)
     {
-        BODY_IC_VEC body_ics;
+        BODY_STATE_VEC body_states;
         /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
         const std::regex row_regex("(.*),(.*),(.*),(.*),(.*),(.*),(.*),?", std::regex::optimize);
 
@@ -84,34 +84,34 @@ namespace CORE
             VEL v{str_to_floating(m[4]), str_to_floating(m[5]), str_to_floating(m[6])};
             MASS mass{str_to_floating(m[7])};
 
-            body_ics.emplace_back(p, v, mass);
+            body_states.emplace_back(p, v, mass);
         }
-        return body_ics;
+        return body_states;
     }
 
-    BODY_IC_VEC deserialize_body_ic_vec_from_csv(const std::string &csv_file_path)
+    BODY_STATE_VEC deserialize_body_state_vec_from_csv(const std::string &csv_file_path)
     {
         std::ifstream csv_file_ifstream(csv_file_path);
         UTST_ASSERT(csv_file_ifstream.is_open());
-        return deserialize_body_ic_vec_from_csv(csv_file_ifstream);
+        return deserialize_body_state_vec_from_csv(csv_file_ifstream);
     }
 
-    void serialize_body_ic_vec_to_bin(std::ostream &bin_ostream, const BODY_IC_VEC &body_ics)
+    void serialize_body_state_vec_to_bin(std::ostream &bin_ostream, const BODY_STATE_VEC &body_states)
     {
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         const int size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
         write_as_binary(bin_ostream, size_floating_value_type);
 
         /// - second 4 bytes: number of bodies
-        const int num_bodies = body_ics.size();
+        const int num_bodies = body_states.size();
         write_as_binary(bin_ostream, num_bodies);
 
-        // - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_IC
-        for (const auto &body_ic : body_ics)
+        // - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_STATE
+        for (const auto &body_state : body_states)
         {
-            const auto &body_pos = std::get<POS>(body_ic);
-            const auto &body_vel = std::get<VEL>(body_ic);
-            const auto body_mass = std::get<MASS>(body_ic);
+            const auto &body_pos = std::get<POS>(body_state);
+            const auto &body_vel = std::get<VEL>(body_state);
+            const auto body_mass = std::get<MASS>(body_state);
 
             write_as_binary(bin_ostream, body_pos.x);
             write_as_binary(bin_ostream, body_pos.y);
@@ -123,16 +123,16 @@ namespace CORE
         }
     }
 
-    void serialize_body_ic_vec_to_bin(const std::string &bin_file_path, const BODY_IC_VEC &body_ics)
+    void serialize_body_state_vec_to_bin(const std::string &bin_file_path, const BODY_STATE_VEC &body_states)
     {
         std::ofstream bin_file_ofstream(bin_file_path, std::ios::binary);
         UTST_ASSERT(bin_file_ofstream.is_open());
-        serialize_body_ic_vec_to_bin(bin_file_ofstream, body_ics);
+        serialize_body_state_vec_to_bin(bin_file_ofstream, body_states);
     }
 
-    BODY_IC_VEC deserialize_body_ic_vec_from_bin(std::istream &bin_istream)
+    BODY_STATE_VEC deserialize_body_state_vec_from_bin(std::istream &bin_istream)
     {
-        BODY_IC_VEC body_ics;
+        BODY_STATE_VEC body_states;
 
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         // Note: if os is not in binary mode, then size_floating_value_type might not
@@ -143,9 +143,9 @@ namespace CORE
 
         /// - second 4 bytes: number of bodies
         const auto num_bodies = read_as_binary<int>(bin_istream);
-        body_ics.reserve(num_bodies);
+        body_states.reserve(num_bodies);
 
-        // - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_IC
+        // - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_STATE
         for (int count_bodies = 0; count_bodies < num_bodies; count_bodies++)
         {
             POS body_pos;
@@ -160,16 +160,16 @@ namespace CORE
             body_vel.z = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
             body_mass = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
 
-            body_ics.emplace_back(body_pos, body_vel, body_mass);
+            body_states.emplace_back(body_pos, body_vel, body_mass);
         }
 
-        return body_ics;
+        return body_states;
     }
 
-    BODY_IC_VEC deserialize_body_ic_vec_from_bin(const std::string &bin_file_path)
+    BODY_STATE_VEC deserialize_body_state_vec_from_bin(const std::string &bin_file_path)
     {
         std::ifstream bin_file_ifstream(bin_file_path, std::ios::binary);
         UTST_ASSERT(bin_file_ifstream.is_open());
-        return deserialize_body_ic_vec_from_bin(bin_file_ifstream);
+        return deserialize_body_state_vec_from_bin(bin_file_ifstream);
     }
 }

@@ -20,14 +20,14 @@ namespace CPUSIM
     void SIMPLE_ENGINE::execute(CORE::DT dt, int n_iter)
     {
         CORE::TIMER timer(std::string("execute(") + std::to_string(dt) + "*" + std::to_string(n_iter) + ")");
-        const int n_body = body_ics().size();
+        const int n_body = body_states().size();
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);
         // Step 1: Prepare ic
         for (int i_body = 0; i_body < n_body; i_body++)
         {
-            const auto &[body_pos, body_vel, body_mass] = body_ics()[i_body];
+            const auto &[body_pos, body_vel, body_mass] = body_states()[i_body];
             buf_in.pos[i_body] = body_pos;
             buf_in.vel[i_body] = body_vel;
             mass[i_body] = body_mass;

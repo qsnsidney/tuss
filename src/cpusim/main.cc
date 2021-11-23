@@ -33,18 +33,18 @@ int main(int argc, char *argv[])
     timer.elapsed_previous("parsing_args");
 
     // Load ic
-    CORE::BODY_IC_VEC
-        body_ics = CORE::deserialize_body_ic_vec_from_bin(ic_bin_file_path);
-    if (max_n_body >= 0 && max_n_body < static_cast<int>(body_ics.size()))
+    CORE::BODY_STATE_VEC
+        body_states = CORE::deserialize_body_state_vec_from_bin(ic_bin_file_path);
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(body_states.size()))
     {
-        body_ics.resize(max_n_body);
+        body_states.resize(max_n_body);
         std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
     }
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
     std::unique_ptr<CPUSIM::ENGINE> engine(new CPUSIM::SIMPLE_ENGINE);
-    engine->init(std::move(body_ics));
+    engine->init(std::move(body_states));
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine

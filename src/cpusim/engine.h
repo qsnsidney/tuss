@@ -12,14 +12,14 @@ namespace CPUSIM
         virtual ~ENGINE() = 0;
 
     public:
-        virtual void init(CORE::BODY_IC_VEC body_ics) final { body_ics_ = std::move(body_ics); }
+        virtual void init(CORE::BODY_STATE_VEC body_states) final { body_states_ = std::move(body_states); }
 
         virtual void execute(CORE::DT dt, int n_iter) = 0;
 
     protected:
-        const CORE::BODY_IC_VEC &body_ics() const { return body_ics_; }
+        const CORE::BODY_STATE_VEC &body_states() const { return body_states_; }
 
     private:
-        CORE::BODY_IC_VEC body_ics_;
+        CORE::BODY_STATE_VEC body_states_;
     };
 }
