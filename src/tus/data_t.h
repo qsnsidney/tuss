@@ -65,6 +65,6 @@ __host__ inline void random_initialize_mass(data_t *input_array, size_t size, da
 // WARNING: this function has hardcoded assumption on float vs double
 __device__ inline data_t power_norm(data_t_3d a, data_t_3d b)
 {
-    data_t res = sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z) + EPSILON * EPSILON);
+    data_t res = sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z) + CORE::UNIVERSE::epislon * CORE::UNIVERSE::epislon);
     return res * res * res;
 }
