@@ -11,6 +11,6 @@ namespace CPUSIM
         virtual ~ENGINE() = 0;
 
     public:
-        virtual void execute() = 0;
+        virtual void execute(int n_iter) = 0;
     };
 }
