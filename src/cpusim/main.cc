@@ -1,33 +1,36 @@
 #include <iostream>
+#include <memory>
 
 #include "macros.h"
 #include "serde.h"
+#include "engine.h"
+#include "simple_engine.h"
+#include "timer.h"
 
 int main(int argc, char *argv[])
 {
-    CORE::XYZ v{3, 4, 5};
-    CORE::XYZ u{30, 40, 50};
-    CORE::XYZ w{40, 50, 60};
-    v += u;
-    w = v + u;
-    v -= u;
-    w = v - u;
-    w = -u;
-    v *= 2.0f;
-    w = v * 2.0f;
-    w = 2.0f * v;
-    v /= 2.0f;
-    w = v / 2.0f;
-    std::cout << "u=" << u << std::endl;
-    std::cout << "v=" << v << std::endl;
-    std::cout << "w=" << w << std::endl;
-    std::cout << "This is very good" << std::endl;
+    CORE::TIMER timer("cpusim");
 
-    std::cout << argc << std::endl;
-    for (int i = 0; i < argc; i++)
-    {
-        std::cout << argv[i] << std::endl;
-    }
+    ASSERT(argc == 3 && "Expect arguments: [ic_bin_file] [n_iteration]");
+    const std::string ic_bin_file_path = argv[1];
+    const int n_iteration = std::stod(argv[2]);
+    std::cout << "Running.." << std::endl;
+    std::cout << "IC: " << ic_bin_file_path << std::endl;
+    std::cout << "n_iteration: " << n_iteration << std::endl;
+    std::cout << std::endl;
+    timer.elapsed_previous("parsing_args");
+
+    std::vector<CORE::BODY_IC>
+        body_ics = CORE::deserialize_body_ic_from_bin(ic_bin_file_path);
+    timer.elapsed_previous("loading_ic");
+
+    // Select engine here
+    std::unique_ptr<CPUSIM::ENGINE> engine(new CPUSIM::SIMPLE_ENGINE);
+    engine->init(std::move(body_ics));
+    timer.elapsed_previous("initializing_engine");
+
+    engine->execute(n_iteration);
+    timer.elapsed_previous("running_engine");
 
     return 0;
 }
