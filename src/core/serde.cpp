@@ -135,8 +135,6 @@ namespace CORE
         BODY_STATE_VEC body_states;
 
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
-        // Note: if os is not in binary mode, then size_floating_value_type might not
-        // be displayable
         const int expected_size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
         const auto size_floating_value_type = read_as_binary<int>(bin_istream);
         UTST_ASSERT_EQUAL(expected_size_floating_value_type, size_floating_value_type);
