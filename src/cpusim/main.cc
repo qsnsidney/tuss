@@ -12,12 +12,21 @@ int main(int argc, char *argv[])
     CORE::TIMER timer("cpusim");
 
     // Load args
-    ASSERT(argc == 4 && "Expect arguments: [ic_bin_file] [dt] [n_iteration]");
+    if (argc != 5)
+    {
+        std::cout << std::endl;
+        std::cout << "Expect arguments: [ic_bin_file] [max_n_body] [dt] [n_iteration]" << std::endl;
+        std::cout << "  [max_n_body]: no effect if < 0 or >= n_body from ic_bin_file" << std::endl;
+        std::cout << std::endl;
+        ASSERT(false && "Wrong number of arguments");
+    }
     const std::string ic_bin_file_path = argv[1];
-    const CORE::DT dt = std::stod(argv[2]);
-    const int n_iteration = std::stoi(argv[3]);
+    const int max_n_body = std::stoi(argv[2]);
+    const CORE::DT dt = std::stod(argv[3]);
+    const int n_iteration = std::stoi(argv[4]);
     std::cout << "Running.." << std::endl;
     std::cout << "IC: " << ic_bin_file_path << std::endl;
+    std::cout << "max_n_body: " << max_n_body << std::endl;
     std::cout << "dt: " << dt << std::endl;
     std::cout << "n_iteration: " << n_iteration << std::endl;
     std::cout << std::endl;
@@ -26,6 +35,11 @@ int main(int argc, char *argv[])
     // Load ic
     std::vector<CORE::BODY_IC>
         body_ics = CORE::deserialize_body_ic_from_bin(ic_bin_file_path);
+    if (max_n_body >= 0 && max_n_body < body_ics.size())
+    {
+        body_ics.resize(max_n_body);
+        std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
+    }
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
