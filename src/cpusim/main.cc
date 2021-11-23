@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     // Load ic
     std::vector<CORE::BODY_IC>
         body_ics = CORE::deserialize_body_ic_from_bin(ic_bin_file_path);
-    if (max_n_body >= 0 && max_n_body < body_ics.size())
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(body_ics.size()))
     {
         body_ics.resize(max_n_body);
         std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
