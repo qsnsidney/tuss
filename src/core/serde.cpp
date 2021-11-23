@@ -80,8 +80,8 @@ namespace CORE
                 return {};
             }
 
-            POS p{{str_to_floating(m[1]), str_to_floating(m[2]), str_to_floating(m[3])}};
-            VEL v{{str_to_floating(m[4]), str_to_floating(m[5]), str_to_floating(m[6])}};
+            POS p{str_to_floating(m[1]), str_to_floating(m[2]), str_to_floating(m[3])};
+            VEL v{str_to_floating(m[4]), str_to_floating(m[5]), str_to_floating(m[6])};
             MASS mass{str_to_floating(m[7])};
 
             body_ics.emplace_back(p, v, mass);
