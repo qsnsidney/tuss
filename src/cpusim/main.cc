@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
 {
     CORE::TIMER timer("cpusim");
 
+    // Load args
     ASSERT(argc == 4 && "Expect arguments: [ic_bin_file] [dt] [n_iteration]");
     const std::string ic_bin_file_path = argv[1];
     const CORE::DT dt = std::stod(argv[2]);
@@ -22,6 +23,7 @@ int main(int argc, char *argv[])
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
+    // Load ic
     std::vector<CORE::BODY_IC>
         body_ics = CORE::deserialize_body_ic_from_bin(ic_bin_file_path);
     timer.elapsed_previous("loading_ic");
@@ -31,6 +33,7 @@ int main(int argc, char *argv[])
     engine->init(std::move(body_ics));
     timer.elapsed_previous("initializing_engine");
 
+    // Execute engine
     engine->execute(dt, n_iteration);
     timer.elapsed_previous("running_engine");
 
