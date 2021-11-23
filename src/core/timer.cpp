@@ -27,7 +27,7 @@ namespace CORE
         double current_time = get_time_stamp();
         double elapsed = current_time - previous_elapsing_time_;
 
-        std::cout << "TIMER: Subprofile (" << subprofile_name << ") took " << elapsed << " seconds" << std::endl;
+        std::cout << "TIMER: Subprofile (" << subprofile_name << ") took " << std::to_string(elapsed) << " seconds" << std::endl;
 
         previous_elapsing_time_ = current_time;
         return elapsed;
@@ -38,7 +38,7 @@ namespace CORE
         double current_time = get_time_stamp();
         double elapsed = current_time - start_time_;
 
-        std::cout << "TIMER: Profile (" << profile_name_ << ") took " << elapsed << " seconds" << std::endl;
+        std::cout << "TIMER: Profile (" << profile_name_ << ") took " << std::to_string(elapsed) << " seconds" << std::endl;
 
         return elapsed;
     }

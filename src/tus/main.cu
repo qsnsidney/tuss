@@ -11,7 +11,6 @@
 #include "data_t.h"
 #include "constant.h"
 #include "basic_kernel.h"
-#include <cassert>
 #include "timer.h"
 // Comment out this line to enable debug mode
 // #define NDEBUG
