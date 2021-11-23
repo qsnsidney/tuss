@@ -3,11 +3,6 @@ project(core VERSION 0.1.0)
 include(CTest)
 
 add_compile_options(-Werror -Wall -Wno-missing-braces -O3)
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG(-march=native COMPILER_SUPPORTS_MARCH_NATIVE)
-if(COMPILER_SUPPORTS_MARCH_NATIVE)
-    add_compile_options(-march=native)
-endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
