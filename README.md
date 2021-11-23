@@ -66,3 +66,27 @@ make test_core ARGS=-V
 # See more options available
 make test_core ARGS=-h
 ```
+
+## Input/Output Data
+
+### `BODY_STATE`
+The state of a single body, consists of `(POS, VEC, MASS)`.  
+The serialization format expands each field, so that looks like:
+`(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)`
+
+### `BODY_STATE_VEC`
+A collection of `BODY_STATE`, each represents individual `BODY_STATE`.
+
+### `BODY_STATE_VEC` in CSV
+Print out each `BODY_STATE` in serialization format.  
+Each `BODY_STATE` is represented as individual row with strings representing floating values, with comma to separate each field, and ends with a new line.  
+This format is not encouraged due to its large file size, and slow deserialization speed due to string processing.
+
+### `BODY_STATE_VEC` in BIN
+Print out each `BODY_STATE` in binary serialization format.  
+Each `BODY_STATE` is represented as a sequence of bytes, with bytes representing floating values.
+The specific format looks like the following:
+- first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
+- second 4 bytes: number of bodies
+- rest: `(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)` for each `BODY_STATE`. 
+This format is the recommended format.
