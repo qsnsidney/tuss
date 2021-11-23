@@ -88,5 +88,6 @@ Each `BODY_STATE` is represented as a sequence of bytes, with bytes representing
 The specific format looks like the following:
 - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
 - second 4 bytes: number of bodies
-- rest: `(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)` for each `BODY_STATE`. 
+- rest: `(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)` for each `BODY_STATE`
+  
 This format is the recommended format.
