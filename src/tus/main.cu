@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     {
         printf("Error: The number of arguments must be either 3 or 4\n");
         printf("Expecting: <nbodies> <path_to_bin> <thread_per_block(optional)>\n");
-        return 0;
+        return 1;
     }
 
     /* BIN file of initial conditions */
