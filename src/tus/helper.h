@@ -45,6 +45,12 @@ void host_malloc_helper(void **ptr, size_t size)
     }
 }
 
+// Leverage from https://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2
+__host__ bool IsPowerOfTwo(unsigned x)
+{
+    return (x & (x - 1)) == 0;
+}
+
 __host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *input_m, std::vector<CORE::BODY_IC> &ic, size_t parse_length = 0)
 {
     size_t length_to_parse = ic.size();

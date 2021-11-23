@@ -18,7 +18,7 @@
 
 #define SIM_TIME 10
 #define STEP_SIZE 1
-
+#define DEFAULT_BLOCK_SIZE 32
 int main(int argc, char *argv[])
 {
     // leave this here just for simple reference
@@ -29,15 +29,24 @@ int main(int argc, char *argv[])
     /* Get Dimension */
     /// TODO: Add more arguments for input and output
     /// Haiqi: I think it should be "main [num_body] [simulation_end_time] [num_iteration] or [step_size]". or we simply let step_size = 1
-    if (argc != 3)
+    if (argc < 3 or argc > 4)
     {
-        printf("Error: The number of arguments is %d, but not exactly 2\n", argc);
+        printf("Error: The number of arguments must be either 3 or 4\n");
+        printf("Expecting: <nbodies> <path_to_bin> <thread_per_block(optional)>\n");
         return 0;
     }
 
     /* BIN file of initial conditions */
     unsigned nBody = atoi(argv[1]);
     std::string bin_path(argv[2]);
+    unsigned nthreads = DEFAULT_BLOCK_SIZE;
+    if(argc == 4){
+        nthreads = atoi(argv[3]);
+        // i know some none-power-of 2 also makes sense
+        // but incase someone enter a dumb number, assert it here
+        // later this can be removed
+        assert(IsPowerOfTwo(nthreads));
+    }
     // temporarily assign them to MARCO
     unsigned simulation_time = SIM_TIME;
     unsigned step_size = STEP_SIZE;
@@ -106,7 +115,8 @@ int main(int argc, char *argv[])
     cudaMemcpy(d_M, h_M, data_size, cudaMemcpyHostToDevice);
     timer.elapsed_previous("copied input data from host to device");
 
-    unsigned nthreads = 256;
+    // nthread is assigned to either 32 by default or set to a custom power of 2 by user
+    std::cout << "Set thread_per_block to " << nthreads << std::endl;
     unsigned nblocks = (nBody + nthreads - 1) / nthreads;
 
     // calculate the initialia acceleration
