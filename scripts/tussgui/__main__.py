@@ -17,6 +17,7 @@ def init(parser):
                              help='path to BODY_STATE_VECs')
     parser_live.add_argument('--fps', default=200, type=int,
                              help='number of iterations to plot per second')
+    # Add arg to control history of trajectory to keep
 
 
 def main(args):
