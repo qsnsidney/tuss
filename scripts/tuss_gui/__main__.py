@@ -126,24 +126,36 @@ def plot_live_trajectory(dir):
         dir, iteration, sleep_handler=sleep_handler)
     n_bodies = len(body_state_vec)
 
+    # Axis limit
+    max_x = 0
+    min_x = 0
+    max_y = 0
+    min_y = 0
+    max_z = 0
+    min_z = 0
+
     # Plot the orbits
     orbits = list()
     for body_state in body_state_vec:
+        max_x = max(max_x, body_state[0])
+        min_x = min(min_x, body_state[0])
+        max_y = max(max_y, body_state[1])
+        min_y = min(min_y, body_state[1])
+        max_z = max(max_z, body_state[2])
+        min_z = min(min_z, body_state[2])
+
         line, = ax.plot(body_state[0],
                         body_state[1], body_state[2])
         orbits.append(line)
 
     # Add a few more bells and whistles
-    # ax.set_xlabel("x-coordinate")
-    # ax.set_ylabel("y-coordinate")
-    # ax.set_zlabel("z-coordinate")
-    # ax.set_title('Visualization of orbits of bodies in a ' +
-    #              str(n_bodies) + ' system\n', fontsize=8)
+    ax.set_xlabel("x-coordinate")
+    ax.set_ylabel("y-coordinate")
+    ax.set_zlabel("z-coordinate")
+    ax.set_title('Visualization of orbits of bodies in a ' +
+                 str(n_bodies) + ' system\n', fontsize=8)
     # ax.legend(loc="upper left", fontsize=14)
-    # fig.gca().autoscale()
-    # ax.set_xlim(-100, 100)
-    # ax.set_ylim(-100, 100)
-    # ax.set_zlim(-100, 100)
+
     plt.ion()
     plt.show()
 
@@ -156,6 +168,13 @@ def plot_live_trajectory(dir):
 
         # Plot the orbits
         for body_i, body_state in enumerate(body_state_vec):
+            max_x = max(max_x, body_state[0])
+            min_x = min(min_x, body_state[0])
+            max_y = max(max_y, body_state[1])
+            min_y = min(min_y, body_state[1])
+            max_z = max(max_z, body_state[2])
+            min_z = min(min_z, body_state[2])
+
             orbits[body_i].set_xdata(
                 np.append(orbits[body_i].get_data_3d()[0], body_state[0]))
             orbits[body_i].set_ydata(
@@ -163,40 +182,18 @@ def plot_live_trajectory(dir):
             orbits[body_i].set_3d_properties(
                 np.append(orbits[body_i].get_data_3d()[2], body_state[2]))
 
-        ax.set_xlim(-10000, 10000)
-        ax.set_ylim(-10000, 10000)
-        ax.set_zlim(-10000, 10000)
+        ax.set_xlim(min_x, max_x)
+        ax.set_ylim(min_y, max_y)
+        ax.set_zlim(min_z, max_z)
+
+        # Doesn't work
         # fig.gca().relim()
         # fig.gca().autoscale()
         # fig.gca().autoscale_view(True,True,True)
         # ax.figure.canvas.draw_idle()
+
         fig.canvas.draw()
         fig.canvas.flush_events()
-        # orbits[body_i].set_xdata(time_series_body[0])
-        # orbits[body_i].set_ydata(time_series_body[1])
-        # orbits[body_i].set_3d_properties(time_series_body[2])
-        # if body_i == 0:
-        #     print(orbits[body_i].get_data_3d())
-        #     if iteration == 10:
-        #         assert False
-        # if body_i == 0:
-        #     # print('get_data_3d', orbits[body_i].get_data_3d())
-        #     print('get_data_3d[0]', orbits[body_i].get_data_3d()[0])
-        #     print('type(get_data_3d[0])', type(
-        #         orbits[body_i].get_data_3d()[0]))
-        #     # print('get_xdata', orbits[body_i].get_xdata())
-        #     print('time_series_body[0]', time_series_body[0])
-        #     print('type(time_series_body[0]0', type(time_series_body[0]))
-        #     print('orbits[body_i].get_data_3d()[0] + time_series_body[0]',
-        #           orbits[body_i].get_data_3d()[0] + time_series_body[0])
-        #     if iteration == 3:
-        #         assert False
-
-        # if body_i == 0:
-        #     print('get_data_3d', orbits[body_i].get_data_3d())
-        #     print('get_xdata', orbits[body_i].get_xdata())
-        #     if iteration == 3:
-        #         assert False
 
         # # Plot the final positions of the stars
         # for body_i, time_series_body in enumerate(time_series_bodies):
