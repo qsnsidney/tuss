@@ -1,5 +1,5 @@
 #include "serde.h"
-#include "macros.h"
+#include "macros.hpp"
 
 #include <regex>
 #include <fstream>
