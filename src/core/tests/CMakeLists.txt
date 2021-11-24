@@ -8,13 +8,13 @@ add_compile_options(-Werror -Wall -Wno-missing-braces -O3)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(xyz_tests xyz_tests.cpp)
+add_executable(xyz_tests xyz_tests.cc)
 add_test(core_tests_xyz xyz_tests)
 
-add_executable(serde_tests serde_tests.cpp)
+add_executable(serde_tests serde_tests.cc)
 add_test(core_tests_serde serde_tests)
 
-add_executable(physics_tests physics_tests.cpp)
+add_executable(physics_tests physics_tests.cc)
 add_test(core_tests_physics physics_tests)
 
 # Add test executable here
