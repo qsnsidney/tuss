@@ -213,5 +213,5 @@ def plot_live_trajectory(dir, fps):
         #                marker='o', s=10, label='Body ' + str(body_i))
 
 
-# plot_live_trajectory('./tmp/2_body_log', 100)
-plot_fixed_trajectory('./tmp/2_body_log', -1)
+plot_live_trajectory('./tmp/2_body_log', 100)
+# plot_fixed_trajectory('./tmp/2_body_log', -1)

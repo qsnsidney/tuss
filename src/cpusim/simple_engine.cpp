@@ -150,6 +150,10 @@ namespace CPUSIM
             }
             push_body_states_to_log([&]()
                                     { return generate_body_state_vec(buf_out, mass); });
+            if (i_iter % 10 == 0)
+            {
+                serialize_body_states_log();
+            }
 
             // Prepare for next iteration
             std::swap(buf_in, buf_out);
