@@ -53,8 +53,11 @@ def fetch_batch_body_state_vec(dir, start_iteration, trajectory_iteration_batch_
     return body_state_vec_batch
 
 
-def fetch_batch_body_state_vec_all(dir):
+def fetch_batch_body_state_vec_all(dir, max_iterations=-1):
     num_files = len(core.fileio.files_in_dir(dir))
+    print('Info:', 'Found', num_files, 'BIN files')
+    if max_iterations >= 0:
+        num_files = min(num_files, max_iterations)
     return fetch_batch_body_state_vec(dir, 0, num_files, no_retry=True)
 
 
@@ -78,16 +81,20 @@ def transform_batch_body_state_vec_to_time_series(body_state_vec_batch):
     return result
 
 
-def plot_fixed_trajectory(dir):
+def plot_fixed_trajectory(dir, max_iterations=-1):
     # Create figure
     fig = plt.figure()
 
     # Create 3D axes
     ax = fig.add_subplot(111, projection="3d")
 
+    body_state_vec_batch = fetch_batch_body_state_vec_all(dir, max_iterations)
+    print('Info:', len(body_state_vec_batch), 'Iterations')
+
     time_series_bodies = transform_batch_body_state_vec_to_time_series(
-        fetch_batch_body_state_vec_all(dir))
+        body_state_vec_batch)
     n_bodies = len(time_series_bodies)
+    print('Info:', n_bodies, "Bodies")
 
     # Plot the orbits
     for time_series_body in time_series_bodies:
@@ -207,4 +214,4 @@ def plot_live_trajectory(dir):
 
 
 # plot_live_trajectory('./tmp/10_body_log')
-plot_fixed_trajectory('./tmp/10_body_log')
+plot_fixed_trajectory('./tmp/10_body_log', -1)
