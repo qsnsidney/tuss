@@ -9,6 +9,8 @@ namespace CPUSIM
     public:
         virtual ~SIMPLE_ENGINE() = default;
 
-        virtual void execute(CORE::DT dt, int n_iter) override;
+        using ENGINE::ENGINE;
+
+        virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
     };
 }
