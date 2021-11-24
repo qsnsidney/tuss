@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-#include "universe.h"
+#include "universe.hpp"
 
 namespace CORE
 {
