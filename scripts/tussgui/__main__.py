@@ -9,13 +9,13 @@ def init(parser):
     parser_fixed = subparsers.add_parser('fixed')
     parser_fixed.add_argument('dir', type=str,
                               help='path to BODY_STATE_VECs')
-    parser_fixed.add_argument('--max_iterations', default=-1,
+    parser_fixed.add_argument('--max_iterations', default=-1, type=int,
                               help='max number of BODY_STATE_VECs to read')
 
     parser_live = subparsers.add_parser('live')
     parser_live.add_argument('dir', type=str,
                              help='path to BODY_STATE_VECs')
-    parser_live.add_argument('--fps', default=100,
+    parser_live.add_argument('--fps', default=200, type=int,
                              help='number of iterations to plot per second')
 
 
