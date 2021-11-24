@@ -91,3 +91,10 @@ The specific format looks like the following:
 - rest: `(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)` for each `BODY_STATE`
   
 This format is the recommended format.
+
+## Demo
+```
+mkdir -p tmp/2_body_log
+make run_cpusim ARGS="./benchmark/ic/benchmark_2_simple_2.csv -1 0.0001 6000 ./tmp/2_body_log"
+python3 -m scripts.tuss_gui
+```

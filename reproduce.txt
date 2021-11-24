@@ -1,3 +1,0 @@
-mkdir -p tmp/10_body_log
-make run_cpusim ARGS="./benchmark/ic/benchmark_2_simple.csv 10  0.001 20 ./tmp/10_body_log"
-python3 -m scripts.tuss_gui

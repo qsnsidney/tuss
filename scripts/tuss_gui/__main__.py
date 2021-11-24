@@ -119,7 +119,7 @@ def plot_fixed_trajectory(dir, max_iterations=-1):
     plt.show()
 
 
-def plot_live_trajectory(dir):
+def plot_live_trajectory(dir, fps):
     # Create figure
     fig = plt.figure()
 
@@ -172,7 +172,7 @@ def plot_live_trajectory(dir):
     plt.show()
 
     while True:
-        plt.pause(1)
+        plt.pause(1.0/fps)
 
         iteration += 1
         body_state_vec = fetch_body_state_vec(
@@ -213,5 +213,5 @@ def plot_live_trajectory(dir):
         #                marker='o', s=10, label='Body ' + str(body_i))
 
 
-# plot_live_trajectory('./tmp/10_body_log')
-plot_fixed_trajectory('./tmp/10_body_log', -1)
+# plot_live_trajectory('./tmp/2_body_log', 100)
+plot_fixed_trajectory('./tmp/2_body_log', -1)
