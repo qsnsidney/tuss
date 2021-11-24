@@ -18,7 +18,7 @@ namespace
     {
         CORE::BODY_STATE_VEC body_states;
         body_states.reserve(mass.size());
-        for (int i_body = 0; i_body < mass.size(); i_body++)
+        for (size_t i_body = 0; i_body < mass.size(); i_body++)
         {
             body_states.emplace_back(buffer.pos[i_body], buffer.vel[i_body], mass[i_body]);
         }
