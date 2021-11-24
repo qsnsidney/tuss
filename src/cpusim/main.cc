@@ -2,11 +2,31 @@
 #include <memory>
 #include <optional>
 
-#include "macros.h"
+#include "macros.hpp"
 #include "serde.h"
 #include "engine.h"
 #include "simple_engine.h"
 #include "timer.h"
+#include "cxxopts.hpp"
+
+auto parse_args(int argc, const char *argv[])
+{
+    cxxopts::Options options(argv[0], " - command line options");
+    options
+        .positional_help("[optional args]")
+        .show_positional_help()
+        .set_tab_expansion()
+        .allow_unrecognised_options();
+
+    auto option_group = options.add_options();
+    option_group("i, ic_file", "ic_file .bin or .csv", cxxopts::value<std::string>());
+    option_group("b, num_bodies", "max_n_bodies, optional (default -1), no effect if < 0 or >= n_body from ic_file", cxxopts::value<int>()->default_value("-1"));
+    option_group("t, dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
+    option_group("n, num_iterations", "num_iterations", cxxopts::value<int>());
+    option_group("o, out", "body_states_log_dir, optional", cxxopts::value<std::string>());
+
+    return options.parse(argc, argv);
+}
 
 int main(int argc, char *argv[])
 {
