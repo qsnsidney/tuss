@@ -1,5 +1,5 @@
 #include "utst.h"
-#include "xyz.h"
+#include "xyz.hpp"
 
 using namespace CORE;
 
