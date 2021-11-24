@@ -29,6 +29,13 @@ Paper reference:
 - Located in ./scripts/bicgen
 - `python3 -m scripts.bicgen`
 
+### tussgui
+- Tiny Universe Simulator System GUI
+- Visualiation of trajectories via `BODY_STATE_VEC`s
+- Input files are expected to be ordered by integer
+- Supports Live and Fixed mode
+- `python3 -m scripts.tussgui`
+
 ## Makefile
 
 ### all
@@ -96,5 +103,7 @@ This format is the recommended format.
 ```
 mkdir -p tmp/2_body_log
 make run_cpusim ARGS="./benchmark/ic/benchmark_2_simple_2.csv -1 0.0001 6000 ./tmp/2_body_log"
-python3 -m scripts.tuss_gui
+python3 -m scripts.tussgui fixed ./tmp/2_body_log
+# Or, some animation
+python3 -m scripts.tussgui live ./tmp/2_body_log
 ```
