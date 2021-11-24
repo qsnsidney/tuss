@@ -214,4 +214,4 @@ def plot_live_trajectory(dir):
 
 
 # plot_live_trajectory('./tmp/10_body_log')
-plot_fixed_trajectory('./tmp/10_body_log', 30)
+plot_fixed_trajectory('./tmp/10_body_log', -1)

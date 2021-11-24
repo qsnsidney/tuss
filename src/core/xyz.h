@@ -16,6 +16,7 @@ namespace CORE
 
         using value_type = T;
 
+        void reset();
         T norm_square() const;
     };
 
@@ -62,6 +63,14 @@ namespace CORE
     T XYZ_BASE<T>::norm_square() const
     {
         return x * x + y * y + z * z;
+    }
+
+    template <typename T>
+    void XYZ_BASE<T>::reset()
+    {
+        x = 0;
+        y = 0;
+        z = 0;
     }
 
     template <typename T>

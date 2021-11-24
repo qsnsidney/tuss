@@ -14,6 +14,38 @@ namespace
         BUFFER(int n_body) : pos(n_body, {0, 0, 0}), vel(n_body, {0, 0, 0}), acc(n_body, {0, 0, 0}) {}
     };
 
+    std::ostream &operator<<(std::ostream &os, const BUFFER &buf)
+    {
+        int counter = 0;
+        os << "POS: ";
+        for (auto p : buf.pos)
+        {
+            os << "[" << counter << "] " << p << ", ";
+            counter++;
+        }
+        os << std::endl;
+
+        counter = 0;
+        os << "VEL: ";
+        for (auto v : buf.vel)
+        {
+            os << "[" << counter << "] " << v << ", ";
+            counter++;
+        }
+        os << std::endl;
+
+        counter = 0;
+        os << "ACC: ";
+        for (auto a : buf.acc)
+        {
+            os << "[" << counter << "] " << a << ", ";
+            counter++;
+        }
+        os << std::endl;
+
+        return os;
+    }
+
     CORE::BODY_STATE_VEC generate_body_state_vec(const BUFFER &buffer, const std::vector<CORE::MASS> &mass)
     {
         CORE::BODY_STATE_VEC body_states;
@@ -23,6 +55,22 @@ namespace
             body_states.emplace_back(buffer.pos[i_body], buffer.vel[i_body], mass[i_body]);
         }
         return body_states;
+    }
+
+    void debug_workspace(const BUFFER &buffer, const std::vector<CORE::MASS> &mass)
+    {
+        int counter = 0;
+        std::cout << "MASS: ";
+        for (auto m : mass)
+        {
+            std::cout << "[" << counter << "] " << m << ", ";
+            counter++;
+        }
+        std::cout << std::endl;
+
+        std::cout << buffer;
+
+        std::cout << std::endl;
     }
 }
 
@@ -48,6 +96,7 @@ namespace CPUSIM
         // Step 2: Prepare acceleration for ic
         for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
         {
+            buf_in.acc[i_target_body].reset();
             for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
             {
                 if (i_target_body != j_source_body)
@@ -63,6 +112,11 @@ namespace CPUSIM
         // Core iteration loop
         for (int i_iter = 0; i_iter < n_iter; i_iter++)
         {
+            if (false)
+            {
+                debug_workspace(buf_in, mass);
+            }
+
             for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
             {
                 // Step 3: Compute temp velocity
@@ -74,6 +128,7 @@ namespace CPUSIM
 
             for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
             {
+                buf_out.acc[i_target_body].reset();
                 // Step 5: Compute acceleration
                 for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
                 {
