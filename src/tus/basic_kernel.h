@@ -16,23 +16,49 @@ __global__ inline void update_step(unsigned nbody, data_t step_size, data_t_3d *
     }
 }
 
-__global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *location, data_t *mass, data_t_3d *acceleration)
+__global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *location, data_t *mass, data_t_3d *acceleration, int n)
 {
-    unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
+    extern __shared__ data_t_3d shared_state[];
+    data_t_3d *shared_locations = (data_t_3d*) shared_state;
+    data_t *shared_mass = (data_t*) &shared_locations[n];
+    
+    unsigned block_tid_start = blockDim.x * blockIdx.x;
+    unsigned block_tid_end = block_tid_start + blockIdx.x;
+    
+    unsigned tid = block_tid_start + threadIdx.x;
     if (tid < nbody)
     {
+        shared_locations[threadIdx.x] = location[tid];
+        shared_mass[threadIdx.x] = mass[tid];
+        
         data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
-        data_t_3d x_self = location[tid];
+        data_t_3d x_self = shared_locations[threadIdx.x];
         for (unsigned j = 0; j < nbody; j++)
         {
-            if (j == tid)
+
+            //Offset neighbour fetching by thread id
+            int index = (tid + j) % nbody;
+            
+            if (index == tid)
             {
                 continue;
             }
-            data_t_3d numerator = (x_self - location[j]) * mass[j];
-            data_t denominator = power_norm(x_self, location[j]);
-            data_t_3d new_term = (numerator / denominator);
-            accumulated_accer = accumulated_accer + new_term;
+            
+            //Check if current neighbour belonging to local block
+            //If true, read from block shared memory
+            if( index >= block_tid_start and index < block_tid_end ) {
+                int local_index = index - block_tid_start;
+                data_t_3d numerator = (x_self - shared_locations[local_index]) * shared_mass[local_index];
+                data_t denominator = power_norm(x_self, shared_locations[local_index]);
+                data_t_3d new_term = (numerator / denominator);
+                accumulated_accer = accumulated_accer + new_term;
+            //Else read from global memory
+            } else {    
+                data_t_3d numerator = (x_self - location[index]) * mass[index];
+                data_t denominator = power_norm(x_self, location[index]);
+                data_t_3d new_term = (numerator / denominator);       
+                accumulated_accer = accumulated_accer + new_term;         
+            }  
             //printf("tid = %d, new_term %f, %f, %f\naccumulated_accer %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z, accumulated_accer.x, accumulated_accer.y, accumulated_accer.z);
         }
         acceleration[tid] = accumulated_accer;
