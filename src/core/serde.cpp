@@ -1,5 +1,5 @@
 #include "serde.h"
-#include "utst.h"
+#include "macros.h"
 
 #include <regex>
 #include <fstream>
@@ -56,7 +56,7 @@ namespace CORE
     void serialize_body_state_vec_to_csv(const std::string &csv_file_path, const BODY_STATE_VEC &body_states)
     {
         std::ofstream csv_file_ofstream(csv_file_path);
-        UTST_ASSERT(csv_file_ofstream.is_open());
+        ASSERT(csv_file_ofstream.is_open());
         serialize_body_state_vec_to_csv(csv_file_ofstream, body_states);
     }
 
@@ -92,7 +92,7 @@ namespace CORE
     BODY_STATE_VEC deserialize_body_state_vec_from_csv(const std::string &csv_file_path)
     {
         std::ifstream csv_file_ifstream(csv_file_path);
-        UTST_ASSERT(csv_file_ifstream.is_open());
+        ASSERT(csv_file_ifstream.is_open());
         return deserialize_body_state_vec_from_csv(csv_file_ifstream);
     }
 
@@ -126,7 +126,12 @@ namespace CORE
     void serialize_body_state_vec_to_bin(const std::string &bin_file_path, const BODY_STATE_VEC &body_states)
     {
         std::ofstream bin_file_ofstream(bin_file_path, std::ios::binary);
-        UTST_ASSERT(bin_file_ofstream.is_open());
+        if (!bin_file_ofstream.is_open())
+        {
+            std::cout << "Cannot open " << bin_file_path << std::endl;
+            ASSERT(false);
+        }
+
         serialize_body_state_vec_to_bin(bin_file_ofstream, body_states);
     }
 
@@ -137,7 +142,7 @@ namespace CORE
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         const int expected_size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
         const auto size_floating_value_type = read_as_binary<int>(bin_istream);
-        UTST_ASSERT_EQUAL(expected_size_floating_value_type, size_floating_value_type);
+        ASSERT(expected_size_floating_value_type == size_floating_value_type);
 
         /// - second 4 bytes: number of bodies
         const auto num_bodies = read_as_binary<int>(bin_istream);
@@ -167,7 +172,7 @@ namespace CORE
     BODY_STATE_VEC deserialize_body_state_vec_from_bin(const std::string &bin_file_path)
     {
         std::ifstream bin_file_ifstream(bin_file_path, std::ios::binary);
-        UTST_ASSERT(bin_file_ifstream.is_open());
+        ASSERT(bin_file_ifstream.is_open());
         return deserialize_body_state_vec_from_bin(bin_file_ifstream);
     }
 }
