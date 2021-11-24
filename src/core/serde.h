@@ -28,4 +28,5 @@ namespace CORE
     BODY_STATE_VEC deserialize_body_state_vec_from_bin(const std::string &);
 
     /// Useful
+    BODY_STATE_VEC deserialize_body_state_vec_from_file(const std::string &);
 }
