@@ -2,6 +2,7 @@ from .. import core
 import os
 from matplotlib import pyplot as plt
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def read_body_state_vec(dir, i):
@@ -164,7 +165,7 @@ def plot_live_trajectory(dir):
     plt.show()
 
     while True:
-        plt.pause(0.001)
+        plt.pause(1)
 
         iteration += 1
         body_state_vec = fetch_body_state_vec(
