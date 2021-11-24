@@ -14,7 +14,7 @@ import struct
 
 def parse_body_state_from_bin(f, floating_type_size, floating_type_sym):
     body_state_bytes = f.read(floating_type_size * 7)
-    return struct.unpack(floating_type_sym*7, body_state_bytes)
+    return struct.unpack(floating_type_sym * 7, body_state_bytes)
 
 
 def deserialize_body_state_vec_from_bin(filename):

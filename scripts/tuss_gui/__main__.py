@@ -104,7 +104,9 @@ def plot_fixed_trajectory(dir):
     ax.set_zlabel("z-coordinate")
     ax.set_title('Visualization of orbits of bodies in a ' +
                  str(n_bodies) + ' system\n', fontsize=8)
-    # ax.legend(loc="upper left", fontsize=14)
+    if n_bodies < 10:
+        # ax.legend(loc="upper left", fontsize=14)
+        ax.legend()
 
     plt.show()
 
@@ -154,7 +156,9 @@ def plot_live_trajectory(dir):
     ax.set_zlabel("z-coordinate")
     ax.set_title('Visualization of orbits of bodies in a ' +
                  str(n_bodies) + ' system\n', fontsize=8)
-    # ax.legend(loc="upper left", fontsize=14)
+    if n_bodies < 10:
+        # ax.legend(loc="upper left", fontsize=14)
+        ax.legend()
 
     plt.ion()
     plt.show()
@@ -201,5 +205,5 @@ def plot_live_trajectory(dir):
         #                marker='o', s=10, label='Body ' + str(body_i))
 
 
-plot_live_trajectory('./tmp/10_body_log')
-# plot_fixed_trajectory('./tmp/10_body_log')
+# plot_live_trajectory('./tmp/10_body_log')
+plot_fixed_trajectory('./tmp/10_body_log')
