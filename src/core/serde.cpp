@@ -175,4 +175,21 @@ namespace CORE
         ASSERT(bin_file_ifstream.is_open());
         return deserialize_body_state_vec_from_bin(bin_file_ifstream);
     }
+
+    BODY_STATE_VEC deserialize_body_state_vec_from_file(const std::string &file_path)
+    {
+        std::string ext = file_path.substr(file_path.find_last_of(".") + 1);
+        if (ext == "csv")
+        {
+            return deserialize_body_state_vec_from_csv(file_path);
+        }
+        else if (ext == "bin")
+        {
+            return deserialize_body_state_vec_from_bin(file_path);
+        }
+        else
+        {
+            ASSERT(false && "Unsupported extension");
+        }
+    }
 }
