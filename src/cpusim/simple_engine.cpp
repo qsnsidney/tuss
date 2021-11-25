@@ -80,7 +80,7 @@ namespace CPUSIM
     {
         const int n_body = body_states_ic().size();
 
-        CORE::TIMER timer(std::string("SIMPLE_ENGINE(") + std::to_string(n_body) + ", " + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
+        CORE::TIMER timer(std::string("SIMPLE_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);
