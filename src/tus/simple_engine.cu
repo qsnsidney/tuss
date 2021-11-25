@@ -108,7 +108,6 @@ namespace TUS
 
       /* BIN file of initial conditions */
       const auto &ic = body_states_ic();
-      timer.elapsed_previous("deserialize_body_state_vec_from_csv");
 
       // TODO: get better debug message.
       size_t nBody = ic.size();
