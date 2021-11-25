@@ -5,7 +5,7 @@
 #include <assert.h>
 #include <iostream>
 
-#include "core/physics.h"
+#include "core/physics.hpp"
 #include "core/serde.h"
 #include "helper.h"
 #include "data_t.h"

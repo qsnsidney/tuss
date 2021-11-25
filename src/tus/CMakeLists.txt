@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 file(GLOB_RECURSE tus_exe_SRC
-    "*.cu"
+    "*.cu",
+    "*.cpp"
 )
 
 add_executable(tus_exe ${tus_exe_SRC})
