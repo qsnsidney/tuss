@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include <vector>
+#include <cmath>
 #include "xyz.hpp"
 #include "universe.hpp"
 
@@ -35,4 +36,25 @@ namespace CORE
 
     using BODY_STATE = std::tuple<POS, VEL, MASS>;
     using BODY_STATE_VEC = std::vector<BODY_STATE>;
+
+    /// Implementations
+
+    ACC ACC::from_gravity(const POS &p_src, MASS m_src, const POS &p_target)
+    {
+        /// TODO: utst
+        const XYZ displacement = p_src - p_target;
+        const UNIVERSE::floating_value_type denom = std::pow(displacement.norm_square() + UNIVERSE::epislon_square, -1.5f);
+
+        return {m_src * displacement * denom};
+    }
+
+    VEL VEL::updated(const VEL &v, const ACC &a, DT dt)
+    {
+        return {v + static_cast<UNIVERSE::floating_value_type>(0.5) * a * dt};
+    }
+
+    POS POS::updated(const POS &p, const VEL &v, const ACC &a, DT dt)
+    {
+        return {p + v * dt + static_cast<UNIVERSE::floating_value_type>(0.5) * a * dt * dt};
+    }
 }

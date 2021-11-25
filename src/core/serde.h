@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "physics.h"
+#include "physics.hpp"
 
 namespace CORE
 {
