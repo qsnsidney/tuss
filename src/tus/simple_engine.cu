@@ -125,7 +125,7 @@ namespace TUS
                 calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
                                                                    d_A[dest_index]);           // output
                 cudaDeviceSynchronize();
-                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half//input
+                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half,//input
                                                         d_V[dest_index]);                                                         // output
 
                 // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
