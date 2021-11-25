@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
-    std::unique_ptr<CPUSIM::ENGINE> engine(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+    std::unique_ptr<CORE::ENGINE> engine(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine

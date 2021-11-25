@@ -4,7 +4,7 @@
 
 namespace CPUSIM
 {
-    class SIMPLE_ENGINE final : public ENGINE
+    class SIMPLE_ENGINE final : public CORE::ENGINE
     {
     public:
         virtual ~SIMPLE_ENGINE() = default;

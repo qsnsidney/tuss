@@ -1,7 +1,7 @@
 #include "engine.h"
 #include "serde.h"
 
-namespace CPUSIM
+namespace CORE
 {
     ENGINE::ENGINE(
         CORE::BODY_STATE_VEC body_states_ic,
