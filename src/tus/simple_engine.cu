@@ -132,7 +132,7 @@ namespace TUS
      *   input randome initialize
      */
 
-      parse_ic(h_X, h_V, h_M, ic, nBody);
+      parse_ic(h_X, h_V, h_M, ic);
       timer.elapsed_previous("deserialize_body_state_vec_from_csv");
 
       /*
