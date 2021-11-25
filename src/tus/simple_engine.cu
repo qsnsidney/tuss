@@ -24,15 +24,15 @@ namespace TUS
    {
    }
 
-   CORE::BODY_STATE_VEC generate_body_state_vec(const data_t_3d * h_X, const data_t_3d * h_V, const data_t * mass, const size_t nbody)
+   CORE::BODY_STATE_VEC generate_body_state_vec(const data_t_3d *h_X, const data_t_3d *h_V, const data_t *mass, const size_t nbody)
    {
       CORE::BODY_STATE_VEC body_states;
       body_states.reserve(nbody);
       for (size_t i_body = 0; i_body < nbody; i_body++)
       {
-            CORE::POS pos_temp{h_X[i_body].x, h_X[i_body].y, h_X[i_body].z};
-            CORE::VEL vel_temp{h_V[i_body].x, h_V[i_body].y, h_V[i_body].z};
-            body_states.emplace_back(pos_temp, vel_temp, mass[i_body]);
+         CORE::POS pos_temp{h_X[i_body].x, h_X[i_body].y, h_X[i_body].z};
+         CORE::VEL vel_temp{h_V[i_body].x, h_V[i_body].y, h_V[i_body].z};
+         body_states.emplace_back(pos_temp, vel_temp, mass[i_body]);
       }
       return body_states;
    }
@@ -118,30 +118,35 @@ namespace TUS
          {
             // There should be more than one ways to do synchronization. I temporarily randomly choosed one
             calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[src_index], d_M,                                                     //input
-                                                            d_A[dest_index]);                                                               // output
+                                                               d_A[dest_index]);                                                               // output
             update_step<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
-                                                   d_X[dest_index], d_V[dest_index]);                                                         // output
+                                                    d_X[dest_index], d_V[dest_index]);                                                         // output
 
             // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
             cudaDeviceSynchronize();
 
             timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
 
-            cudaMemcpy(h_output_X, d_X[dest_index], vector_size, cudaMemcpyDeviceToHost);
-            cudaMemcpy(h_output_V, d_V[dest_index], vector_size, cudaMemcpyDeviceToHost);
+            if (is_body_states_logging_enabled())
+            {
+               cudaMemcpy(h_output_X, d_X[dest_index], vector_size, cudaMemcpyDeviceToHost);
+               cudaMemcpy(h_output_V, d_V[dest_index], vector_size, cudaMemcpyDeviceToHost);
 
-            if(i_iter == 0) {
-               push_body_states_to_log([&]() 
-                  { return generate_body_state_vec(h_X, h_V, h_M, nBody); }); 
+               if (i_iter == 0)
+               {
+                  push_body_states_to_log(generate_body_state_vec(h_X, h_V, h_M, nBody));
+               }
+               push_body_states_to_log(generate_body_state_vec(h_output_X, h_output_V, h_M, nBody));
+
+               if (i_iter % 10 == 0)
+               {
+                  serialize_body_states_log();
+               }
+
+               timer.elapsed_previous(std::string("Transfer to CPU"));
             }
-            push_body_states_to_log([&]() 
-               { return generate_body_state_vec(h_output_X, h_output_V, h_M, nBody); });     
-            if(i_iter % 10 == 0) {
-               serialize_body_states_log();
-            }
+
             swap(src_index, dest_index);
-            
-            timer.elapsed_previous(std::string("Transfer to CPU"));
          }
          cudaDeviceSynchronize();
       }
