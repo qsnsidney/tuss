@@ -11,7 +11,7 @@
 
 auto parse_args(int argc, const char *argv[])
 {
-    cxxopts::Options options(argv[0], " - command line options");
+    cxxopts::Options options(argv[0]);
     options
         .positional_help("[optional args]")
         .show_positional_help()
@@ -19,39 +19,40 @@ auto parse_args(int argc, const char *argv[])
         .allow_unrecognised_options();
 
     auto option_group = options.add_options();
-    option_group("i, ic_file", "ic_file .bin or .csv", cxxopts::value<std::string>());
-    option_group("b, num_bodies", "max_n_bodies, optional (default -1), no effect if < 0 or >= n_body from ic_file", cxxopts::value<int>()->default_value("-1"));
-    option_group("t, dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
-    option_group("n, num_iterations", "num_iterations", cxxopts::value<int>());
-    option_group("o, out", "body_states_log_dir, optional", cxxopts::value<std::string>());
+    option_group("i,ic_file", "ic_file: .bin or .csv", cxxopts::value<std::string>());
+    option_group("b,num_bodies", "max_n_bodies: optional (default -1), no effect if < 0 or >= n_body from ic_file", cxxopts::value<int>()->default_value("-1"));
+    option_group("t,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
+    option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
+    option_group("o,out", "body_states_log_dir: optional", cxxopts::value<std::string>());
+    option_group("h,help", "Print usage");
 
-    return options.parse(argc, argv);
+    auto result = options.parse(argc, argv);
+
+    if (result.count("help"))
+    {
+        std::cout << options.help() << std::endl;
+        exit(0);
+    }
+
+    return result;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     CORE::TIMER timer("cpusim");
 
     // Load args
-    if (argc != 5 && argc != 6)
-    {
-        std::cout << std::endl;
-        std::cout << "Expect arguments: ic_file max_n_body dt n_iteration [body_states_log_dir]" << std::endl;
-        std::cout << "  ic_file: .bin or .csv" << std::endl;
-        std::cout << "  max_n_body: no effect if < 0 or >= n_body from ic_bin_file" << std::endl;
-        std::cout << "  [body_state_log_dir]: optional" << std::endl;
-        std::cout << std::endl;
-        ASSERT(false && "Wrong number of arguments");
-    }
-    const std::string ic_file_path = argv[1];
-    const int max_n_body = std::stoi(argv[2]);
-    const CORE::DT dt = std::stod(argv[3]);
-    const int n_iteration = std::stoi(argv[4]);
+    auto arg_result = parse_args(argc, argv);
+    const std::string ic_file_path = arg_result["ic_file"].as<std::string>();
+    const int max_n_body = arg_result["num_bodies"].as<int>();
+    const CORE::DT dt = arg_result["dt"].as<CORE::UNIVERSE::floating_value_type>();
+    const int n_iteration = arg_result["num_iterations"].as<int>();
     std::optional<std::string> body_states_log_dir_opt = {};
-    if (argc == 6)
+    if (arg_result.count("out"))
     {
-        body_states_log_dir_opt = argv[5];
+        body_states_log_dir_opt = arg_result["out"].as<std::string>();
     }
+
     std::cout << "Running.." << std::endl;
     std::cout << "ic_file: " << ic_file_path << std::endl;
     std::cout << "max_n_body: " << max_n_body << std::endl;
