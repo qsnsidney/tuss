@@ -19,24 +19,33 @@ __global__ inline void update_step(unsigned nbody, data_t step_size, data_t_3d *
 __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *location, data_t *mass, data_t_3d *acceleration)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
-    if (tid < nbody)
+    unsigned unrolling_factor = 4;
+
+    if (tid % unrolling_factor == 0)
     {
-        data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
-        data_t_3d x_self = location[tid];
-        for (unsigned j = 0; j < nbody; j++)
+        for (unsigned k = 0; k < unrolling_factor; k++)
         {
-            if (j == tid)
+            unsigned idx = tid + k;
+            if (idx < nbody)
             {
-                continue;
+                data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
+                data_t_3d x_self = location[idx];
+                for (unsigned j = 0; j < nbody; j++)
+                {
+                    if (j == idx)
+                    {
+                        continue;
+                    }
+                    // source of gravitiy
+                    data_t_3d x_source = location[j];
+                    data_t_3d numerator = (x_source - x_self) * mass[j];
+                    data_t denominator = power_norm(x_self, x_source);
+                    data_t_3d new_term = (numerator / denominator);
+                    accumulated_accer = accumulated_accer + new_term;
+                    //printf("idx = %d, new_term %f, %f, %f\naccumulated_accer %f, %f, %f\n", idx, new_term.x, new_term.y, new_term.z, accumulated_accer.x, accumulated_accer.y, accumulated_accer.z);
+                }
+                acceleration[idx] = accumulated_accer;
             }
-            // source of gravitiy
-            data_t_3d x_source = location[j];
-            data_t_3d numerator = (x_source - x_self) * mass[j];
-            data_t denominator = power_norm(x_self, x_source);
-            data_t_3d new_term = (numerator / denominator);
-            accumulated_accer = accumulated_accer + new_term;
-            //printf("tid = %d, new_term %f, %f, %f\naccumulated_accer %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z, accumulated_accer.x, accumulated_accer.y, accumulated_accer.z);
         }
-        acceleration[tid] = accumulated_accer;
     }
 }
