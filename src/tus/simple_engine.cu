@@ -39,13 +39,12 @@ namespace TUS
 
    CORE::BODY_STATE_VEC SIMPLE_ENGINE::execute(int n_iter)
    {
-      CORE::TIMER timer("cuda program");
+      size_t nBody = body_states_ic().size();
+
+      CORE::TIMER timer(std::string("SIMPLE_ENGINE(") + std::to_string(nBody) + ", " + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
       /* BIN file of initial conditions */
       const auto &ic = body_states_ic();
-
-      // TODO: get better debug message.
-      size_t nBody = ic.size();
 
       // random initializer just for now
       srand(time(NULL));
