@@ -5,13 +5,13 @@
 #include <assert.h>
 #include <iostream>
 
-#include "physics.h"
-#include "serde.h"
+#include "core/physics.h"
+#include "core/serde.h"
 #include "helper.h"
 #include "data_t.h"
 #include "constant.h"
 #include "basic_kernel.h"
-#include "timer.h"
+#include "core/timer.h"
 // Comment out this line to enable debug mode
 // #define NDEBUG
 
