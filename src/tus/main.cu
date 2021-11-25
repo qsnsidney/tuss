@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <memory>
@@ -29,8 +28,8 @@ int main(int argc, char *argv[])
     /// Haiqi: I think it should be "main [num_body] [simulation_end_time] [num_iteration] or [step_size]". or we simply let step_size = 1
     if (argc < 3 or argc > 4)
     {
-        printf("Error: The number of arguments must be either 3 or 4\n");
-        printf("Expecting: <maxnbodies> <path_to_ic_file> <thread_per_block(optional)>\n");
+        std::cout << "Error: The number of arguments must be either 3 or 4" << std::endl;
+        std::cout << "Expecting: <maxnbodies> <path_to_ic_file> <thread_per_block(optional)>" << std::endl;
         return 1;
     }
     /* BIN file of initial conditions */

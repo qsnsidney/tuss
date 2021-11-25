@@ -21,7 +21,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
     if (code == cudaSuccess)
         return;
 
-    fprintf(stderr, "Error: %s %s %d\n", cudaGetErrorString(code), file, line);
+    std::cout << "Error: " << cudaGetErrorString(code) << " " << file << " " << line << std::endl;
     if (abort)
         exit(code);
 }
@@ -32,7 +32,7 @@ inline void host_malloc_helper(void **ptr, size_t size)
     cudaError_t err = cudaMallocHost((void **)ptr, size);
     if (cudaSuccess != err)
     {
-        printf("Error: %s in %s at line %d\n", cudaGetErrorString(err), __FILE__, __LINE__);
+        std::cout << "Error: " << cudaGetErrorString(err) << " in " << __FILE__ << " at line " << __LINE__ << std::endl;
         exit(1);
     }
 }
