@@ -2,12 +2,12 @@
 #include <memory>
 #include <optional>
 
-#include "macros.hpp"
-#include "serde.h"
-#include "engine.h"
+#include "core/macros.hpp"
+#include "core/serde.h"
+#include "core/engine.h"
+#include "core/timer.h"
+#include "core/cxxopts.hpp"
 #include "simple_engine.h"
-#include "timer.h"
-#include "cxxopts.hpp"
 
 auto parse_args(int argc, const char *argv[])
 {
@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
-    std::unique_ptr<CPUSIM::ENGINE> engine(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+    std::unique_ptr<CORE::ENGINE> engine(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine

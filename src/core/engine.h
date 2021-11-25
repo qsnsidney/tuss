@@ -4,7 +4,7 @@
 #include <optional>
 #include "physics.h"
 
-namespace CPUSIM
+namespace CORE
 {
     /// Interface
     class ENGINE
