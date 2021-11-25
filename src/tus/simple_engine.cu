@@ -55,12 +55,13 @@ namespace TUS
       /*
      *   host side memory allocation
      */
-      data_t_3d *h_X, *h_A, *h_V, *h_output_X;
+      data_t_3d *h_X, *h_A, *h_V, *h_output_X, *h_output_V;
       data_t *h_M;
       host_malloc_helper((void **)&h_X, vector_size);
       host_malloc_helper((void **)&h_A, vector_size);
       host_malloc_helper((void **)&h_V, vector_size);
       host_malloc_helper((void **)&h_output_X, vector_size);
+      host_malloc_helper((void **)&h_output_V, vector_size);
       host_malloc_helper((void **)&h_M, data_size);
       timer.elapsed_previous("allocated host side memory");
       /*
@@ -124,19 +125,24 @@ namespace TUS
             // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
             cudaDeviceSynchronize();
 
+            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
+
+            cudaMemcpy(h_output_X, d_X[dest_index], vector_size, cudaMemcpyDeviceToHost);
+            cudaMemcpy(h_output_V, d_V[dest_index], vector_size, cudaMemcpyDeviceToHost);
+
             if(i_iter == 0) {
                push_body_states_to_log([&]() 
-                  { return generate_body_state_vec(d_X[src_index], d_V[src_index], d_M, nBody); }); 
+                  { return generate_body_state_vec(h_X, h_V, h_M, nBody); }); 
             }
             push_body_states_to_log([&]() 
-               { return generate_body_state_vec(d_X[dest_index], d_V[dest_index], d_M, nBody); });
+               { return generate_body_state_vec(h_output_X, h_output_V, h_M, nBody); });
             
             if(i_iter % 10 == 0) {
                serialize_body_states_log();
             }
             swap(src_index, dest_index);
 
-            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
+            timer.elapsed_previous(std::string("Transfer to CPU"));
 
          }
          cudaDeviceSynchronize();
@@ -144,6 +150,7 @@ namespace TUS
 
       // at end, the final data is actually at src_index because the last swap
       cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
+      cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
       timer.elapsed_previous("copied output back to host");
       // Just for debug purpose on small inputs
       // for (unsigned i = 0; i < nBody; i++)
@@ -151,6 +158,6 @@ namespace TUS
       //    //printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
       // }
 
-      return body_states_ic();
+      return generate_body_state_vec(h_output_X, h_output_V, h_M, nBody);
    }
 }
