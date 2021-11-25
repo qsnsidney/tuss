@@ -45,7 +45,7 @@ auto parse_args(int argc, const char *argv[])
     return result;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     CORE::TIMER timer("tus");
 
