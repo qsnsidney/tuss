@@ -15,6 +15,9 @@
 #include "constant.h"
 #include "basic_kernel.h"
 
+#define SIM_TIME 10
+#define STEP_SIZE 1
+#define DEFAULT_BLOCK_SIZE 32
 // namespace
 // {
 //     struct BUFFER
