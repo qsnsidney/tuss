@@ -54,4 +54,9 @@ namespace CORE
         num_body_states_log_popped_ += body_states_log_.size();
         body_states_log_.clear();
     }
+
+    int ENGINE::num_logged_iterations() const
+    {
+        return num_body_states_log_popped_ + body_states_log_.size();
+    }
 }

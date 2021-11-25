@@ -36,6 +36,8 @@ namespace CORE
         void push_body_states_to_log(CORE::BODY_STATE_VEC body_states);
         void serialize_body_states_log();
 
+        int num_logged_iterations() const;
+
     private:
         void set_body_states_ic(CORE::BODY_STATE_VEC body_states_ic);
 
