@@ -3,6 +3,7 @@
 import os
 import re
 import subprocess
+import argparse
 
 def error_and_exit(err_msg):
     print(err_msg)
@@ -12,12 +13,18 @@ def error_and_exit(err_msg):
 if __name__=='__main__':
     THREAD_PER_BLOCK = [16,32,64,128,256]
     NBODY = [10000,20000,50000,100000]
-    AVG_ITERATION = 5
+    AVG_ITERATION = 1
     CUDA_EXECUTABLE = "build/tus/tus_exe"
-    GPU_TIME_PATTERN = "Subprofile \(Finished computation\) took (([0-9]*[.])?[0-9]+)"
+    GPU_TIME_PATTERN = "Subprofile \[cuda program/Finished computation\] took (([0-9]*[.])?[0-9]+)"
     BENCHMARK_DATA = "benchmark/ic/benchmark_500000.bin"
     BENCHMARK_OUTPUT_FILE = "gpu_benchmark.csv"
     STDOUT_OUTPUT = "benchmark.stdout"
+
+    parser = argparse.ArgumentParser(description='Simple parser')
+    parser.add_argument('--iter', type=int, default=AVG_ITERATION,
+                        help='number of runs for each configuration (default: 1)')
+
+    args = parser.parse_args()
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     project_home_dir = os.path.join(script_dir, "../../")
@@ -39,7 +46,7 @@ if __name__=='__main__':
         f_data.write(str(num_block) + ",")
         for num_body in NBODY:
             total_time = 0
-            for count in range(AVG_ITERATION):
+            for count in range(args.iter):
                 info_msg = "RUNNING NUMBLOCK : " + str(num_block) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
                 f_stdout.write(info_msg + "\n")
                 print(info_msg)
