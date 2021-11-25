@@ -135,15 +135,13 @@ namespace TUS
                   { return generate_body_state_vec(h_X, h_V, h_M, nBody); }); 
             }
             push_body_states_to_log([&]() 
-               { return generate_body_state_vec(h_output_X, h_output_V, h_M, nBody); });
-            
+               { return generate_body_state_vec(h_output_X, h_output_V, h_M, nBody); });     
             if(i_iter % 10 == 0) {
                serialize_body_states_log();
             }
             swap(src_index, dest_index);
-
+            
             timer.elapsed_previous(std::string("Transfer to CPU"));
-
          }
          cudaDeviceSynchronize();
       }
