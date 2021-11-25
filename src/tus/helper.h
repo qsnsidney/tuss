@@ -1,5 +1,5 @@
 #pragma once
-#include <sys/time.h>
+#include "core/macros.hpp"
 #include "data_t.h"
 #include "core/physics.hpp"
 #include "core/serde.h"
@@ -21,7 +21,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
     if (code == cudaSuccess)
         return;
 
-    fprintf(stderr, "Error: %s %s %d\n", cudaGetErrorString(code), file, line);
+    std::cout << "Error: " << cudaGetErrorString(code) << " " << file << " " << line << std::endl;
     if (abort)
         exit(code);
 }
@@ -32,7 +32,7 @@ inline void host_malloc_helper(void **ptr, size_t size)
     cudaError_t err = cudaMallocHost((void **)ptr, size);
     if (cudaSuccess != err)
     {
-        printf("Error: %s in %s at line %d\n", cudaGetErrorString(err), __FILE__, __LINE__);
+        std::cout << "Error: " << cudaGetErrorString(err) << " in " << __FILE__ << " at line " << __LINE__ << std::endl;
         exit(1);
     }
 }
@@ -43,14 +43,9 @@ inline __host__ bool IsPowerOfTwo(unsigned x)
     return (x & (x - 1)) == 0;
 }
 
-inline __host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *input_m, const CORE::BODY_STATE_VEC &ic, size_t parse_length = 0)
+inline __host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *input_m, const CORE::BODY_STATE_VEC &ic)
 {
     size_t length_to_parse = ic.size();
-    if (parse_length != 0)
-    {
-        assert(parse_length <= length_to_parse);
-        length_to_parse = parse_length;
-    }
     std::cout << "parsing " << length_to_parse << " bodies\n";
     for (size_t i = 0; i < length_to_parse; i++)
     {
