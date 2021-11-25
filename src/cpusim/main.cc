@@ -21,7 +21,7 @@ auto parse_args(int argc, const char *argv[])
     auto option_group = options.add_options();
     option_group("i,ic_file", "ic_file: .bin or .csv", cxxopts::value<std::string>());
     option_group("b,num_bodies", "max_n_bodies: optional (default -1), no effect if < 0 or >= n_body from ic_file", cxxopts::value<int>()->default_value("-1"));
-    option_group("t,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
+    option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("o,out", "body_states_log_dir: optional", cxxopts::value<std::string>());
     option_group("h,help", "Print usage");

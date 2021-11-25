@@ -18,9 +18,9 @@ namespace TUS
 {
    SIMPLE_ENGINE::SIMPLE_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
                                 CORE::DT dt,
-                                int n_threads,
+                                int block_size,
                                 std::optional<std::string> body_states_log_dir_opt) : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
-                                                                                      n_threads_(n_threads)
+                                                                                      block_size_(block_size)
    {
    }
 
@@ -104,11 +104,11 @@ namespace TUS
       timer.elapsed_previous("copied input data from host to device");
 
       // nthread is assigned to either 32 by default or set to a custom power of 2 by user
-      std::cout << "Set thread_per_block to " << n_threads_ << std::endl;
-      unsigned nblocks = (nBody + n_threads_ - 1) / n_threads_;
+      std::cout << "Set thread_per_block to " << block_size_ << std::endl;
+      unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
       // calculate the initialia acceleration
-      calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
+      calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
       timer.elapsed_previous("Calculated initial acceleration");
 
       {
@@ -116,9 +116,9 @@ namespace TUS
          for (int i_iter = 0; i_iter < n_iter; i_iter++)
          {
             // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-            calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M,                                                     //input
+            calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[src_index], d_M,                                                     //input
                                                             d_A[dest_index]);                                                               // output
-            update_step<<<nblocks, n_threads_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
+            update_step<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
                                                    d_X[dest_index], d_V[dest_index]);                                                         // output
 
             // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is

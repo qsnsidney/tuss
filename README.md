@@ -97,7 +97,7 @@ This format is the recommended format.
 ## Demo
 ```
 mkdir -p ./tmp/solar_sys_log
-make run_cpusim ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -t 0.05 -n 10000 -o ./tmp/solar_sys_log"
+make run_cpusim ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_log"
 python3 -m scripts.tussgui fixed ./tmp/solar_sys_log
 # Or, some animation
 # python3 -m scripts.tussgui live ./tmp/solar_sys_log

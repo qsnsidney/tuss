@@ -41,16 +41,16 @@ if __name__=='__main__':
     for i in NBODY:
         f_data.write("," + str(i))
 
-    for num_block in THREAD_PER_BLOCK:
+    for block_size in THREAD_PER_BLOCK:
         f_data.write("\n")
-        f_data.write(str(num_block) + ",")
+        f_data.write(str(block_size) + ",")
         for num_body in NBODY:
             total_time = 0
             for count in range(args.iter):
-                info_msg = "RUNNING NUMBLOCK : " + str(num_block) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
+                info_msg = "RUNNING NUMBLOCK : " + str(block_size) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
                 f_stdout.write(info_msg + "\n")
                 print(info_msg)
-                command = [cuda_executable, str(num_body), benchmark_path, str(num_block)]
+                command = [cuda_executable, '-b ' + str(num_body), '-i ' + benchmark_path, '-t ' + str(block_size), '-d 1', '-n 10']
                 try:
                     result = subprocess.check_output(command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
