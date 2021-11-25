@@ -170,11 +170,11 @@ namespace TUS
       timer.elapsed_previous("copied input data from host to device");
 
       // nthread is assigned to either 32 by default or set to a custom power of 2 by user
-      std::cout << "Set thread_per_block to " << nthreads_ << std::endl;
-      unsigned nblocks = (nBody + nthreads_ - 1) / nthreads_;
+      std::cout << "Set thread_per_block to " << n_threads_ << std::endl;
+      unsigned nblocks = (nBody + n_threads_ - 1) / n_threads_;
 
       // calculate the initialia acceleration
-      calculate_acceleration<<<nblocks, nthreads_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
+      calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
       timer.elapsed_previous("Calculated initial acceleration");
 
       std::cout << "Start Computation\n";
@@ -183,9 +183,9 @@ namespace TUS
       {
 
          // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-         calculate_acceleration<<<nblocks, nthreads_>>>(nBody, d_X[src_index], d_M,                                                          //input
+         calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M,                                                          //input
                                                          d_A[dest_index]);                                                                    // output
-         update_step<<<nblocks, nthreads_>>>(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
+         update_step<<<nblocks, n_threads_>>>(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
                                               d_X[dest_index], d_V[dest_index]);                                                              // output
 
          // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
