@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <memory>
-#include <sys/time.h>
-#include <assert.h>
 #include <iostream>
 
 #include "core/physics.hpp"
@@ -13,6 +11,7 @@
 #include "constant.h"
 #include "basic_kernel.h"
 #include "core/timer.h"
+#include "core/macros.hpp"
 #include "simple_engine.cuh"
 
 // Comment out this line to enable debug mode
@@ -31,12 +30,12 @@ int main(int argc, char *argv[])
     if (argc < 3 or argc > 4)
     {
         printf("Error: The number of arguments must be either 3 or 4\n");
-        printf("Expecting: <nbodies> <path_to_bin> <thread_per_block(optional)>\n");
+        printf("Expecting: <maxnbodies> <path_to_ic_file> <thread_per_block(optional)>\n");
         return 1;
     }
     /* BIN file of initial conditions */
-    unsigned nBody = atoi(argv[1]);
-    std::string bin_path(argv[2]);
+    unsigned max_n_body = atoi(argv[1]);
+    std::string ic_file_path(argv[2]);
     unsigned nthreads = DEFAULT_BLOCK_SIZE;
     if (argc == 4)
     {
@@ -44,7 +43,7 @@ int main(int argc, char *argv[])
         // i know some none-power-of 2 also makes sense
         // but incase someone enter a dumb number, assert it here
         // later this can be removed
-        assert(IsPowerOfTwo(nthreads));
+        ASSERT(IsPowerOfTwo(nthreads));
     }
     timer.elapsed_previous("parsing_args");
 
@@ -53,14 +52,17 @@ int main(int argc, char *argv[])
     unsigned step_size = STEP_SIZE;
 
     /* BIN file of initial conditions */
-    auto ic = CORE::deserialize_body_state_vec_from_bin(bin_path);
+    CORE::BODY_STATE_VEC
+        body_states = CORE::deserialize_body_state_vec_from_file(ic_file_path);
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(body_states.size()))
+    {
+        body_states.resize(max_n_body);
+        std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
+    }
     timer.elapsed_previous("loading_ic");
 
-    // TODO: get better debug message.
-    assert(ic.size() >= nBody);
-
     // Select engine here
-    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(std::move(ic), step_size, nthreads));
+    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(std::move(body_states), step_size, nthreads));
     timer.elapsed_previous("initializing_engine");
 
     engine->run(simulation_time / step_size);
