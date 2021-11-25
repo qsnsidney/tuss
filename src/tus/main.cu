@@ -117,19 +117,17 @@ int main(int argc, char *argv[])
     // nthread is assigned to either 32 by default or set to a custom power of 2 by user
     std::cout << "Set thread_per_block to " << nthreads << std::endl;
     unsigned nblocks = (nBody + nthreads - 1) / nthreads;
-
+    
     // calculate the initialia acceleration
-    calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
     timer.elapsed_previous("Calculated initial acceleration");
-
+    int stride = 2;
     std::cout << "Start Computation\n";
-
     for (unsigned step = 0; step < simulation_time; step += step_size)
     {
 
         // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-        calculate_acceleration<<<nblocks, nthreads>>>(nBody, d_X[src_index], d_M,                                                          //input
-                                                        d_A[dest_index]);                                                                    // output
+        calculate_acceleration<<<nblocks/stride, nthreads>>>(nBody, d_X[src_index], d_M,                                                          //input
+                                                        d_A[dest_index], stride);                                                                    // output
         update_step<<<nblocks, nthreads>>>(nBody, (data_t)step_size, d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
                                              d_X[dest_index], d_V[dest_index]);                                                              // output
 
@@ -145,6 +143,8 @@ int main(int argc, char *argv[])
     cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
     timer.elapsed_previous("copied output back to host");
     // Just for debug purpose on small inputs
+    printf("object = %d, %f, %f, %f\n", 0, h_output_X[0].x, h_output_X[0].y, h_output_X[0].z);
+    printf("object = %d, %f, %f, %f\n", nBody - 1, h_output_X[nBody - 1].x, h_output_X[nBody - 1].y, h_output_X[nBody - 1].z);
     for (unsigned i = 0; i < nBody; i++)
     {
         //printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
