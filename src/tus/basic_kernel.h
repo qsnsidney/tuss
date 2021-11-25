@@ -19,7 +19,7 @@ __global__ inline void update_step(unsigned nbody, data_t step_size, data_t_3d *
 __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *location, data_t *mass, data_t_3d *acceleration)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
-    unsigned unrolling_factor = 4;
+    unsigned unrolling_factor = 8;
 
     if (tid % unrolling_factor == 0)
     {
