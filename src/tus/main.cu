@@ -76,18 +76,6 @@ int main(int argc, const char *argv[])
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
-    /* Get Dimension */
-    /// TODO: Add more arguments for input and output
-    /// Haiqi: I think it should be "main [num_body] [simulation_end_time] [num_iteration] or [step_size]". or we simply let step_size = 1
-    if (argc < 3 or argc > 4)
-    {
-        std::cout << "Error: The number of arguments must be either 3 or 4" << std::endl;
-        std::cout << "Expecting: <maxnbodies> <path_to_ic_file> <thread_per_block(optional)>" << std::endl;
-        return 1;
-    }
-
-    timer.elapsed_previous("parsing_args");
-
     /* BIN file of initial conditions */
     CORE::BODY_STATE_VEC
         body_states = CORE::deserialize_body_state_vec_from_file(ic_file_path);
