@@ -4,19 +4,11 @@
 #include "core/physics.hpp"
 #include "core/serde.h"
 #include <iostream>
-void swap(unsigned &a, unsigned &b)
+inline void swap(unsigned &a, unsigned &b)
 {
     unsigned temp = a;
     a = b;
     b = temp;
-}
-
-/* time stamp function in milliseconds */
-__host__ double getTimeStamp()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (double)tv.tv_usec / 1000000 + tv.tv_sec;
 }
 
 /*You can use the following for any CUDA function that returns cudaError_t type*/
@@ -35,7 +27,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 }
 
 // helper function to allocate cuda host memory
-void host_malloc_helper(void **ptr, size_t size)
+inline void host_malloc_helper(void **ptr, size_t size)
 {
     cudaError_t err = cudaMallocHost((void **)ptr, size);
     if (cudaSuccess != err)
@@ -46,12 +38,12 @@ void host_malloc_helper(void **ptr, size_t size)
 }
 
 // Leverage from https://stackoverflow.com/questions/600293/how-to-check-if-a-number-is-a-power-of-2
-__host__ bool IsPowerOfTwo(unsigned x)
+inline __host__ bool IsPowerOfTwo(unsigned x)
 {
     return (x & (x - 1)) == 0;
 }
 
-__host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *input_m, const CORE::BODY_STATE_VEC &ic, size_t parse_length = 0)
+inline __host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *input_m, const CORE::BODY_STATE_VEC &ic, size_t parse_length = 0)
 {
     size_t length_to_parse = ic.size();
     if (parse_length != 0)
