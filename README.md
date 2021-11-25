@@ -95,11 +95,37 @@ This format is the recommended format.
 
 
 ## Demo
+
+### Visualization
+
+#### cpusim
 ```
-mkdir -p ./tmp/solar_sys_log
-make run_cpusim ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_log"
-python3 -m scripts.tussgui fixed ./tmp/solar_sys_log
+mkdir -p ./tmp/solar_sys_cpu_log
+make run_cpusim ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_cpu_log"
+python3 -m scripts.tussgui fixed ./tmp/solar_sys_cpu_log
 # Or, some animation
-# python3 -m scripts.tussgui live ./tmp/solar_sys_log
-rm -rf ./tmp/solar_sys_log
+# python3 -m scripts.tussgui live ./tmp/solar_sys_cpu_log
+rm -rf ./tmp/solar_sys_cpu_log
+```
+
+#### tus
+```
+mkdir -p ./tmp/solar_sys_tus_log
+make run_tus ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_tus_log"
+python3 -m scripts.tussgui fixed ./tmp/solar_sys_tus_log
+# Or, some animation
+# python3 -m scripts.tussgui live ./tmp/solar_sys_tus_log
+rm -rf ./tmp/solar_sys_tus_log
+```
+
+### Performance
+
+#### cpusim
+```
+make run_cpusim ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -d 0.05 -n 10000"
+```
+
+#### tus
+```
+make run_tus ARGS="-i ./benchmark/ic/benchmark_solar_system_planet.csv -d 0.05 -n 10000"
 ```
