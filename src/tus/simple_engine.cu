@@ -98,8 +98,6 @@ namespace TUS
       calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
       timer.elapsed_previous("Calculated initial acceleration");
 
-      std::cout << "Start Computation\n";
-
       {
          CORE::TIMER core_timer("computation_core");
          for (int i_iter = 0; i_iter < n_iter; i_iter++)
