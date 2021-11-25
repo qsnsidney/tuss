@@ -100,23 +100,26 @@ namespace TUS
 
       std::cout << "Start Computation\n";
 
-      for (int i_iter = 0; i_iter < n_iter; i_iter++)
       {
-         // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-         calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M,                                                     //input
-                                                           d_A[dest_index]);                                                               // output
-         update_step<<<nblocks, n_threads_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
-                                                d_X[dest_index], d_V[dest_index]);                                                         // output
+         CORE::TIMER core_timer("computation_core");
+         for (int i_iter = 0; i_iter < n_iter; i_iter++)
+         {
+            // There should be more than one ways to do synchronization. I temporarily randomly choosed one
+            calculate_acceleration<<<nblocks, n_threads_>>>(nBody, d_X[src_index], d_M,                                                     //input
+                                                            d_A[dest_index]);                                                               // output
+            update_step<<<nblocks, n_threads_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
+                                                   d_X[dest_index], d_V[dest_index]);                                                         // output
 
-         // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
+            // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
+            cudaDeviceSynchronize();
+
+            swap(src_index, dest_index);
+
+            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
+         }
          cudaDeviceSynchronize();
-
-         swap(src_index, dest_index);
-
-         timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
       }
-      cudaDeviceSynchronize();
-      timer.elapsed_previous("Finished computation");
+
       // at end, the final data is actually at src_index because the last swap
       cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
       timer.elapsed_previous("copied output back to host");
