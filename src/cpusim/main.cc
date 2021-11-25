@@ -2,12 +2,12 @@
 #include <memory>
 #include <optional>
 
-#include "macros.hpp"
-#include "serde.h"
-#include "engine.h"
+#include "core/macros.hpp"
+#include "core/serde.h"
+#include "core/engine.h"
+#include "core/timer.h"
+#include "core/cxxopts.hpp"
 #include "simple_engine.h"
-#include "timer.h"
-#include "cxxopts.hpp"
 
 auto parse_args(int argc, const char *argv[])
 {
