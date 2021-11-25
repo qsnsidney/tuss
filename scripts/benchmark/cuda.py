@@ -50,7 +50,7 @@ if __name__=='__main__':
                 info_msg = "RUNNING NUMBLOCK : " + str(block_size) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
                 f_stdout.write(info_msg + "\n")
                 print(info_msg)
-                command = [cuda_executable, '-b ' + str(num_body), '-i ' + benchmark_path, '-t ' + str(block_size), '-d 1', '-n 10']
+                command = [cuda_executable, '-b', str(num_body), '-i', benchmark_path, '-t', str(block_size), '-d', '1', '-n', '10']
                 try:
                     result = subprocess.check_output(command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
