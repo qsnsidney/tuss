@@ -1,18 +1,26 @@
 #pragma once
 #include "data_t.h"
 
-__global__ inline void update_step(unsigned nbody, data_t step_size, data_t_3d *i_location, data_t_3d *i_velocity, data_t_3d *i_accer, data_t *mass, data_t_3d *new_accer, // new accer is accer at i+1 iteration
-                            data_t_3d *o_location, data_t_3d *o_velocity)
+__global__ inline void update_step_pos(unsigned nbody, data_t step_size, data_t_3d *i_location, data_t_3d *i_velocity, data_t_3d *i_accer, data_t *mass, // new accer is accer at i+1 iteration
+                            data_t_3d *o_location, data_t_3d *velocity_half)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
     if (tid < nbody)
     {
         // v1/2          =         vi      +     ai  *          1/2 *    dt
-        data_t_3d v_half = i_velocity[tid] + i_accer[tid] * ((data_t)0.5 * step_size);
+        velocity_half[tid] = i_velocity[tid] + i_accer[tid] * ((data_t)0.5 * step_size);
         // Xi+1         =      xi         +       vi        *     dt    +    ai   *     1/2     *     (dt)^2
         o_location[tid] = i_location[tid] + i_velocity[tid] * step_size + i_accer[tid] * (data_t)0.5 * powf(step_size, 2);
-        // Vi+1         =  V1/2  +      ai+1      *     1/2      *    dt
-        o_velocity[tid] = v_half + new_accer[tid] * ((data_t)0.5 * step_size);
+    }
+}
+
+__global__ inline void update_step_vel(unsigned nbody, data_t step_size, data_t *mass, data_t_3d *new_accer, data_t_3d *velocity_half,// new accer is accer at i+1 iteration
+                            data_t_3d *o_velocity)
+{
+    unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
+    if (tid < nbody)
+    {
+        o_velocity[tid] = velocity_half[tid] + new_accer[tid] * ((data_t)0.5 * step_size);
     }
 }
 

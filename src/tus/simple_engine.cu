@@ -93,6 +93,9 @@ namespace TUS
         gpuErrchk(cudaMalloc((void **)&d_V[src_index], vector_size));
         gpuErrchk(cudaMalloc((void **)&d_V[dest_index], vector_size));
 
+        data_t_3d *d_V_half;
+        gpuErrchk(cudaMalloc((void **)&d_V_half, vector_size));
+
         timer.elapsed_previous("allocated device memory");
         /*
      *   create double buffer on device side
@@ -115,12 +118,15 @@ namespace TUS
             CORE::TIMER core_timer("computation_core");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
+                update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M,  //input
+                                                        d_X[dest_index], d_V_half);     
                 // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-                calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[src_index], d_M, //input
+                cudaDeviceSynchronize();
+                calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
                                                                    d_A[dest_index]);           // output
                 cudaDeviceSynchronize();
-                update_step<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, d_A[dest_index], //input
-                                                        d_X[dest_index], d_V[dest_index]);                                                         // output
+                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half//input
+                                                        d_V[dest_index]);                                                         // output
 
                 // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
                 cudaDeviceSynchronize();
