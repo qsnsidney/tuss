@@ -1,4 +1,4 @@
-#include "simple_engine.h"
+#include "simple_engine.cuh"
 #include "core/timer.h"
 
 #include <stdio.h>
