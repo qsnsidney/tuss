@@ -14,16 +14,7 @@
 #include "constant.h"
 #include "basic_kernel.h"
 
-namespace TUS
-{
-    SIMPLE_ENGINE::SIMPLE_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
-                                 CORE::DT dt,
-                                 int block_size,
-                                 std::optional<std::string> body_states_log_dir_opt) : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
-                                                                                       block_size_(block_size)
-    {
-    }
-
+namespace {
     CORE::BODY_STATE_VEC generate_body_state_vec(const data_t_3d *h_X, const data_t_3d *h_V, const data_t *mass, const size_t nbody)
     {
         CORE::BODY_STATE_VEC body_states;
@@ -35,6 +26,17 @@ namespace TUS
             body_states.emplace_back(pos_temp, vel_temp, mass[i_body]);
         }
         return body_states;
+    }
+}
+
+namespace TUS
+{
+    SIMPLE_ENGINE::SIMPLE_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+                                 CORE::DT dt,
+                                 int block_size,
+                                 std::optional<std::string> body_states_log_dir_opt) : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
+                                                                                       block_size_(block_size)
+    {
     }
 
     CORE::BODY_STATE_VEC SIMPLE_ENGINE::execute(int n_iter)
@@ -118,17 +120,18 @@ namespace TUS
             CORE::TIMER core_timer("computation_core");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
-                update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M,  //input
-                                                        d_X[dest_index], d_V_half);     
-                // There should be more than one ways to do synchronization. I temporarily randomly choosed one
-                cudaDeviceSynchronize();
-                calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
-                                                                   d_A[dest_index]);           // output
-                cudaDeviceSynchronize();
-                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half,//input
-                                                        d_V[dest_index]);                                                         // output
+                update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, //input
+                                                            d_X[dest_index], d_V_half); // output
 
-                // we don't have to synchronize here but this gices a better visualization on how fast / slow the program is
+                cudaDeviceSynchronize();
+
+                calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
+                                                                   d_A[dest_index]); // output
+
+                cudaDeviceSynchronize();
+
+                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
+                                                            d_V[dest_index]); // output
                 cudaDeviceSynchronize();
 
                 timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
@@ -161,6 +164,7 @@ namespace TUS
         cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
         timer.elapsed_previous("copied output back to host");
+        
         // Just for debug purpose on small inputs
         // for (unsigned i = 0; i < nBody; i++)
         // {
