@@ -1,9 +1,48 @@
 #include "mt_engine.h"
 #include "core/timer.h"
 
+#include <type_traits>
 #include <iostream>
 #include <thread>
 #include "buffer.h"
+
+namespace
+{
+    // Function signature: void(int i)
+    template <typename Function>
+    void parallel_for(int n_thread, int begin, int end, Function &&f)
+    {
+        typename std::decay_t<Function> f_copy = std::forward<Function>(f);
+        auto worker_thread = [&f_copy](int i_begin, int i_end)
+        {
+            for (int i = i_begin; i < i_end; i++)
+            {
+                f_copy(i);
+            }
+        };
+
+        int count = end - begin;
+        int count_per_thread = (count - 1) / n_thread + 1;
+
+        std::vector<std::thread> threads;
+        threads.reserve(n_thread);
+
+        int count_remaining = count;
+        for (int thread_idx = 0; thread_idx < n_thread; thread_idx++)
+        {
+            int i_begin = thread_idx * count_per_thread;
+            int i_size = std::min(count_per_thread, count_remaining);
+            int i_end = i_begin + i_size;
+            count_remaining -= i_size;
+            threads.emplace_back(worker_thread, i_begin, i_end);
+        }
+
+        for (auto &thread : threads)
+        {
+            thread.join();
+        }
+    }
+}
 
 namespace CPUSIM
 {
@@ -35,18 +74,17 @@ namespace CPUSIM
 
         // Step 2: Prepare acceleration for ic
         // TODO: Convert to parallel for loop
-        static_cast<void>(n_thread_);
-        for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
-        {
-            buf_in.acc[i_target_body].reset();
-            for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
-            {
-                if (i_target_body != j_source_body)
-                {
-                    buf_in.acc[i_target_body] += CORE::ACC::from_gravity(buf_in.pos[j_source_body], mass[j_source_body], buf_in.pos[i_target_body]);
-                }
-            }
-        }
+        parallel_for(n_thread_, 0, n_body, [n_body, &buf_in, &mass](int i_target_body)
+                     {
+                         buf_in.acc[i_target_body].reset();
+                         for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
+                         {
+                             if (i_target_body != j_source_body)
+                             {
+                                 buf_in.acc[i_target_body] += CORE::ACC::from_gravity(buf_in.pos[j_source_body], mass[j_source_body], buf_in.pos[i_target_body]);
+                             }
+                         }
+                     });
         timer.elapsed_previous("step2");
 
         BUFFER buf_out(n_body);
@@ -68,21 +106,21 @@ namespace CPUSIM
                 buf_out.pos[i_target_body] = CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
             }
 
-            for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
-            {
-                buf_out.acc[i_target_body].reset();
-                // Step 5: Compute acceleration
-                for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
-                {
-                    if (i_target_body != j_source_body)
-                    {
-                        buf_out.acc[i_target_body] += CORE::ACC::from_gravity(buf_out.pos[j_source_body], mass[j_source_body], buf_out.pos[i_target_body]);
-                    }
-                }
+            parallel_for(n_thread_, 0, n_body, [n_body, &buf_out, &vel_tmp, &mass, this](int i_target_body)
+                         {
+                             buf_out.acc[i_target_body].reset();
+                             // Step 5: Compute acceleration
+                             for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
+                             {
+                                 if (i_target_body != j_source_body)
+                                 {
+                                     buf_out.acc[i_target_body] += CORE::ACC::from_gravity(buf_out.pos[j_source_body], mass[j_source_body], buf_out.pos[i_target_body]);
+                                 }
+                             }
 
-                // Step 6: Update velocity
-                buf_out.vel[i_target_body] = CORE::VEL::updated(vel_tmp[i_target_body], buf_out.acc[i_target_body], dt());
-            }
+                             // Step 6: Update velocity
+                             buf_out.vel[i_target_body] = CORE::VEL::updated(vel_tmp[i_target_body], buf_out.acc[i_target_body], dt());
+                         });
 
             // Write BODY_STATE_VEC to log
             if (i_iter == 0)
