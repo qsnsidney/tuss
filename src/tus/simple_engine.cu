@@ -9,10 +9,10 @@
 
 #include "core/physics.hpp"
 #include "core/serde.h"
-#include "helper.h"
-#include "data_t.h"
+#include "helper.cuh"
+#include "data_t.cuh"
 #include "constant.h"
-#include "basic_kernel.h"
+#include "basic_kernel.cuh"
 
 namespace {
     CORE::BODY_STATE_VEC generate_body_state_vec(const data_t_3d *h_X, const data_t_3d *h_V, const data_t *mass, const size_t nbody)

@@ -5,10 +5,8 @@
 
 #include "core/physics.hpp"
 #include "core/serde.h"
-#include "helper.h"
-#include "data_t.h"
+#include "helper.cuh"
 #include "constant.h"
-#include "basic_kernel.h"
 #include "core/timer.h"
 #include "core/macros.hpp"
 #include "simple_engine.cuh"

@@ -1,6 +1,6 @@
 #pragma once
 #include "core/macros.hpp"
-#include "data_t.h"
+#include "data_t.cuh"
 #include "core/physics.hpp"
 #include "core/serde.h"
 #include <iostream>

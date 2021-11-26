@@ -1,5 +1,5 @@
 #pragma once
-#include "data_t.h"
+#include "data_t.cuh"
 
 __global__ inline void update_step_pos(unsigned nbody, data_t step_size, data_t_3d *i_location, data_t_3d *i_velocity, data_t_3d *i_accer, data_t *mass, // new accer is accer at i+1 iteration
                             data_t_3d *o_location, data_t_3d *velocity_half)
