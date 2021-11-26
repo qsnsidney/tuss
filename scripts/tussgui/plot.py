@@ -105,7 +105,7 @@ def plot_live_trajectory(dir, fps):
             orbit.set_3d_properties(np.array([]))
         return orbits
 
-    def animate(i_iter):
+    def animate(i_frame):
         nonlocal sleep_handler
         nonlocal frame_multiplier
         nonlocal ax
@@ -118,8 +118,9 @@ def plot_live_trajectory(dir, fps):
         nonlocal max_z
         nonlocal min_z
 
+        i_iter = int(i_frame * frame_multiplier)
         body_state_vec = data.fetch_body_state_vec(
-            dir, int(i_iter * frame_multiplier), sleep_handler=sleep_handler)
+            dir, i_iter, sleep_handler=sleep_handler)
 
         # Plot the orbits
         for body_i, body_state in enumerate(body_state_vec):
