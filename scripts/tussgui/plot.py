@@ -1,6 +1,8 @@
+import itertools
 import os
 
 import numpy as np
+from matplotlib import animation
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -47,42 +49,23 @@ def plot_fixed_trajectory(dir, max_iterations=-1):
 
 
 def plot_live_trajectory(dir, fps):
+    # define sleep_handler
+    def sleep_handler(x):
+        if x > 0:
+            plt.pause(x)
+
     # Create figure
     fig = plt.figure()
 
     # Create 3D axes
     ax = fig.add_subplot(111, projection="3d")
 
-    def sleep_handler(x):
-        if x > 0:
-            plt.pause(x)
-
-    # Initial
-    iteration = 0
-    body_state_vec = data.fetch_body_state_vec(
-        dir, iteration, sleep_handler=sleep_handler)
-    n_bodies = len(body_state_vec)
-
-    # Axis limit
-    max_x = 0
-    min_x = 0
-    max_y = 0
-    min_y = 0
-    max_z = 0
-    min_z = 0
-
-    # Plot the orbits
+    # Init
+    n_bodies = len(data.fetch_body_state_vec(
+        dir, 0, sleep_handler=sleep_handler))
     orbits = list()
-    for body_state in body_state_vec:
-        max_x = max(max_x, body_state[0])
-        min_x = min(min_x, body_state[0])
-        max_y = max(max_y, body_state[1])
-        min_y = min(min_y, body_state[1])
-        max_z = max(max_z, body_state[2])
-        min_z = min(min_z, body_state[2])
-
-        line, = ax.plot(body_state[0],
-                        body_state[1], body_state[2])
+    for body_i in range(n_bodies):
+        line, = ax.plot([], [], [], label='Body ' + str(body_i))
         orbits.append(line)
 
     # Add a few more bells and whistles
@@ -94,24 +77,58 @@ def plot_live_trajectory(dir, fps):
     if n_bodies < 10:
         ax.legend()
 
-    plt.ion()
-    plt.show()
+    # Axis limit
+    max_x = float('-inf')
+    min_x = float('inf')
+    max_y = float('-inf')
+    min_y = float('inf')
+    max_z = float('-inf')
+    min_z = float('inf')
 
-    while True:
-        plt.pause(1.0/fps)
+    # frame_interval calculation
+    frame_interval = 1000.0 / fps
+    print('Info:', 'fps=' + str(fps),
+          'intended_frame_interval=' + str(frame_interval))
+    frame_multiplier = 1
+    min_frame_interval = 5.0
+    if frame_interval < min_frame_interval:
+        frame_multiplier = min_frame_interval / frame_interval
+        frame_interval = min_frame_interval
+    print('Info:', 'frame_interval=' + str(frame_interval),
+          'frame_multiplier=' + str(frame_multiplier))
 
-        iteration += 1
+    def init():
+        nonlocal orbits
+        for orbit in orbits:
+            orbit.set_xdata(np.array([]))
+            orbit.set_ydata(np.array([]))
+            orbit.set_3d_properties(np.array([]))
+        return orbits
+
+    def animate(i_iter):
+        nonlocal sleep_handler
+        nonlocal frame_multiplier
+        nonlocal ax
+        nonlocal dir
+        nonlocal orbits
+        nonlocal max_x
+        nonlocal min_x
+        nonlocal max_y
+        nonlocal min_y
+        nonlocal max_z
+        nonlocal min_z
+
         body_state_vec = data.fetch_body_state_vec(
-            dir, iteration, sleep_handler=sleep_handler)
+            dir, int(i_iter * frame_multiplier), sleep_handler=sleep_handler)
 
         # Plot the orbits
         for body_i, body_state in enumerate(body_state_vec):
-            max_x = max(max_x, body_state[0])
-            min_x = min(min_x, body_state[0])
-            max_y = max(max_y, body_state[1])
-            min_y = min(min_y, body_state[1])
-            max_z = max(max_z, body_state[2])
-            min_z = min(min_z, body_state[2])
+            max_x = max(max_x, body_state[0]+1)
+            min_x = min(min_x, body_state[0]-1)
+            max_y = max(max_y, body_state[1]+1)
+            min_y = min(min_y, body_state[1]-1)
+            max_z = max(max_z, body_state[2]+1)
+            min_z = min(min_z, body_state[2]-1)
 
             orbits[body_i].set_xdata(
                 np.append(orbits[body_i].get_data_3d()[0], body_state[0]))
@@ -123,12 +140,9 @@ def plot_live_trajectory(dir, fps):
         ax.set_xlim(min_x, max_x)
         ax.set_ylim(min_y, max_y)
         ax.set_zlim(min_z, max_z)
+        return orbits
 
-        # Doesn't work
-        # fig.gca().relim()
-        # fig.gca().autoscale()
-        # fig.gca().autoscale_view(True,True,True)
-        # ax.figure.canvas.draw_idle()
+    anim = animation.FuncAnimation(fig, animate, init_func=init,
+                                   frames=itertools.count(), interval=frame_interval, blit=False, cache_frame_data=False)
 
-        fig.canvas.draw()
-        fig.canvas.flush_events()
+    plt.show()
