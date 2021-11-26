@@ -10,7 +10,7 @@ from .. import core
 from . import data
 
 
-def plot_fixed_trajectory(dir, max_iterations=-1):
+def plot_still_trajectory(dir, max_iterations=-1):
     # Create figure
     fig = plt.figure()
 

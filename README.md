@@ -64,7 +64,7 @@ make test_core ARGS=-h
 - Tiny Universe Simulator System GUI
 - Visualiation of trajectories via `BODY_STATE_VEC`s
 - Input files are expected to be ordered by integer
-- Supports Live and Fixed mode
+- Supports Live and Still trajectory mode
 - `python3 -m scripts.tussgui`
 
 
@@ -102,7 +102,7 @@ This format is the recommended format.
 ```
 mkdir -p ./tmp/solar_sys_cpu_log
 make run_cpusim ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_cpu_log"
-python3 -m scripts.tussgui fixed ./tmp/solar_sys_cpu_log
+python3 -m scripts.tussgui still ./tmp/solar_sys_cpu_log
 # Or, some animation
 # python3 -m scripts.tussgui live ./tmp/solar_sys_cpu_log
 rm -rf ./tmp/solar_sys_cpu_log
@@ -112,7 +112,7 @@ rm -rf ./tmp/solar_sys_cpu_log
 ```
 mkdir -p ./tmp/solar_sys_tus_log
 make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_tus_log"
-python3 -m scripts.tussgui fixed ./tmp/solar_sys_tus_log
+python3 -m scripts.tussgui still ./tmp/solar_sys_tus_log
 # Or, some animation
 # python3 -m scripts.tussgui live ./tmp/solar_sys_tus_log
 rm -rf ./tmp/solar_sys_tus_log

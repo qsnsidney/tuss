@@ -6,10 +6,10 @@ from . import plot
 def init(parser):
     subparsers = parser.add_subparsers(dest='target', required=True)
 
-    parser_fixed = subparsers.add_parser('fixed')
-    parser_fixed.add_argument('dir', type=str,
+    parser_still = subparsers.add_parser('still')
+    parser_still.add_argument('dir', type=str,
                               help='path to BODY_STATE_VECs')
-    parser_fixed.add_argument('--max_iterations', default=-1, type=int,
+    parser_still.add_argument('--max_iterations', default=-1, type=int,
                               help='max number of BODY_STATE_VECs to read')
 
     parser_live = subparsers.add_parser('live')
@@ -21,8 +21,8 @@ def init(parser):
 
 
 def main(args):
-    if args.target == 'fixed':
-        plot.plot_fixed_trajectory(args.dir, args.max_iterations)
+    if args.target == 'still':
+        plot.plot_still_trajectory(args.dir, args.max_iterations)
     elif args.target == 'live':
         plot.plot_live_trajectory(args.dir, args.fps)
 
