@@ -74,10 +74,9 @@ namespace CORE
             std::regex_match(row_str, m, row_regex);
             if (m.size() != 8)
             {
-                // Invalid csv
-                std::cout << "Invalid CSV: " << m.size() << " matches for row:" << std::endl;
-                std::cout << row_str << std::endl;
-                return {};
+                // Skip invalid row
+                std::cout << "Invalid CSV row: " << row_str << std::endl;
+                continue;
             }
 
             POS p{str_to_floating(m[1]), str_to_floating(m[2]), str_to_floating(m[3])};
