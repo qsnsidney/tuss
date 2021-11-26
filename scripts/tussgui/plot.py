@@ -143,7 +143,9 @@ def plot_live_trajectory(dir, fps):
         ax.set_zlim(min_z, max_z)
         return orbits
 
+    # TODO: fix the blit=True issue
     anim = animation.FuncAnimation(fig, animate, init_func=init,
                                    frames=itertools.count(), interval=frame_interval, blit=False, cache_frame_data=False)
 
     plt.show()
+    # Can save as video format
