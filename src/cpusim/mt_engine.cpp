@@ -2,10 +2,19 @@
 #include "core/timer.h"
 
 #include <iostream>
+#include <thread>
 #include "buffer.h"
 
 namespace CPUSIM
 {
+    MT_ENGINE::MT_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+                         CORE::DT dt,
+                         int n_thread,
+                         std::optional<std::string> body_states_log_dir_opt) : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
+                                                                               n_thread_(n_thread)
+    {
+    }
+
     CORE::BODY_STATE_VEC MT_ENGINE::execute(int n_iter)
     {
         const int n_body = body_states_ic().size();
@@ -25,6 +34,8 @@ namespace CPUSIM
         timer.elapsed_previous("step1");
 
         // Step 2: Prepare acceleration for ic
+        // TODO: Convert to parallel for loop
+        static_cast<void>(n_thread_);
         for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
         {
             buf_in.acc[i_target_body].reset();
