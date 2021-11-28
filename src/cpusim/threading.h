@@ -30,7 +30,7 @@ namespace CPUSIM
         CHANNEL_LITE() : state_ptr_(std::make_unique<STATE>()) {}
 
         // False if the channel is already full; True if successfully sent
-        bool try_send(T data);
+        [[nodiscard]] bool try_send(T data);
         T receive();
 
     private:
