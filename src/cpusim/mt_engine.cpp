@@ -1,7 +1,7 @@
 #include "mt_engine.h"
 #include "core/timer.h"
 #include "buffer.h"
-#include "threading.hpp"
+#include "threading.h"
 
 #include <iostream>
 
@@ -34,7 +34,8 @@ namespace CPUSIM
         timer.elapsed_previous("step1");
 
         // Step 2: Prepare acceleration for ic
-        parallel_for(n_thread_, 0, n_body, [n_body, &buf_in, &mass](int i_target_body)
+        parallel_for(n_thread_, 0, n_body,
+                     [n_body, &buf_in, &mass](int i_target_body)
                      {
                          buf_in.acc[i_target_body].reset();
                          for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
@@ -57,7 +58,8 @@ namespace CPUSIM
                 debug_workspace(buf_in, mass);
             }
 
-            parallel_for(n_thread_, 0, n_body, [&buf_out, &buf_in, &vel_tmp, this](int i_target_body)
+            parallel_for(n_thread_, 0, n_body,
+                         [&buf_out, &buf_in, &vel_tmp, this](int i_target_body)
                          {
                              // Step 3: Compute temp velocity
                              vel_tmp[i_target_body] = CORE::VEL::updated(buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
@@ -66,7 +68,8 @@ namespace CPUSIM
                              buf_out.pos[i_target_body] = CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
                          });
 
-            parallel_for(n_thread_, 0, n_body, [n_body, &buf_out, &vel_tmp, &mass, this](int i_target_body)
+            parallel_for(n_thread_, 0, n_body,
+                         [n_body, &buf_out, &vel_tmp, &mass, this](int i_target_body)
                          {
                              buf_out.acc[i_target_body].reset();
                              // Step 5: Compute acceleration
