@@ -81,16 +81,14 @@ namespace CPUSIM
     template <typename T>
     bool CHANNEL_LITE<T>::try_send(T data)
     {
+        std::lock_guard<std::mutex> lock_guard(state_ptr_->mutex);
+        if (state_ptr_->parcel.has_value())
         {
-            std::lock_guard<std::mutex> lock_guard(state_ptr_->mutex);
-            if (state_ptr_->parcel.has_value())
-            {
-                return false;
-            }
-            else
-            {
-                state_ptr_->parcel.emplace(std::move(data));
-            }
+            return false;
+        }
+        else
+        {
+            state_ptr_->parcel.emplace(std::move(data));
         }
         state_ptr_->cv_has_parcel.notify_one();
         return true;
