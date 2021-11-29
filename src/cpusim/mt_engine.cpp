@@ -9,7 +9,7 @@ namespace CPUSIM
 {
     MT_ENGINE::MT_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
                          CORE::DT dt,
-                         int n_thread,
+                         size_t n_thread,
                          std::optional<std::string> body_states_log_dir_opt) : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
                                                                                n_thread_(n_thread)
     {
