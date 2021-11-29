@@ -67,7 +67,7 @@ namespace CPUSIM
         std::vector<thread_event_launch_channel> threads_launch_channel_;
     };
 
-    // Function signature: void(int i)
+    /// Function signature: void(int i)
     template <typename Function>
     void parallel_for(int n_thread, int begin, int end, Function &&f);
 
@@ -132,35 +132,55 @@ namespace CPUSIM
         }
     }
 
-    template <typename Function>
-    void parallel_for(int n_thread, int begin, int end, Function &&f)
+    /// Prepare the Function f to be ready to run on multiple threads.
+    /// Function signature: void(int i)
+    ///     The main body of the task to be run in a for loop.
+    /// Executor signature: void Executor::operator()(typename ThreadTask)
+    ///     The actual execution of the threadTask.
+    /// ThreadTask signature: void(size_t thread_id)
+    ///     A task that can be run on a thread directly.
+    template <typename Executor, typename Function>
+    void parallel_for_impl(Executor &executor, int n_thread, int begin, int end, Function &&f)
     {
-        typename std::decay_t<Function> f_copy = std::forward<Function>(f);
-        auto worker_thread = [f_copy](int i_begin, int i_end)
-        {
-            for (int i = i_begin; i < i_end; i++)
-            {
-                f_copy(i);
-            }
-        };
-
         int count = end - begin;
         int count_per_thread = (count - 1) / n_thread + 1;
 
-        // Launch
-        std::vector<std::thread> threads;
-        threads.reserve(n_thread);
-        for (int thread_idx = 0; thread_idx < n_thread; thread_idx++)
-        {
-            int i_begin = thread_idx * count_per_thread;
-            int i_end = (thread_idx == n_thread - 1) ? end : (i_begin + count_per_thread);
-            threads.emplace_back(worker_thread, i_begin, i_end);
-        }
+        // Launch and synchronize
+        executor([f = std::forward<Function>(f), begin, end, n_thread, count_per_thread](size_t thread_id)
+                 {
+                     int i_begin = begin + thread_id * count_per_thread;
+                     int i_end = (thread_id == n_thread - 1) ? end : (i_begin + count_per_thread);
+                     for (int i = i_begin; i < i_end; i++)
+                     {
+                         f(i);
+                     }
+                 });
+    }
 
-        // Synchronize
-        for (auto &thread : threads)
+    template <typename Function>
+    void parallel_for(int n_thread, int begin, int end, Function &&f)
+    {
+        // Define an executor
+        auto executor = [n_thread](auto &&thread_task)
         {
-            thread.join();
-        }
+            using ThreadTask = decltype(thread_task);
+            typename std::decay_t<ThreadTask> thread_task_copy = std::forward<ThreadTask>(thread_task);
+
+            // Launch
+            std::vector<std::thread> threads;
+            threads.reserve(n_thread);
+            for (int thread_id = 0; thread_id < n_thread; thread_id++)
+            {
+                threads.emplace_back(thread_task_copy, thread_id);
+            }
+
+            // Synchronize
+            for (auto &thread : threads)
+            {
+                thread.join();
+            }
+        };
+
+        parallel_for_impl(executor, n_thread, begin, end, std::forward<Function>(f));
     }
 }
