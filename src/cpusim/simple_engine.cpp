@@ -92,7 +92,7 @@ namespace CPUSIM
             timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::VERBOSITY::INFO);
         }
 
-        timer.elapsed_previous("all_iter");
+        timer.elapsed_previous("all_iters");
 
         return generate_body_state_vec(buf_in, mass);
     }

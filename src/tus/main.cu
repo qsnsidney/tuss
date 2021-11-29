@@ -30,6 +30,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(DEFAULT_BLOCK_SIZE)));
     option_group("o,out", "body_states_log_dir: optional", cxxopts::value<std::string>());
+    option_group("v,verbose", "verbosity: can stack, optional");
     option_group("h,help", "Print usage");
 
     auto result = options.parse(argc, argv);
@@ -63,6 +64,8 @@ int main(int argc, const char *argv[])
     {
         body_states_log_dir_opt = arg_result["out"].as<std::string>();
     }
+    const int verbosity = arg_result.count("verbose");
+    CORE::TIMER::set_verbosity(static_cast<CORE::TIMER::VERBOSITY>(verbosity));
 
     std::cout << "Running.." << std::endl;
     std::cout << "ic_file: " << ic_file_path << std::endl;
@@ -71,6 +74,7 @@ int main(int argc, const char *argv[])
     std::cout << "n_iteration: " << n_iteration << std::endl;
     std::cout << "block_size: " << block_size << std::endl;
     std::cout << "body_states_log_dir: " << (body_states_log_dir_opt ? *body_states_log_dir_opt : std::string("null")) << std::endl;
+    std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 

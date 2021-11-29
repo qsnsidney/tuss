@@ -14,7 +14,8 @@
 #include "constant.h"
 #include "basic_kernel.cuh"
 
-namespace {
+namespace
+{
     CORE::BODY_STATE_VEC generate_body_state_vec(const data_t_3d *h_X, const data_t_3d *h_V, const data_t *mass, const size_t nbody)
     {
         CORE::BODY_STATE_VEC body_states;
@@ -117,24 +118,24 @@ namespace TUS
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
-            CORE::TIMER core_timer("computation_core");
+            CORE::TIMER core_timer("all_iters");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
                 update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, //input
-                                                            d_X[dest_index], d_V_half); // output
+                                                            d_X[dest_index], d_V_half);                                               // output
 
                 cudaDeviceSynchronize();
 
                 calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
-                                                                   d_A[dest_index]); // output
+                                                                   d_A[dest_index]);            // output
 
                 cudaDeviceSynchronize();
 
                 update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
-                                                            d_V[dest_index]); // output
+                                                            d_V[dest_index]);                                    // output
                 cudaDeviceSynchronize();
 
-                timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
+                timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::VERBOSITY::INFO);
 
                 if (is_body_states_logging_enabled())
                 {
@@ -152,7 +153,7 @@ namespace TUS
                         serialize_body_states_log();
                     }
 
-                    timer.elapsed_previous(std::string("Transfer to CPU"));
+                    timer.elapsed_previous(std::string("Transfer to CPU"), CORE::TIMER::VERBOSITY::INFO);
                 }
 
                 swap(src_index, dest_index);
@@ -164,7 +165,7 @@ namespace TUS
         cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
         timer.elapsed_previous("copied output back to host");
-        
+
         // Just for debug purpose on small inputs
         // for (unsigned i = 0; i < nBody; i++)
         // {
