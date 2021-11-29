@@ -48,6 +48,7 @@ namespace CPUSIM
     public:
         THREAD_POOL() = default;
         explicit THREAD_POOL(size_t n_thread);
+        ~THREAD_POOL() { reset(); }
 
         // Function signature: void(size_t thread_id)
         template <typename Function>
@@ -55,7 +56,7 @@ namespace CPUSIM
 
         size_t size() const { return threads_.size(); }
 
-        // Remove all worker threads
+        // Properly terminate and clear all worker threads
         void reset();
         // Does a reset and then reset to n_thread
         void resize(size_t n_thread);
