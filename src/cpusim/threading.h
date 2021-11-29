@@ -70,6 +70,10 @@ namespace CPUSIM
 
     /// Function signature: void(int i)
     template <typename Function>
+    void parallel_for(THREAD_POOL &thread_pool, int begin, int end, Function &&f);
+
+    /// Function signature: void(int i)
+    template <typename Function>
     void parallel_for(size_t n_thread, int begin, int end, Function &&f);
 
     /// Implementation
@@ -141,7 +145,7 @@ namespace CPUSIM
     /// ThreadTask signature: void(size_t thread_id)
     ///     A task that can be run on a thread directly.
     template <typename Executor, typename Function>
-    void parallel_for_impl(Executor &executor, size_t n_thread, int begin, int end, Function &&f)
+    void parallel_for_impl(Executor &&executor, size_t n_thread, int begin, int end, Function &&f)
     {
         int count = end - begin;
         int count_per_thread = (count - 1) / n_thread + 1;
@@ -156,6 +160,14 @@ namespace CPUSIM
                          f(i);
                      }
                  });
+    }
+
+    template <typename Function>
+    void parallel_for(THREAD_POOL &thread_pool, int begin, int end, Function &&f)
+    {
+        parallel_for_impl([&thread_pool](auto &&thread_task)
+                          { thread_pool.run(thread_task); },
+                          thread_pool.size(), begin, end, std::forward<Function>(f));
     }
 
     template <typename Function>
@@ -182,6 +194,6 @@ namespace CPUSIM
             }
         };
 
-        parallel_for_impl(executor, n_thread, begin, end, std::forward<Function>(f));
+        parallel_for_impl(std::move(executor), n_thread, begin, end, std::forward<Function>(f));
     }
 }
