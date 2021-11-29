@@ -9,6 +9,7 @@
 #include "core/cxxopts.hpp"
 #include "simple_engine.h"
 #include "mt_engine.h"
+#include "acc_shared_engine.h"
 
 auto parse_args(int argc, const char *argv[])
 {
@@ -85,14 +86,16 @@ int main(int argc, const char *argv[])
 
     // Select engine here
     std::unique_ptr<CORE::ENGINE> engine;
-    if (n_thread == 1)
-    {
-        engine.reset(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
-    }
-    else
-    {
-        engine.reset(new CPUSIM::MT_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
-    }
+    // if (n_thread == 1)
+    // {
+    //     engine.reset(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+    // }
+    // else
+    // {
+    //     engine.reset(new CPUSIM::MT_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
+    // }
+    engine.reset(new CPUSIM::ACC_SHARED_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine
