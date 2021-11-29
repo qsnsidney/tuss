@@ -169,7 +169,7 @@ namespace CPUSIM
             // Launch
             std::vector<std::thread> threads;
             threads.reserve(n_thread);
-            for (int thread_id = 0; thread_id < n_thread; thread_id++)
+            for (size_t thread_id = 0; thread_id < n_thread; thread_id++)
             {
                 threads.emplace_back(thread_task_copy, thread_id);
             }
