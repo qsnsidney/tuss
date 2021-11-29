@@ -130,4 +130,5 @@ make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 
 #### tus
 ```
 make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000"
+make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 -n 10"
 ```
