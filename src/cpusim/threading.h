@@ -69,7 +69,7 @@ namespace CPUSIM
 
     /// Function signature: void(int i)
     template <typename Function>
-    void parallel_for(int n_thread, int begin, int end, Function &&f);
+    void parallel_for(size_t n_thread, int begin, int end, Function &&f);
 
     /// Implementation
 
@@ -140,7 +140,7 @@ namespace CPUSIM
     /// ThreadTask signature: void(size_t thread_id)
     ///     A task that can be run on a thread directly.
     template <typename Executor, typename Function>
-    void parallel_for_impl(Executor &executor, int n_thread, int begin, int end, Function &&f)
+    void parallel_for_impl(Executor &executor, size_t n_thread, int begin, int end, Function &&f)
     {
         int count = end - begin;
         int count_per_thread = (count - 1) / n_thread + 1;
@@ -158,7 +158,7 @@ namespace CPUSIM
     }
 
     template <typename Function>
-    void parallel_for(int n_thread, int begin, int end, Function &&f)
+    void parallel_for(size_t n_thread, int begin, int end, Function &&f)
     {
         // Define an executor
         auto executor = [n_thread](auto &&thread_task)
