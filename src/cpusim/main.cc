@@ -57,7 +57,7 @@ int main(int argc, const char *argv[])
         body_states_log_dir_opt = arg_result["out"].as<std::string>();
     }
     const int verbosity = arg_result.count("verbose");
-    CORE::TIMER::set_verbosity(static_cast<CORE::TIMER::VERBOSITY>(verbosity));
+    CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
 
     std::cout << "Running.." << std::endl;
     std::cout << "ic_file: " << ic_file_path << std::endl;

@@ -135,7 +135,7 @@ namespace TUS
                                                             d_V[dest_index]);                                    // output
                 cudaDeviceSynchronize();
 
-                timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::VERBOSITY::INFO);
+                timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::TRIGGER_LEVEL::INFO);
 
                 if (is_body_states_logging_enabled())
                 {
@@ -153,7 +153,7 @@ namespace TUS
                         serialize_body_states_log();
                     }
 
-                    timer.elapsed_previous(std::string("Transfer to CPU"), CORE::TIMER::VERBOSITY::INFO);
+                    timer.elapsed_previous(std::string("Transfer to CPU"), CORE::TIMER::TRIGGER_LEVEL::INFO);
                 }
 
                 swap(src_index, dest_index);

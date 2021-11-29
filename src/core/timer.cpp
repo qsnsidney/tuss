@@ -12,7 +12,7 @@ namespace CORE
         return (double)tv.tv_usec / 1000000 + tv.tv_sec;
     }
 
-    TIMER::VERBOSITY TIMER::s_verbosity = TIMER::VERBOSITY::IMP;
+    TIMER::TRIGGER_LEVEL TIMER::s_trigger_level = TIMER::TRIGGER_LEVEL::IMP;
 
     TIMER::TIMER(std::string profile_name) : start_time_(get_time_stamp()), previous_elapsing_time_(start_time_), profile_name_(std::move(profile_name))
     {
@@ -24,19 +24,19 @@ namespace CORE
         elapsed_start();
     }
 
-    double TIMER::elapsed_previous(const std::string &subprofile_name, VERBOSITY verbosity)
+    double TIMER::elapsed_previous(const std::string &subprofile_name, TRIGGER_LEVEL trigger_level)
     {
 
         double current_time = get_time_stamp();
         double elapsed = current_time - previous_elapsing_time_;
 
-        if (match_verbosity(verbosity))
+        if (match_trigger_level(trigger_level))
         {
             std::cout << "TIMER: Subprofile [" << profile_name_ << "/" << subprofile_name
                       << "]: " << std::to_string(elapsed) << " seconds" << std::endl;
+            previous_elapsing_time_ = current_time;
         }
 
-        previous_elapsing_time_ = current_time;
         return elapsed;
     }
 

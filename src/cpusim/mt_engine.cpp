@@ -17,6 +17,7 @@ namespace CPUSIM
 
     CORE::BODY_STATE_VEC MT_ENGINE::execute(int n_iter)
     {
+        CPUSIM::THREAD_POOL thread_pool(n_thread_);
         const int n_body = body_states_ic().size();
 
         CORE::TIMER timer(std::string("MT_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
@@ -34,7 +35,7 @@ namespace CPUSIM
         timer.elapsed_previous("step1");
 
         // Step 2: Prepare acceleration for ic
-        parallel_for(n_thread_, 0, n_body,
+        parallel_for(thread_pool, 0, n_body,
                      [n_body, &buf_in, &mass](int i_target_body)
                      {
                          buf_in.acc[i_target_body].reset();
@@ -58,7 +59,7 @@ namespace CPUSIM
                 debug_workspace(buf_in, mass);
             }
 
-            parallel_for(n_thread_, 0, n_body,
+            parallel_for(thread_pool, 0, n_body,
                          [&buf_out, &buf_in, &vel_tmp, this](int i_target_body)
                          {
                              // Step 3: Compute temp velocity
@@ -68,7 +69,7 @@ namespace CPUSIM
                              buf_out.pos[i_target_body] = CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
                          });
 
-            parallel_for(n_thread_, 0, n_body,
+            parallel_for(thread_pool, 0, n_body,
                          [n_body, &buf_out, &vel_tmp, &mass, this](int i_target_body)
                          {
                              buf_out.acc[i_target_body].reset();
@@ -101,7 +102,7 @@ namespace CPUSIM
             // Prepare for next iteration
             std::swap(buf_in, buf_out);
 
-            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::VERBOSITY::INFO);
+            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::TRIGGER_LEVEL::INFO);
         }
 
         timer.elapsed_previous("all_iters");
