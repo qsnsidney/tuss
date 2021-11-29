@@ -1,3 +1,4 @@
+#pragma once
 #include <thread>
 #include <type_traits>
 #include <optional>
