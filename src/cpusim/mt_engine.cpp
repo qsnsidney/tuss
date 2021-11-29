@@ -101,8 +101,10 @@ namespace CPUSIM
             // Prepare for next iteration
             std::swap(buf_in, buf_out);
 
-            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter));
+            timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::VERBOSITY::INFO);
         }
+
+        timer.elapsed_previous("all_iter");
 
         return generate_body_state_vec(buf_in, mass);
     }
