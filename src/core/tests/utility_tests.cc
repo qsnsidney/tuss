@@ -37,7 +37,7 @@ UTST_TEST(delinearize_upper_triangle_matrix_index)
 
 UTST_TEST(linearize_delinearize_upper_triangle_matrix_index)
 {
-    constexpr size_t n = 70000;
+    constexpr size_t n = 50000;
     for (size_t i = 0; i < n; i++)
     {
         for (size_t j = i + 1; j < n; j++)
