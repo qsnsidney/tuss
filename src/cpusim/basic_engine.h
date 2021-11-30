@@ -6,16 +6,16 @@
 
 namespace CPUSIM
 {
-    class MT_ENGINE final : public CORE::ENGINE
+    class BASIC_ENGINE final : public CORE::ENGINE
     {
     public:
-        virtual ~MT_ENGINE() = default;
+        virtual ~BASIC_ENGINE() = default;
 
-        MT_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
-                  CORE::DT dt,
-                  size_t n_thread,
-                  bool use_thread_pool,
-                  std::optional<std::string> body_states_log_dir_opt = {});
+        BASIC_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+                     CORE::DT dt,
+                     size_t n_thread,
+                     bool use_thread_pool,
+                     std::optional<std::string> body_states_log_dir_opt = {});
 
         virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
 
@@ -30,7 +30,7 @@ namespace CPUSIM
     /// Implementation
 
     template <typename Function>
-    void MT_ENGINE::parallel_for_helper(int begin, int end, Function &&f)
+    void BASIC_ENGINE::parallel_for_helper(int begin, int end, Function &&f)
     {
         if (n_thread_ == 1)
         {

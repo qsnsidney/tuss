@@ -1,4 +1,4 @@
-#include "mt_engine.h"
+#include "basic_engine.h"
 #include "core/timer.h"
 #include "buffer.h"
 #include "threading.h"
@@ -7,22 +7,22 @@
 
 namespace CPUSIM
 {
-    MT_ENGINE::MT_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
-                         CORE::DT dt,
-                         size_t n_thread,
-                         bool use_thread_pool,
-                         std::optional<std::string> body_states_log_dir_opt)
+    BASIC_ENGINE::BASIC_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+                               CORE::DT dt,
+                               size_t n_thread,
+                               bool use_thread_pool,
+                               std::optional<std::string> body_states_log_dir_opt)
         : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
           n_thread_(n_thread),
           thread_pool_opt_(use_thread_pool ? std::make_optional<THREAD_POOL>(n_thread_) : std::nullopt)
     {
     }
 
-    CORE::BODY_STATE_VEC MT_ENGINE::execute(int n_iter)
+    CORE::BODY_STATE_VEC BASIC_ENGINE::execute(int n_iter)
     {
         const int n_body = body_states_ic().size();
 
-        CORE::TIMER timer(std::string("MT_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
+        CORE::TIMER timer(std::string("BASIC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);
