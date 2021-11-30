@@ -28,12 +28,19 @@ namespace CPUSIM
         for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
         {
             buf_in.acc[i_target_body].reset();
-            for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
+        }
+        for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
+        {
+            for (int j_source_body = i_target_body + 1; j_source_body < n_body; j_source_body++)
             {
-                if (i_target_body != j_source_body)
-                {
-                    buf_in.acc[i_target_body] += CORE::ACC::from_gravity(buf_in.pos[j_source_body], mass[j_source_body], buf_in.pos[i_target_body]);
-                }
+                const CORE::XYZ displacement = buf_in.pos[j_source_body] - buf_in.pos[i_target_body];
+                const CORE::UNIVERSE::floating_value_type denom = std::pow(displacement.norm_square() + CORE::UNIVERSE::epislon_square, -1.5f);
+
+                const CORE::ACC tmp{displacement * denom};
+                buf_in.acc[i_target_body] += mass[j_source_body] * tmp;
+                buf_in.acc[j_source_body] -= mass[i_target_body] * tmp;
+
+                // buf_in.acc[i_target_body] += CORE::ACC::from_gravity(buf_in.pos[j_source_body], mass[j_source_body], buf_in.pos[i_target_body]);
             }
         }
         timer.elapsed_previous("step2");
