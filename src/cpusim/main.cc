@@ -100,7 +100,7 @@ int main(int argc, const char *argv[])
     std::unique_ptr<CORE::ENGINE> engine;
     if (version == VERSION::SHARED_ACC)
     {
-        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
     }
     else
     {

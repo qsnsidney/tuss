@@ -6,7 +6,7 @@
 
 namespace CPUSIM
 {
-    class BASIC_ENGINE final : public CORE::ENGINE
+    class BASIC_ENGINE : public CORE::ENGINE
     {
     public:
         virtual ~BASIC_ENGINE() = default;
@@ -19,10 +19,14 @@ namespace CPUSIM
 
         virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
 
-    private:
+    protected:
         template <typename Function>
         void parallel_for_helper(int begin, int end, Function &&f);
 
+        size_t n_thread() const { return n_thread_; }
+        std::optional<THREAD_POOL> &thread_pool_opt() { return thread_pool_opt_; }
+
+    private:
         size_t n_thread_;
         std::optional<THREAD_POOL> thread_pool_opt_ = std::nullopt;
     };

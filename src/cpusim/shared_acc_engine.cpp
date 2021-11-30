@@ -25,6 +25,8 @@ namespace CPUSIM
         timer.elapsed_previous("step1");
 
         // Step 2: Prepare acceleration for ic
+        parallel_for_helper(0, n_body, [&buf_in](int i_target_body)
+                            { buf_in.acc[i_target_body].reset(); });
         for (int i_target_body = 0; i_target_body < n_body; i_target_body++)
         {
             buf_in.acc[i_target_body].reset();
