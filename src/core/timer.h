@@ -12,7 +12,7 @@ namespace CORE
     public:
         enum class TRIGGER_LEVEL
         {
-            IMP,
+            IMP = 0,
             INFO,
             DBG
         };

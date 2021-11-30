@@ -9,6 +9,16 @@
 #include "core/cxxopts.hpp"
 #include "simple_engine.h"
 #include "mt_engine.h"
+#include "shared_acc_engine.h"
+
+namespace
+{
+    enum class VERSION
+    {
+        BASIC = 0,
+        SHARED_ACC
+    };
+}
 
 auto parse_args(int argc, const char *argv[])
 {
@@ -25,9 +35,11 @@ auto parse_args(int argc, const char *argv[])
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,num_threads", "num_threads for CPU", cxxopts::value<int>()->default_value("1"));
-    option_group("thread_pool", "use thread pool for multithreading: optional");
-    option_group("o,out", "body_states_log_dir: optional", cxxopts::value<std::string>());
-    option_group("v,verbose", "verbosity: can stack, optional");
+    option_group("thread_pool", "use thread pool for multithreading: optional (default off)");
+    option_group("version", "version of optimization (0 - basic, 1 - shared acc edge): optional (default 1)",
+                 cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::SHARED_ACC))));
+    option_group("o,out", "body_states_log_dir: optional (default null)", cxxopts::value<std::string>());
+    option_group("v,verbose", "verbosity: can stack, optional (default off)");
     option_group("h,help", "Print usage");
 
     auto result = options.parse(argc, argv);
@@ -53,6 +65,7 @@ int main(int argc, const char *argv[])
     const int n_iteration = arg_result["num_iterations"].as<int>();
     const int n_thread = arg_result["num_threads"].as<int>();
     const bool use_thread_pool = static_cast<bool>(arg_result.count("thread_pool"));
+    const VERSION version = static_cast<VERSION>(arg_result["version"].as<int>());
     std::optional<std::string> body_states_log_dir_opt = {};
     if (arg_result.count("out"))
     {
@@ -68,6 +81,7 @@ int main(int argc, const char *argv[])
     std::cout << "n_iteration: " << n_iteration << std::endl;
     std::cout << "n_thread: " << n_thread << std::endl;
     std::cout << "use_thread_pool: " << use_thread_pool << std::endl;
+    std::cout << "version: " << static_cast<int>(version) << std::endl;
     std::cout << "body_states_log_dir: " << (body_states_log_dir_opt ? *body_states_log_dir_opt : std::string("null")) << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
@@ -85,14 +99,22 @@ int main(int argc, const char *argv[])
 
     // Select engine here
     std::unique_ptr<CORE::ENGINE> engine;
-    if (n_thread == 1)
+    if (version == VERSION::SHARED_ACC)
     {
-        engine.reset(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
     }
     else
     {
-        engine.reset(new CPUSIM::MT_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
+        if (n_thread == 1)
+        {
+            engine.reset(new CPUSIM::SIMPLE_ENGINE(std::move(body_states), dt, body_states_log_dir_opt));
+        }
+        else
+        {
+            engine.reset(new CPUSIM::MT_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
+        }
     }
+
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine
