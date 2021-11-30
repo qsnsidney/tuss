@@ -1,4 +1,4 @@
-#include "acc_shared_engine.h"
+#include "shared_acc_engine.h"
 #include "core/timer.h"
 
 #include <iostream>
@@ -6,11 +6,11 @@
 
 namespace CPUSIM
 {
-    CORE::BODY_STATE_VEC ACC_SHARED_ENGINE::execute(int n_iter)
+    CORE::BODY_STATE_VEC SHARED_ACC_ENGINE::execute(int n_iter)
     {
         const int n_body = body_states_ic().size();
 
-        CORE::TIMER timer(std::string("ACC_SHARED_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
+        CORE::TIMER timer(std::string("SHARED_ACC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);

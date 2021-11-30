@@ -4,10 +4,10 @@
 
 namespace CPUSIM
 {
-    class ACC_SHARED_ENGINE final : public CORE::ENGINE
+    class SHARED_ACC_ENGINE final : public CORE::ENGINE
     {
     public:
-        virtual ~ACC_SHARED_ENGINE() = default;
+        virtual ~SHARED_ACC_ENGINE() = default;
 
         using ENGINE::ENGINE;
 
