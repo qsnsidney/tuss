@@ -21,7 +21,25 @@ namespace CPUSIM
 
     private:
         template <typename Function>
-        void parallel_for_helper(int begin, int end, Function &&f)
+        void parallel_for_helper(int begin, int end, Function &&f);
+
+        size_t n_thread_;
+        std::optional<THREAD_POOL> thread_pool_opt_ = std::nullopt;
+    };
+
+    /// Implementation
+
+    template <typename Function>
+    void MT_ENGINE::parallel_for_helper(int begin, int end, Function &&f)
+    {
+        if (n_thread_ == 1)
+        {
+            for (int i = begin; i < end; i++)
+            {
+                f(i);
+            }
+        }
+        else
         {
             if (thread_pool_opt_)
             {
@@ -32,8 +50,5 @@ namespace CPUSIM
                 parallel_for(n_thread_, begin, end, std::forward<Function>(f));
             }
         }
-
-        size_t n_thread_;
-        std::optional<THREAD_POOL> thread_pool_opt_ = std::nullopt;
-    };
+    }
 }
