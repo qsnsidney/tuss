@@ -69,15 +69,15 @@ namespace CPUSIM
         std::vector<thread_event_launch_channel> threads_launch_channel_;
     };
 
-    /// Function signature: void(int i)
-    ///                     void(int i, size_t thread_id)
+    /// Function signature: void(size_t i)
+    ///                     void(size_t i, size_t thread_id)
     template <typename Function>
-    void parallel_for(THREAD_POOL &thread_pool, int begin, int end, Function &&f);
+    void parallel_for(THREAD_POOL &thread_pool, size_t begin, size_t end, Function &&f);
 
-    /// Function signature: void(int i)
-    ///                     void(int i, size_t thread_id)
+    /// Function signature: void(size_t i)
+    ///                     void(size_t i, size_t thread_id)
     template <typename Function>
-    void parallel_for(size_t n_thread, int begin, int end, Function &&f);
+    void parallel_for(size_t n_thread, size_t begin, size_t end, Function &&f);
 
     /// Implementation
 
@@ -139,27 +139,27 @@ namespace CPUSIM
     }
 
     /// Prepare the Function f to be ready to run on multiple threads.
-    /// Function signature: void(int i)
-    ///                     void(int i, size_t thread_id)
+    /// Function signature: void(size_t i)
+    ///                     void(size_t i, size_t thread_id)
     ///     The main body of the task to be run in a for loop.
     /// Executor signature: void Executor::operator()(typename ThreadTask)
     ///     The actual execution of the threadTask.
     /// ThreadTask signature: void(size_t thread_id)
     ///     A task that can be run on a thread directly.
     template <typename Executor, typename Function>
-    void parallel_for_impl(Executor &&executor, size_t n_thread, int begin, int end, Function &&f)
+    void parallel_for_impl(Executor &&executor, size_t n_thread, size_t begin, size_t end, Function &&f)
     {
-        int count = end - begin;
-        int count_per_thread = (count - 1) / n_thread + 1;
+        size_t count = end - begin;
+        size_t count_per_thread = (count - 1) / n_thread + 1;
 
         // Launch and synchronize
         executor([f = std::forward<Function>(f), begin, end, n_thread, count_per_thread](size_t thread_id)
                  {
-                     int i_begin = begin + thread_id * count_per_thread;
-                     int i_end = (thread_id == n_thread - 1) ? end : (i_begin + count_per_thread);
-                     for (int i = i_begin; i < i_end; i++)
+                     size_t i_begin = begin + thread_id * count_per_thread;
+                     size_t i_end = (thread_id == n_thread - 1) ? end : (i_begin + count_per_thread);
+                     for (size_t i = i_begin; i < i_end; i++)
                      {
-                         if constexpr (std::is_invocable_v<Function, int, size_t>)
+                         if constexpr (std::is_invocable_v<Function, size_t, size_t>)
                          {
                              f(i, thread_id);
                          }
@@ -172,7 +172,7 @@ namespace CPUSIM
     }
 
     template <typename Function>
-    void parallel_for(THREAD_POOL &thread_pool, int begin, int end, Function &&f)
+    void parallel_for(THREAD_POOL &thread_pool, size_t begin, size_t end, Function &&f)
     {
         parallel_for_impl([&thread_pool](auto &&thread_task)
                           { thread_pool.run(thread_task); },
@@ -180,7 +180,7 @@ namespace CPUSIM
     }
 
     template <typename Function>
-    void parallel_for(size_t n_thread, int begin, int end, Function &&f)
+    void parallel_for(size_t n_thread, size_t begin, size_t end, Function &&f)
     {
         // Define an executor
         auto executor = [n_thread](auto &&thread_task)

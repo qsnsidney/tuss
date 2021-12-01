@@ -18,6 +18,7 @@ namespace CPUSIM
         {
             a.reset();
         }
+
         if (n_thread() == 1)
         {
             for (size_t i_target_body = 0; i_target_body < n_body; i_target_body++)
@@ -34,6 +35,7 @@ namespace CPUSIM
         {
             // parallel_for_helper(0, n_body, [&buf_in](int i_target_body)
             //                     { buf_in.acc[i_target_body].reset(); });
+
             const size_t num_pairs = n_body * (n_body - 1) / 2;
             for (size_t pair_id = 0; pair_id < num_pairs; pair_id++)
             {

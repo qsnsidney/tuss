@@ -20,10 +20,10 @@ namespace CPUSIM
         virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
 
     protected:
-        /// Function signature: void(int i)
-        ///                     void(int i, size_t thread_id)
+        /// Function signature: void(size_t i)
+        ///                     void(size_t i, size_t thread_id)
         template <typename Function>
-        void parallel_for_helper(int begin, int end, Function &&f);
+        void parallel_for_helper(size_t begin, size_t end, Function &&f);
 
         size_t n_thread() const { return n_thread_; }
         std::optional<THREAD_POOL> &thread_pool_opt() { return thread_pool_opt_; }
@@ -36,11 +36,11 @@ namespace CPUSIM
     /// Implementation
 
     template <typename Function>
-    void BASIC_ENGINE::parallel_for_helper(int begin, int end, Function &&f)
+    void BASIC_ENGINE::parallel_for_helper(size_t begin, size_t end, Function &&f)
     {
         if (n_thread_ == 1)
         {
-            for (int i = begin; i < end; i++)
+            for (size_t i = begin; i < end; i++)
             {
                 f(i);
             }
