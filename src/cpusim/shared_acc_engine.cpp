@@ -39,6 +39,38 @@ namespace CPUSIM
             {
                 shared_acc.resize(n_body, {0, 0, 0});
             }
+
+            parallel_for_helper(0, n_body, [n_body, &shared_accs, &mass, &pos](size_t i, size_t thread_id)
+                                {
+                                    const size_t offset = i / 2;
+                                    const size_t i_target_body = (i % 2 == 0) ? offset : n_body - 1 - offset;
+                                    for (size_t j_source_body = i_target_body + 1; j_source_body < n_body; j_source_body++)
+                                    {
+                                        const CORE::ACC tgt_to_src{CORE::universal_field(pos[j_source_body], pos[i_target_body])};
+                                        shared_accs[thread_id][i_target_body] += mass[j_source_body] * tgt_to_src;
+                                        shared_accs[thread_id][j_source_body] -= mass[i_target_body] * tgt_to_src;
+                                    }
+                                });
+
+            parallel_for_helper(0, n_body, [&shared_accs, &acc, nthread](size_t i_body)
+                                {
+                                    for (size_t i_thread = 0; i_thread < nthread; i_thread++)
+                                    {
+                                        acc[i_body] += shared_accs[i_thread][i_body];
+                                    }
+                                });
+        }
+
+#if 0
+        {
+            // Useless shit
+            // The savings on one less sqrt calculation for acceleration
+            // is paid back by index calculation
+            std::vector<std::vector<CORE::ACC> > shared_accs(nthread); // [thread_idx][i_body]
+            for (auto &shared_acc : shared_accs)
+            {
+                shared_acc.resize(n_body, {0, 0, 0});
+            }
             const size_t num_pairs = n_body * (n_body - 1) / 2;
             parallel_for_helper(0, num_pairs, [n_body, &shared_accs, &mass, &pos](size_t pair_id, size_t thread_id)
                                 {
@@ -55,6 +87,7 @@ namespace CPUSIM
                                     }
                                 });
         }
+#endif
     }
 
     CORE::BODY_STATE_VEC SHARED_ACC_ENGINE::execute(int n_iter)
