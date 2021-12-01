@@ -75,12 +75,6 @@ namespace TUS
         parse_ic_f4(h_X, h_V, ic);
         timer.elapsed_previous("deserialize_body_state_vec_from_csv");
 
-        //Just for debug purpose on small inputs
-        for (unsigned i = 0; i < nBody; i++)
-        {
-           printf("object = %d, %f, %f, %f, %f\n", i, h_X[i].x, h_X[i].y, h_X[i].z, h_X[i].w);
-        }
-
         /*
          * create double buffer on device side
          */
@@ -109,7 +103,7 @@ namespace TUS
          */
         // cudaMemcpy(d_A[0], h_A, vector_size, cudaMemcpyHostToDevice);
         cudaMemcpy(d_X[src_index], h_X, vector_size_4d, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_V[src_index], h_V, vector_size_4d, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_V[src_index], h_V, vector_size_3d, cudaMemcpyHostToDevice);
         timer.elapsed_previous("copied input data from host to device");
 
         // nthread is assigned to either 32 by default or set to a custom power of 2 by user
@@ -124,7 +118,6 @@ namespace TUS
             CORE::TIMER core_timer("all_iters");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
-                printf("Iter = %d\n", i_iter);
                 update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], //input
                                                             d_X[dest_index], d_V_half);                                               // output
 
