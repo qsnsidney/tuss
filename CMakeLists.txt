@@ -3,6 +3,8 @@ project(tuss)
 
 include(CTest)
 
+option(ENABLE_FFAST_MATH "Enable -ffast-math" OFF)
+
 add_subdirectory(src/core core)
 add_subdirectory(src/cpusim cpusim)
 

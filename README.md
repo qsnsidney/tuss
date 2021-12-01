@@ -132,3 +132,16 @@ make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 
 make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000"
 make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 -n 10"
 ```
+
+
+## CMake and Makefile
+
+### Arg Passing to exe
+```
+ARGS="<your_args>"
+```
+
+###
+```
+CMAKE_ARGS="-DENABLE_FFAST_MATH=OFF"
+```

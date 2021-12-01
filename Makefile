@@ -9,8 +9,9 @@ clean:
 	rm -rf build/
 .PHONY: clean
 
+# CMAKE_ARGS="-DENABLE_FFAST_MATH=ON"
 prepare:
-	cmake -B build
+	cmake ${CMAKE_ARGS} -B build
 	@echo [=== cmake is successfully prepared ===]
 	@echo 
 .PHONY: prepare
@@ -19,7 +20,7 @@ prepare:
 
 test_core: prepare
 	$(MAKE) -C build core_tests
-	$(MAKE) -C build test ARGS="-R '^core_tests_' ${ARGS}"
+	$(MAKE) -C build test ARGS="-R '^core_tests_'"
 	@echo [=== core is successfully tested ===]
 	@echo 
 .PHONY: test_core
