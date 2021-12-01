@@ -141,7 +141,7 @@ make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 -n 
 ARGS="<your_args>"
 ```
 
-###
+### Enable -ffast-math
 ```
 CMAKE_ARGS="-DENABLE_FFAST_MATH=OFF"
 ```
