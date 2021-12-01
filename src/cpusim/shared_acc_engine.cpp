@@ -13,13 +13,14 @@ namespace CPUSIM
     {
         const size_t n_body = mass.size();
         ASSERT(acc.size() == n_body);
+        const size_t nthread = n_thread();
 
         for (auto &a : acc)
         {
             a.reset();
         }
 
-        if (n_thread() == 1)
+        if (nthread == 1)
         {
             for (size_t i_target_body = 0; i_target_body < n_body; i_target_body++)
             {
@@ -33,16 +34,25 @@ namespace CPUSIM
         }
         else
         {
-            // parallel_for_helper(0, n_body, [&buf_in](int i_target_body)
-            //                     { buf_in.acc[i_target_body].reset(); });
-
-            const size_t num_pairs = n_body * (n_body - 1) / 2;
-            for (size_t pair_id = 0; pair_id < num_pairs; pair_id++)
+            std::vector<std::vector<CORE::ACC> > shared_accs(nthread); // [thread_idx][i_body]
+            for (auto &shared_acc : shared_accs)
             {
-                auto [i_target_body, j_source_body] = CORE::delinearize_upper_triangle_matrix_index(pair_id, n_body);
-                const CORE::ACC tgt_to_src{CORE::universal_field(pos[j_source_body], pos[i_target_body])};
-                acc[i_target_body] += mass[j_source_body] * tgt_to_src;
-                acc[j_source_body] -= mass[i_target_body] * tgt_to_src;
+                shared_acc.resize(n_body, {0, 0, 0});
+            }
+            const size_t num_pairs = n_body * (n_body - 1) / 2;
+            parallel_for_helper(0, num_pairs, [n_body, &shared_accs, &mass, &pos](size_t pair_id, size_t thread_id)
+                                {
+                                    auto [i_target_body, j_source_body] = CORE::delinearize_upper_triangle_matrix_index(pair_id, n_body);
+                                    const CORE::ACC tgt_to_src{CORE::universal_field(pos[j_source_body], pos[i_target_body])};
+                                    shared_accs[thread_id][i_target_body] += mass[j_source_body] * tgt_to_src;
+                                    shared_accs[thread_id][j_source_body] -= mass[i_target_body] * tgt_to_src;
+                                });
+            for (size_t i_body = 0; i_body < n_body; i_body++)
+            {
+                for (size_t i_thread = 0; i_thread < nthread; i_thread++)
+                {
+                    acc[i_body] += shared_accs[i_thread][i_body];
+                }
             }
         }
     }
@@ -69,7 +79,7 @@ namespace CPUSIM
         compute_acceleration(buf_in.acc, buf_in.pos, mass);
 
         // Verify
-        if (n_thread() != 1)
+        if (n_thread() != 1 && false)
         {
             std::cout << "Verifying IC acceleration" << std::endl;
             std::vector<CORE::ACC> expected_acc(n_body);

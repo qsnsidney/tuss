@@ -42,7 +42,14 @@ namespace CPUSIM
         {
             for (size_t i = begin; i < end; i++)
             {
-                f(i);
+                if constexpr (std::is_invocable_v<Function, size_t, size_t>)
+                {
+                    f(i, 0);
+                }
+                else
+                {
+                    f(i);
+                }
             }
         }
         else
