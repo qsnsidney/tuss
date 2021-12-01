@@ -60,7 +60,8 @@ namespace CORE
     inline XYZ universal_field(const POS &p_src, const POS &p_target)
     {
         const XYZ displacement = p_src - p_target;
-        const UNIVERSE::floating_value_type denom = std::pow(displacement.norm_square() + UNIVERSE::epislon_square, -1.5f);
-        return displacement * denom;
+        const UNIVERSE::floating_value_type denom_base = displacement.norm_square() + UNIVERSE::epislon_square;
+
+        return displacement / (denom_base * std::sqrt(denom_base));
     }
 }
