@@ -143,5 +143,5 @@ ARGS="<your_args>"
 
 ### Enable -ffast-math
 ```
-CMAKE_ARGS="-DENABLE_FFAST_MATH=OFF"
+CMAKE_ARGS="-DENABLE_FFAST_MATH=ON"
 ```
