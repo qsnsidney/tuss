@@ -70,10 +70,12 @@ namespace CPUSIM
     };
 
     /// Function signature: void(int i)
+    ///                     void(int i, size_t thread_id)
     template <typename Function>
     void parallel_for(THREAD_POOL &thread_pool, int begin, int end, Function &&f);
 
     /// Function signature: void(int i)
+    ///                     void(int i, size_t thread_id)
     template <typename Function>
     void parallel_for(size_t n_thread, int begin, int end, Function &&f);
 
@@ -138,6 +140,7 @@ namespace CPUSIM
 
     /// Prepare the Function f to be ready to run on multiple threads.
     /// Function signature: void(int i)
+    ///                     void(int i, size_t thread_id)
     ///     The main body of the task to be run in a for loop.
     /// Executor signature: void Executor::operator()(typename ThreadTask)
     ///     The actual execution of the threadTask.
@@ -156,7 +159,14 @@ namespace CPUSIM
                      int i_end = (thread_id == n_thread - 1) ? end : (i_begin + count_per_thread);
                      for (int i = i_begin; i < i_end; i++)
                      {
-                         f(i);
+                         if constexpr (std::is_invocable_v<Function, int, size_t>)
+                         {
+                             f(i, thread_id);
+                         }
+                         else
+                         {
+                             f(i);
+                         }
                      }
                  });
     }

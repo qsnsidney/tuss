@@ -20,6 +20,8 @@ namespace CPUSIM
         virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
 
     protected:
+        /// Function signature: void(int i)
+        ///                     void(int i, size_t thread_id)
         template <typename Function>
         void parallel_for_helper(int begin, int end, Function &&f);
 
