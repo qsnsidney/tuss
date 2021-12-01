@@ -24,7 +24,7 @@ m1 ffast-math: 17.95
 
 # acceleraition edge sharing with linearized triangular matrix index
 -t 4 --version 1
-m1: 8.21
-m1 ffast-math: 7.70
+m1: 7.96
+m1 ffast-math: 7.47
 4790 march=native: 41.63
 4790 march=native ffast-math: 20.92
