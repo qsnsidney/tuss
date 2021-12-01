@@ -167,10 +167,10 @@ namespace TUS
         timer.elapsed_previous("copied output back to host");
 
         // Just for debug purpose on small inputs
-        // for (unsigned i = 0; i < nBody; i++)
-        // {
-        //    //printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
-        // }
+        for (unsigned i = 0; i < nBody; i++)
+        {
+           printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
+        }
 
         return generate_system_state(h_output_X, h_output_V, h_M, nBody);
     }

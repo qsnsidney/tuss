@@ -57,3 +57,17 @@ inline __host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *in
         input_m[i] = (data_t)m;
     }
 }
+
+inline __host__ void parse_ic_f4(float4 *input_x, data_t_3d *input_v, const CORE::BODY_STATE_VEC &ic)
+{
+    size_t length_to_parse = ic.size();
+    std::cout << "parsing " << length_to_parse << " bodies\n";
+    for (size_t i = 0; i < length_to_parse; i++)
+    {
+        CORE::POS p = std::get<CORE::POS>(ic[i]);
+        CORE::VEL v = std::get<CORE::VEL>(ic[i]);
+        CORE::MASS m = std::get<CORE::MASS>(ic[i]);
+        input_x[i] = make_float4(p.x, p.y, p.z, m);
+        input_v[i] = make_data_t_3d((data_t)v.x, (data_t)v.y, (data_t)v.z);
+    }
+}
