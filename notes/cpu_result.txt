@@ -6,19 +6,23 @@ per iteration seconds
 -t 1 --version 0
 m1: 73.5
 4790: 159.4
+4790 march=native ffast-math: 41.8
 
 -t 4 --version 0
 m1: 20.5
 4790: 41.3
+4790 march=native ffast-math: 10.9
 
 # acceleration edge sharing
 -t 1 --version 1
 m1: 38.45
 4790: 89.7
 4790 march=native: 85.9
+4790 march=native ffast-math: 31.4
 
 # acceleraition edge sharing with linearized triangular matrix index
 -t 4 --version 1
 m1: 15.7
 4790: 56
 4790 march=native: 52
+4790 march=native ffast-math: 20.9
