@@ -20,14 +20,14 @@ namespace CPUSIM
 
     CORE::BODY_STATE_VEC BASIC_ENGINE::execute(int n_iter)
     {
-        const int n_body = body_states_ic().size();
+        const size_t n_body = body_states_ic().size();
 
         CORE::TIMER timer(std::string("BASIC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);
         // Step 1: Prepare ic
-        for (int i_body = 0; i_body < n_body; i_body++)
+        for (size_t i_body = 0; i_body < n_body; i_body++)
         {
             const auto &[body_pos, body_vel, body_mass] = body_states_ic()[i_body];
             buf_in.pos[i_body] = body_pos;
@@ -38,10 +38,10 @@ namespace CPUSIM
 
         // Step 2: Prepare acceleration for ic
         parallel_for_helper(0, n_body,
-                            [n_body, &buf_in, &mass](int i_target_body)
+                            [n_body, &buf_in, &mass](size_t i_target_body)
                             {
                                 buf_in.acc[i_target_body].reset();
-                                for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
+                                for (size_t j_source_body = 0; j_source_body < n_body; j_source_body++)
                                 {
                                     if (i_target_body != j_source_body)
                                     {
@@ -62,21 +62,23 @@ namespace CPUSIM
             }
 
             parallel_for_helper(0, n_body,
-                                [&buf_out, &buf_in, &vel_tmp, this](int i_target_body)
+                                [&buf_out, &buf_in, &vel_tmp, this](size_t i_target_body)
                                 {
                                     // Step 3: Compute temp velocity
-                                    vel_tmp[i_target_body] = CORE::VEL::updated(buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
+                                    vel_tmp[i_target_body] =
+                                        CORE::VEL::updated(buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
 
                                     // Step 4: Update position
-                                    buf_out.pos[i_target_body] = CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
+                                    buf_out.pos[i_target_body] =
+                                        CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
                                 });
 
             parallel_for_helper(0, n_body,
-                                [n_body, &buf_out, &vel_tmp, &mass, this](int i_target_body)
+                                [n_body, &buf_out, &vel_tmp, &mass, this](size_t i_target_body)
                                 {
                                     buf_out.acc[i_target_body].reset();
                                     // Step 5: Compute acceleration
-                                    for (int j_source_body = 0; j_source_body < n_body; j_source_body++)
+                                    for (size_t j_source_body = 0; j_source_body < n_body; j_source_body++)
                                     {
                                         if (i_target_body != j_source_body)
                                         {

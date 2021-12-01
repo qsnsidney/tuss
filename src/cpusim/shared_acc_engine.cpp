@@ -47,13 +47,13 @@ namespace CPUSIM
                                     shared_accs[thread_id][i_target_body] += mass[j_source_body] * tgt_to_src;
                                     shared_accs[thread_id][j_source_body] -= mass[i_target_body] * tgt_to_src;
                                 });
-            for (size_t i_body = 0; i_body < n_body; i_body++)
-            {
-                for (size_t i_thread = 0; i_thread < nthread; i_thread++)
-                {
-                    acc[i_body] += shared_accs[i_thread][i_body];
-                }
-            }
+            parallel_for_helper(0, n_body, [&shared_accs, &acc, nthread](size_t i_body)
+                                {
+                                    for (size_t i_thread = 0; i_thread < nthread; i_thread++)
+                                    {
+                                        acc[i_body] += shared_accs[i_thread][i_body];
+                                    }
+                                });
         }
     }
 
@@ -118,23 +118,28 @@ namespace CPUSIM
                 debug_workspace(buf_in, mass);
             }
 
-            for (size_t i_target_body = 0; i_target_body < n_body; i_target_body++)
-            {
-                // Step 3: Compute temp velocity
-                vel_tmp[i_target_body] = CORE::VEL::updated(buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
+            parallel_for_helper(0, n_body,
+                                [&buf_out, &buf_in, &vel_tmp, this](size_t i_target_body)
+                                {
+                                    // Step 3: Compute temp velocity
+                                    vel_tmp[i_target_body] =
+                                        CORE::VEL::updated(buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
 
-                // Step 4: Update position
-                buf_out.pos[i_target_body] = CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
-            }
+                                    // Step 4: Update position
+                                    buf_out.pos[i_target_body] =
+                                        CORE::POS::updated(buf_in.pos[i_target_body], buf_in.vel[i_target_body], buf_in.acc[i_target_body], dt());
+                                });
 
             // Step 5: Compute acceleration
             compute_acceleration(buf_out.acc, buf_out.pos, mass);
 
             // Step 6: Update velocity
-            for (size_t i_target_body = 0; i_target_body < n_body; i_target_body++)
-            {
-                buf_out.vel[i_target_body] = CORE::VEL::updated(vel_tmp[i_target_body], buf_out.acc[i_target_body], dt());
-            }
+            parallel_for_helper(0, n_body,
+                                [&buf_out, &vel_tmp, this](size_t i_target_body)
+                                {
+                                    // Step 6: Update velocity
+                                    buf_out.vel[i_target_body] = CORE::VEL::updated(vel_tmp[i_target_body], buf_out.acc[i_target_body], dt());
+                                });
 
             // Write BODY_STATE_VEC to log
             if (i_iter == 0)
