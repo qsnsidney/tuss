@@ -15,8 +15,10 @@ m1: 20.5
 -t 1 --version 1
 m1: 38.45
 4790: 89.7
+4790 march=native: 85.9
 
 # acceleraition edge sharing with linearized triangular matrix index
 -t 4 --version 1
 m1: 15.7
 4790: 56
+4790 march=native: 52
