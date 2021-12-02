@@ -34,7 +34,7 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
     {
         data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
         data_t_3d x_self = location[tid];
-        for (unsigned j = 0; j < 1; j++)
+        for (unsigned j = 0; j < nbody; j++)
         {
             if (j == tid)
             {
