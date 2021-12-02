@@ -11,6 +11,8 @@ __global__ inline void update_step_pos(unsigned nbody, data_t step_size, data_t_
         velocity_half[tid] = i_velocity[tid] + i_accer[tid] * ((data_t)0.5 * step_size);
         // Xi+1         =      xi         +       vi        *     dt    +    ai   *     1/2     *     (dt)^2
         o_location[tid] = i_location[tid] + i_velocity[tid] * step_size + i_accer[tid] * (data_t)0.5 * powf(step_size, 2);
+
+        //printf("tid = %d, half_v %f, %f, %f\no_location %f, %f, %f\n", tid, velocity_half[tid].x, velocity_half[tid].y, velocity_half[tid].z, o_location[tid].x, o_location[tid].y, o_location[tid].z);
     }
 }
 
@@ -21,6 +23,7 @@ __global__ inline void update_step_vel(unsigned nbody, data_t step_size, data_t 
     if (tid < nbody)
     {
         o_velocity[tid] = velocity_half[tid] + new_accer[tid] * ((data_t)0.5 * step_size);
+        //printf("tid = %d, update_v %f, %f, %f\n", tid, o_velocity[tid].x, o_velocity[tid].y, o_velocity[tid].z);
     }
 }
 
@@ -31,7 +34,7 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
     {
         data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
         data_t_3d x_self = location[tid];
-        for (unsigned j = 0; j < nbody; j++)
+        for (unsigned j = 0; j < 1; j++)
         {
             if (j == tid)
             {
@@ -43,7 +46,7 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
             data_t denominator = power_norm(x_self, x_source);
             data_t_3d new_term = (numerator / denominator);
             accumulated_accer = accumulated_accer + new_term;
-            printf("tid = %d, new_term %f, %f, %f\naccumulated_accer %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z, accumulated_accer.x, accumulated_accer.y, accumulated_accer.z);
+            //printf("tid = %d, new_term %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z);
         }
         acceleration[tid] = accumulated_accer;
     }
