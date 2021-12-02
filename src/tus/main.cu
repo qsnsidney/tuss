@@ -9,8 +9,8 @@
 #include "constant.h"
 #include "core/timer.h"
 #include "core/macros.hpp"
-//#include "simple_engine.cuh"
-#include "reference_engine.cuh"
+#include "simple_engine.cuh"
+//#include "reference_engine.cuh"
 #include "core/cxxopts.hpp"
 #include "cpusim/reference.h"
 
@@ -110,8 +110,8 @@ int main(int argc, const char *argv[])
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
-    //std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(system_state_ic, dt, block_size, body_states_log_dir_opt));
-    std::unique_ptr<CORE::ENGINE> engine(new TUS::REFERENCE_ENGINE(system_state_ic, dt, block_size, body_states_log_dir_opt));
+    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(system_state_ic, dt, block_size, body_states_log_dir_opt));
+    //std::unique_ptr<CORE::ENGINE> engine(new TUS::REFERENCE_ENGINE(system_state_ic, dt, block_size, body_states_log_dir_opt));
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine

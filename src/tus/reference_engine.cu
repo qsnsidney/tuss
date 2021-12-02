@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <iostream>
+#include <fstream>
 
 #include "core/physics.hpp"
 #include "core/serde.h"
@@ -160,7 +161,30 @@ namespace TUS
 
         // at end, the final data is actually at src_index because the last swap
         cudaMemcpy(h_output_X, d_X[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
-        cudaMemcpy(h_output_V, d_V[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_output_V, d_V[src_index], vector_size_3d, cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_A, d_A[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
+
+        std::ofstream X_file;
+        std::ofstream V_file;
+        std::ofstream A_file;
+        X_file.open ("referenceX.output");
+        V_file.open ("referenceV.output");
+        A_file.open ("referenceA.output");
+        for(int i = 0; i < nBody; i++) {
+            X_file << h_output_X[i].x << "\n";
+            X_file << h_output_X[i].y << "\n";
+            X_file << h_output_X[i].z << "\n";
+            V_file << h_output_V[i].x << "\n";
+            V_file << h_output_V[i].y << "\n";
+            V_file << h_output_V[i].z << "\n";
+            A_file << h_A[i].x << "\n";
+            A_file << h_A[i].y << "\n";
+            A_file << h_A[i].z << "\n";
+        }
+        X_file.close();
+        V_file.close();
+        A_file.close();
+
         timer.elapsed_previous("copied output back to host");
 
         //Just for debug purpose on small inputs
