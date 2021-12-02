@@ -30,6 +30,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(DEFAULT_BLOCK_SIZE)));
     option_group("o,out", "body_states_log_dir: optional", cxxopts::value<std::string>());
+    option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional");
     option_group("h,help", "Print usage");
 
@@ -64,6 +65,7 @@ int main(int argc, const char *argv[])
     {
         body_states_log_dir_opt = arg_result["out"].as<std::string>();
     }
+    const bool verify = static_cast<bool>(arg_result.count("verify"));
     const int verbosity = arg_result.count("verbose");
     CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
 
@@ -74,6 +76,7 @@ int main(int argc, const char *argv[])
     std::cout << "n_iteration: " << n_iteration << std::endl;
     std::cout << "block_size: " << block_size << std::endl;
     std::cout << "body_states_log_dir: " << (body_states_log_dir_opt ? *body_states_log_dir_opt : std::string("null")) << std::endl;
+    std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
@@ -92,7 +95,11 @@ int main(int argc, const char *argv[])
     std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(std::move(body_states), dt, block_size, body_states_log_dir_opt));
     timer.elapsed_previous("initializing_engine");
 
-    engine->run(n_iteration);
+    const int n_iteration_to_run = verify ? 1 : n_iteration;
+    std::cout << "INFO: Ready to run " << n_iteration_to_run << " iterations" << std::endl;
+
+    // Execute engine
+    engine->run(n_iteration_to_run);
     timer.elapsed_previous("running_engine");
 
     return 0;

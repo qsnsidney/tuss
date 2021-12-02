@@ -38,6 +38,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("version", "version of optimization (0 - basic, 1 - shared acc edge): optional (default 1)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::SHARED_ACC))));
     option_group("o,out", "body_states_log_dir: optional (default null)", cxxopts::value<std::string>());
+    option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional (default off)");
     option_group("h,help", "Print usage");
 
@@ -70,6 +71,7 @@ int main(int argc, const char *argv[])
     {
         body_states_log_dir_opt = arg_result["out"].as<std::string>();
     }
+    const bool verify = static_cast<bool>(arg_result.count("verify"));
     const int verbosity = arg_result.count("verbose");
     CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
 
@@ -82,6 +84,7 @@ int main(int argc, const char *argv[])
     std::cout << "use_thread_pool: " << use_thread_pool << std::endl;
     std::cout << "version: " << static_cast<int>(version) << std::endl;
     std::cout << "body_states_log_dir: " << (body_states_log_dir_opt ? *body_states_log_dir_opt : std::string("null")) << std::endl;
+    std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
@@ -109,8 +112,11 @@ int main(int argc, const char *argv[])
 
     timer.elapsed_previous("initializing_engine");
 
+    const int n_iteration_to_run = verify ? 1 : n_iteration;
+    std::cout << "INFO: Ready to run " << n_iteration_to_run << " iterations" << std::endl;
+
     // Execute engine
-    engine->run(n_iteration);
+    engine->run(n_iteration_to_run);
     timer.elapsed_previous("running_engine");
 
     return 0;
