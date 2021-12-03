@@ -29,7 +29,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(DEFAULT_BLOCK_SIZE)));
-    option_group("o,out", "body_states_log_dir: optional", cxxopts::value<std::string>());
+    option_group("o,out", "system_state_log_dir: optional", cxxopts::value<std::string>());
     option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional");
     option_group("h,help", "Print usage");
@@ -60,10 +60,10 @@ int main(int argc, const char *argv[])
     // but incase someone enter a dumb number, assert it here
     // later this can be removed
     ASSERT(IsPowerOfTwo(block_size));
-    std::optional<std::string> body_states_log_dir_opt = {};
+    std::optional<std::string> system_state_log_dir_opt = {};
     if (arg_result.count("out"))
     {
-        body_states_log_dir_opt = arg_result["out"].as<std::string>();
+        system_state_log_dir_opt = arg_result["out"].as<std::string>();
     }
     const bool verify = static_cast<bool>(arg_result.count("verify"));
     const int verbosity = arg_result.count("verbose");
@@ -75,24 +75,24 @@ int main(int argc, const char *argv[])
     std::cout << "dt: " << dt << std::endl;
     std::cout << "n_iteration: " << n_iteration << std::endl;
     std::cout << "block_size: " << block_size << std::endl;
-    std::cout << "body_states_log_dir: " << (body_states_log_dir_opt ? *body_states_log_dir_opt : std::string("null")) << std::endl;
+    std::cout << "system_state_log_dir: " << (system_state_log_dir_opt ? *system_state_log_dir_opt : std::string("null")) << std::endl;
     std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
     /* BIN file of initial conditions */
-    CORE::BODY_STATE_VEC
-        body_states = CORE::deserialize_body_state_vec_from_file(ic_file_path);
-    if (max_n_body >= 0 && max_n_body < static_cast<int>(body_states.size()))
+    CORE::SYSTEM_STATE
+        system_state = CORE::deserialize_system_state_from_file(ic_file_path);
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(system_state.size()))
     {
-        body_states.resize(max_n_body);
+        system_state.resize(max_n_body);
         std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
     }
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
-    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(std::move(body_states), dt, block_size, body_states_log_dir_opt));
+    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(std::move(system_state), dt, block_size, system_state_log_dir_opt));
     timer.elapsed_previous("initializing_engine");
 
     const int n_iteration_to_run = verify ? 1 : n_iteration;

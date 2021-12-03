@@ -62,7 +62,7 @@ make test_core ARGS=-h
 
 ### tussgui
 - Tiny Universe Simulator System GUI
-- Visualiation of trajectories via `BODY_STATE_VEC`s
+- Visualiation of trajectories via `SYSTEM_STATE`s
 - Input files are expected to be ordered by integer
 - Supports Live and Still trajectory mode
 - `python3 -m scripts.tussgui`
@@ -75,15 +75,15 @@ The state of a single body, consists of `(POS, VEC, MASS)`.
 The serialization format expands each field, so that looks like:
 `(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)`
 
-### `BODY_STATE_VEC`
+### `SYSTEM_STATE`
 A collection of `BODY_STATE`, each represents individual `BODY_STATE`.
 
-### `BODY_STATE_VEC` in CSV
+### `SYSTEM_STATE` in CSV
 Print out each `BODY_STATE` in serialization format.  
 Each `BODY_STATE` is represented as individual row with strings representing floating values, with comma to separate each field, and ends with a new line.  
 This format is not encouraged due to its large file size, and slow deserialization speed due to string processing.
 
-### `BODY_STATE_VEC` in BIN
+### `SYSTEM_STATE` in BIN
 Print out each `BODY_STATE` in binary serialization format.  
 Each `BODY_STATE` is represented as a sequence of bytes, with bytes representing floating values.
 The specific format looks like the following:

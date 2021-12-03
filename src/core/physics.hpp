@@ -40,10 +40,10 @@ namespace CORE
     /// Input/output types
 
     using BODY_STATE = std::tuple<POS, VEL, MASS>;
-    using BODY_STATE_VEC = std::vector<BODY_STATE>;
+    using SYSTEM_STATE = std::vector<BODY_STATE>;
 
     /// Comparison
-    bool verify(const BODY_STATE_VEC &expected_state_vec, const BODY_STATE_VEC &actual_state_vec);
+    bool verify(const SYSTEM_STATE &expected_state_vec, const SYSTEM_STATE &actual_state_vec);
 
     /// Implementations
 
@@ -70,7 +70,7 @@ namespace CORE
         return displacement / (denom_base * std::sqrt(denom_base));
     }
 
-    inline bool verify(const BODY_STATE_VEC &expected_state_vec, const BODY_STATE_VEC &actual_state_vec)
+    inline bool verify(const SYSTEM_STATE &expected_state_vec, const SYSTEM_STATE &actual_state_vec)
     {
         ASSERT(expected_state_vec.size() == actual_state_vec.size());
         const size_t n_body = expected_state_vec.size();

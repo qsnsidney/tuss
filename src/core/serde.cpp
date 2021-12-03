@@ -37,11 +37,11 @@ namespace
 
 namespace CORE
 {
-    void serialize_body_state_vec_to_csv(std::ostream &csv_ostream, const BODY_STATE_VEC &body_states)
+    void serialize_system_state_to_csv(std::ostream &csv_ostream, const SYSTEM_STATE &system_state)
     {
         csv_ostream << std::fixed;
         /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
-        for (const auto &[p, v, m] : body_states)
+        for (const auto &[p, v, m] : system_state)
         {
             csv_ostream << p.x << ",";
             csv_ostream << p.y << ",";
@@ -53,16 +53,16 @@ namespace CORE
         }
     }
 
-    void serialize_body_state_vec_to_csv(const std::string &csv_file_path, const BODY_STATE_VEC &body_states)
+    void serialize_system_state_to_csv(const std::string &csv_file_path, const SYSTEM_STATE &system_state)
     {
         std::ofstream csv_file_ofstream(csv_file_path);
         ASSERT(csv_file_ofstream.is_open());
-        serialize_body_state_vec_to_csv(csv_file_ofstream, body_states);
+        serialize_system_state_to_csv(csv_file_ofstream, system_state);
     }
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_csv(std::istream &csv_istream)
+    SYSTEM_STATE deserialize_system_state_from_csv(std::istream &csv_istream)
     {
-        BODY_STATE_VEC body_states;
+        SYSTEM_STATE system_state;
         /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
         const std::regex row_regex("(.*),(.*),(.*),(.*),(.*),(.*),(.*),?", std::regex::optimize);
 
@@ -83,30 +83,30 @@ namespace CORE
             VEL v{str_to_floating(m[4]), str_to_floating(m[5]), str_to_floating(m[6])};
             MASS mass{str_to_floating(m[7])};
 
-            body_states.emplace_back(p, v, mass);
+            system_state.emplace_back(p, v, mass);
         }
-        return body_states;
+        return system_state;
     }
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_csv(const std::string &csv_file_path)
+    SYSTEM_STATE deserialize_system_state_from_csv(const std::string &csv_file_path)
     {
         std::ifstream csv_file_ifstream(csv_file_path);
         ASSERT(csv_file_ifstream.is_open());
-        return deserialize_body_state_vec_from_csv(csv_file_ifstream);
+        return deserialize_system_state_from_csv(csv_file_ifstream);
     }
 
-    void serialize_body_state_vec_to_bin(std::ostream &bin_ostream, const BODY_STATE_VEC &body_states)
+    void serialize_system_state_to_bin(std::ostream &bin_ostream, const SYSTEM_STATE &system_state)
     {
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         const int size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
         write_as_binary(bin_ostream, size_floating_value_type);
 
         /// - second 4 bytes: number of bodies
-        const int num_bodies = body_states.size();
+        const int num_bodies = system_state.size();
         write_as_binary(bin_ostream, num_bodies);
 
         // - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_STATE
-        for (const auto &body_state : body_states)
+        for (const auto &body_state : system_state)
         {
             const auto &body_pos = std::get<POS>(body_state);
             const auto &body_vel = std::get<VEL>(body_state);
@@ -122,7 +122,7 @@ namespace CORE
         }
     }
 
-    void serialize_body_state_vec_to_bin(const std::string &bin_file_path, const BODY_STATE_VEC &body_states)
+    void serialize_system_state_to_bin(const std::string &bin_file_path, const SYSTEM_STATE &system_state)
     {
         std::ofstream bin_file_ofstream(bin_file_path, std::ios::binary);
         if (!bin_file_ofstream.is_open())
@@ -131,12 +131,12 @@ namespace CORE
             ASSERT(false);
         }
 
-        serialize_body_state_vec_to_bin(bin_file_ofstream, body_states);
+        serialize_system_state_to_bin(bin_file_ofstream, system_state);
     }
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_bin(std::istream &bin_istream)
+    SYSTEM_STATE deserialize_system_state_from_bin(std::istream &bin_istream)
     {
-        BODY_STATE_VEC body_states;
+        SYSTEM_STATE system_state;
 
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         const int expected_size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
@@ -145,7 +145,7 @@ namespace CORE
 
         /// - second 4 bytes: number of bodies
         const auto num_bodies = read_as_binary<int>(bin_istream);
-        body_states.reserve(num_bodies);
+        system_state.reserve(num_bodies);
 
         // - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_STATE
         for (int count_bodies = 0; count_bodies < num_bodies; count_bodies++)
@@ -162,29 +162,29 @@ namespace CORE
             body_vel.z = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
             body_mass = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
 
-            body_states.emplace_back(body_pos, body_vel, body_mass);
+            system_state.emplace_back(body_pos, body_vel, body_mass);
         }
 
-        return body_states;
+        return system_state;
     }
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_bin(const std::string &bin_file_path)
+    SYSTEM_STATE deserialize_system_state_from_bin(const std::string &bin_file_path)
     {
         std::ifstream bin_file_ifstream(bin_file_path, std::ios::binary);
         ASSERT(bin_file_ifstream.is_open());
-        return deserialize_body_state_vec_from_bin(bin_file_ifstream);
+        return deserialize_system_state_from_bin(bin_file_ifstream);
     }
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_file(const std::string &file_path)
+    SYSTEM_STATE deserialize_system_state_from_file(const std::string &file_path)
     {
         std::string ext = file_path.substr(file_path.find_last_of(".") + 1);
         if (ext == "csv")
         {
-            return deserialize_body_state_vec_from_csv(file_path);
+            return deserialize_system_state_from_csv(file_path);
         }
         else if (ext == "bin")
         {
-            return deserialize_body_state_vec_from_bin(file_path);
+            return deserialize_system_state_from_bin(file_path);
         }
         else
         {

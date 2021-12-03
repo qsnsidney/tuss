@@ -10,44 +10,44 @@ namespace CORE
     class ENGINE
     {
     public:
-        ENGINE(CORE::BODY_STATE_VEC body_states_ic, CORE::DT dt, std::optional<std::string> body_states_log_dir_opt = {});
+        ENGINE(CORE::SYSTEM_STATE system_state_ic, CORE::DT dt, std::optional<std::string> system_state_log_dir_opt = {});
         virtual ~ENGINE() = 0;
 
         // Main entrance
         virtual void run(int n_iter) final;
 
-        const CORE::BODY_STATE_VEC &body_states_snapshot() const { return body_states_snapshot_; }
+        const CORE::SYSTEM_STATE &system_state_snapshot() const { return system_state_snapshot_; }
 
     protected:
         // To be defined
-        // Continues execution from previous BODY_STATE_VEC
-        virtual CORE::BODY_STATE_VEC execute(int n_iter) = 0;
+        // Continues execution from previous SYSTEM_STATE
+        virtual CORE::SYSTEM_STATE execute(int n_iter) = 0;
 
     protected:
         CORE::DT dt() const { return dt_; }
 
-        bool is_body_states_logging_enabled() const { return body_states_log_dir_opt_.has_value(); }
-        // P signature: CORE::BODY_STATE_VEC body_states_producer()
+        bool is_system_state_logging_enabled() const { return system_state_log_dir_opt_.has_value(); }
+        // P signature: CORE::SYSTEM_STATE system_state_producer()
         template <typename P>
-        void push_body_states_to_log(P body_states_producer)
+        void push_system_state_to_log(P system_state_producer)
         {
-            if (is_body_states_logging_enabled())
-                push_body_states_to_log(body_states_producer());
+            if (is_system_state_logging_enabled())
+                push_system_state_to_log(system_state_producer());
         }
-        void push_body_states_to_log(CORE::BODY_STATE_VEC body_states);
-        void serialize_body_states_log();
+        void push_system_state_to_log(CORE::SYSTEM_STATE system_state);
+        void serialize_system_state_log();
 
         int num_logged_iterations() const;
 
     private:
-        void set_body_states_snapshot(CORE::BODY_STATE_VEC body_states_snapshot) { body_states_snapshot_ = std::move(body_states_snapshot); }
+        void set_system_state_snapshot(CORE::SYSTEM_STATE system_state_snapshot) { system_state_snapshot_ = std::move(system_state_snapshot); }
 
     private:
-        CORE::BODY_STATE_VEC body_states_snapshot_;
+        CORE::SYSTEM_STATE system_state_snapshot_;
         CORE::DT dt_;
 
-        std::optional<std::string> body_states_log_dir_opt_;
-        std::vector<CORE::BODY_STATE_VEC> body_states_log_;
-        int num_body_states_log_popped_ = 0;
+        std::optional<std::string> system_state_log_dir_opt_;
+        std::vector<CORE::SYSTEM_STATE> system_state_log_;
+        int num_system_state_log_popped_ = 0;
     };
 }

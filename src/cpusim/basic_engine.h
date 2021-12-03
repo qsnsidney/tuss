@@ -11,13 +11,13 @@ namespace CPUSIM
     public:
         virtual ~BASIC_ENGINE() = default;
 
-        BASIC_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+        BASIC_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                      CORE::DT dt,
                      size_t n_thread,
                      bool use_thread_pool,
-                     std::optional<std::string> body_states_log_dir_opt = {});
+                     std::optional<std::string> system_state_log_dir_opt = {});
 
-        virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
+        virtual CORE::SYSTEM_STATE execute(int n_iter) override;
 
     protected:
         /// Function signature: void(size_t i)

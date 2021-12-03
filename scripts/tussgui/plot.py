@@ -17,12 +17,12 @@ def plot_still_trajectory(dir, max_iterations=-1):
     # Create 3D axes
     ax = fig.add_subplot(111, projection="3d")
 
-    body_state_vec_batch = data.fetch_batch_body_state_vec_all(
+    system_state_batch = data.fetch_batch_system_state_all(
         dir, max_iterations)
-    print('Info:', len(body_state_vec_batch), 'Iterations')
+    print('Info:', len(system_state_batch), 'Iterations')
 
-    time_series_bodies = data.transform_batch_body_state_vec_to_time_series(
-        body_state_vec_batch)
+    time_series_bodies = data.transform_batch_system_state_to_time_series(
+        system_state_batch)
     n_bodies = len(time_series_bodies)
     print('Info:', n_bodies, "Bodies")
 
@@ -61,7 +61,7 @@ def plot_live_trajectory(dir, fps):
     ax = fig.add_subplot(111, projection="3d")
 
     # Init
-    n_bodies = len(data.fetch_body_state_vec(
+    n_bodies = len(data.fetch_system_state(
         dir, 0, sleep_handler=sleep_handler))
     orbits = list()
     for body_i in range(n_bodies):
@@ -119,11 +119,11 @@ def plot_live_trajectory(dir, fps):
         nonlocal min_z
 
         i_iter = int(i_frame * frame_multiplier)
-        body_state_vec = data.fetch_body_state_vec(
+        system_state = data.fetch_system_state(
             dir, i_iter, sleep_handler=sleep_handler)
 
         # Plot the orbits
-        for body_i, body_state in enumerate(body_state_vec):
+        for body_i, body_state in enumerate(system_state):
             max_x = max(max_x, body_state[0]+1)
             min_x = min(min_x, body_state[0]-1)
             max_y = max(max_y, body_state[1]+1)

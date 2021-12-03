@@ -9,11 +9,11 @@ namespace CORE
     /// CSV
     /// (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each row
 
-    void serialize_body_state_vec_to_csv(std::ostream &, const BODY_STATE_VEC &);
-    void serialize_body_state_vec_to_csv(const std::string &, const BODY_STATE_VEC &);
+    void serialize_system_state_to_csv(std::ostream &, const SYSTEM_STATE &);
+    void serialize_system_state_to_csv(const std::string &, const SYSTEM_STATE &);
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_csv(std::istream &);
-    BODY_STATE_VEC deserialize_body_state_vec_from_csv(const std::string &);
+    SYSTEM_STATE deserialize_system_state_from_csv(std::istream &);
+    SYSTEM_STATE deserialize_system_state_from_csv(const std::string &);
 
     /// BINARY
     /// - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
@@ -21,12 +21,12 @@ namespace CORE
     /// - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_STATE
     /// Everything in binary
 
-    void serialize_body_state_vec_to_bin(std::ostream &, const BODY_STATE_VEC &);
-    void serialize_body_state_vec_to_bin(const std::string &, const BODY_STATE_VEC &);
+    void serialize_system_state_to_bin(std::ostream &, const SYSTEM_STATE &);
+    void serialize_system_state_to_bin(const std::string &, const SYSTEM_STATE &);
 
-    BODY_STATE_VEC deserialize_body_state_vec_from_bin(std::istream &);
-    BODY_STATE_VEC deserialize_body_state_vec_from_bin(const std::string &);
+    SYSTEM_STATE deserialize_system_state_from_bin(std::istream &);
+    SYSTEM_STATE deserialize_system_state_from_bin(const std::string &);
 
     /// Useful
-    BODY_STATE_VEC deserialize_body_state_vec_from_file(const std::string &);
+    SYSTEM_STATE deserialize_system_state_from_file(const std::string &);
 }

@@ -9,12 +9,12 @@ namespace TUS
     public:
         virtual ~SIMPLE_ENGINE() = default;
 
-        SIMPLE_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+        SIMPLE_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                       CORE::DT dt,
                       int block_size,
-                      std::optional<std::string> body_states_log_dir_opt = {});
+                      std::optional<std::string> system_state_log_dir_opt = {});
 
-        virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
+        virtual CORE::SYSTEM_STATE execute(int n_iter) override;
 
     private:
         int block_size_;

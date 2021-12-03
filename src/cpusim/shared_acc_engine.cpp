@@ -90,9 +90,9 @@ namespace CPUSIM
 #endif
     }
 
-    CORE::BODY_STATE_VEC SHARED_ACC_ENGINE::execute(int n_iter)
+    CORE::SYSTEM_STATE SHARED_ACC_ENGINE::execute(int n_iter)
     {
-        const size_t n_body = body_states_snapshot().size();
+        const size_t n_body = system_state_snapshot().size();
 
         CORE::TIMER timer(std::string("SHARED_ACC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
@@ -101,7 +101,7 @@ namespace CPUSIM
         // Step 1: Prepare ic
         for (size_t i_body = 0; i_body < n_body; i_body++)
         {
-            const auto &[body_pos, body_vel, body_mass] = body_states_snapshot()[i_body];
+            const auto &[body_pos, body_vel, body_mass] = system_state_snapshot()[i_body];
             buf_in.pos[i_body] = body_pos;
             buf_in.vel[i_body] = body_vel;
             mass[i_body] = body_mass;
@@ -174,17 +174,17 @@ namespace CPUSIM
                                     buf_out.vel[i_target_body] = CORE::VEL::updated(vel_tmp[i_target_body], buf_out.acc[i_target_body], dt());
                                 });
 
-            // Write BODY_STATE_VEC to log
+            // Write SYSTEM_STATE to log
             if (i_iter == 0)
             {
-                push_body_states_to_log([&]()
-                                        { return generate_body_state_vec(buf_in, mass); });
+                push_system_state_to_log([&]()
+                                         { return generate_system_state(buf_in, mass); });
             }
-            push_body_states_to_log([&]()
-                                    { return generate_body_state_vec(buf_out, mass); });
+            push_system_state_to_log([&]()
+                                     { return generate_system_state(buf_out, mass); });
             if (i_iter % 10 == 0)
             {
-                serialize_body_states_log();
+                serialize_system_state_log();
             }
 
             // Prepare for next iteration
@@ -195,6 +195,6 @@ namespace CPUSIM
 
         timer.elapsed_previous("all_iters");
 
-        return generate_body_state_vec(buf_in, mass);
+        return generate_system_state(buf_in, mass);
     }
 }

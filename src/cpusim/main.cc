@@ -37,7 +37,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("thread_pool", "use thread pool for multithreading: optional (default off)");
     option_group("version", "version of optimization (0 - basic, 1 - shared acc edge): optional (default 1)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::SHARED_ACC))));
-    option_group("o,out", "body_states_log_dir: optional (default null)", cxxopts::value<std::string>());
+    option_group("o,out", "system_state_log_dir: optional (default null)", cxxopts::value<std::string>());
     option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional (default off)");
     option_group("h,help", "Print usage");
@@ -66,10 +66,10 @@ int main(int argc, const char *argv[])
     const int n_thread = arg_result["num_threads"].as<int>();
     const bool use_thread_pool = static_cast<bool>(arg_result.count("thread_pool"));
     const VERSION version = static_cast<VERSION>(arg_result["version"].as<int>());
-    std::optional<std::string> body_states_log_dir_opt = {};
+    std::optional<std::string> system_state_log_dir_opt = {};
     if (arg_result.count("out"))
     {
-        body_states_log_dir_opt = arg_result["out"].as<std::string>();
+        system_state_log_dir_opt = arg_result["out"].as<std::string>();
     }
     const bool verify = static_cast<bool>(arg_result.count("verify"));
     const int verbosity = arg_result.count("verbose");
@@ -83,18 +83,18 @@ int main(int argc, const char *argv[])
     std::cout << "n_thread: " << n_thread << std::endl;
     std::cout << "use_thread_pool: " << use_thread_pool << std::endl;
     std::cout << "version: " << static_cast<int>(version) << std::endl;
-    std::cout << "body_states_log_dir: " << (body_states_log_dir_opt ? *body_states_log_dir_opt : std::string("null")) << std::endl;
+    std::cout << "system_state_log_dir: " << (system_state_log_dir_opt ? *system_state_log_dir_opt : std::string("null")) << std::endl;
     std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
     // Load ic
-    CORE::BODY_STATE_VEC
-        body_states = CORE::deserialize_body_state_vec_from_file(ic_file_path);
-    if (max_n_body >= 0 && max_n_body < static_cast<int>(body_states.size()))
+    CORE::SYSTEM_STATE
+        system_state = CORE::deserialize_system_state_from_file(ic_file_path);
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(system_state.size()))
     {
-        body_states.resize(max_n_body);
+        system_state.resize(max_n_body);
         std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
     }
     timer.elapsed_previous("loading_ic");
@@ -103,11 +103,11 @@ int main(int argc, const char *argv[])
     std::unique_ptr<CORE::ENGINE> engine;
     if (version == VERSION::SHARED_ACC)
     {
-        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
+        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(std::move(system_state), dt, n_thread, use_thread_pool, system_state_log_dir_opt));
     }
     else
     {
-        engine.reset(new CPUSIM::BASIC_ENGINE(std::move(body_states), dt, n_thread, use_thread_pool, body_states_log_dir_opt));
+        engine.reset(new CPUSIM::BASIC_ENGINE(std::move(system_state), dt, n_thread, use_thread_pool, system_state_log_dir_opt));
     }
 
     timer.elapsed_previous("initializing_engine");

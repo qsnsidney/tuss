@@ -17,7 +17,7 @@ namespace CPUSIM
 
     std::ostream &operator<<(std::ostream &os, const BUFFER &buf);
 
-    CORE::BODY_STATE_VEC generate_body_state_vec(const BUFFER &buffer, const std::vector<CORE::MASS> &mass);
+    CORE::SYSTEM_STATE generate_system_state(const BUFFER &buffer, const std::vector<CORE::MASS> &mass);
 
     void debug_workspace(const BUFFER &buffer, const std::vector<CORE::MASS> &mass);
 }

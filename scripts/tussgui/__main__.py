@@ -8,13 +8,13 @@ def init(parser):
 
     parser_still = subparsers.add_parser('still')
     parser_still.add_argument('dir', type=str,
-                              help='path to BODY_STATE_VECs')
+                              help='path to system_states')
     parser_still.add_argument('--max_iterations', default=-1, type=int,
-                              help='max number of BODY_STATE_VECs to read')
+                              help='max number of system_states to read')
 
     parser_live = subparsers.add_parser('live')
     parser_live.add_argument('dir', type=str,
-                             help='path to BODY_STATE_VECs')
+                             help='path to system_states')
     parser_live.add_argument('--fps', default=200, type=int,
                              help='number of iterations to plot per second')
     # Add arg to control history of trajectory to keep

@@ -10,7 +10,7 @@ namespace CPUSIM
 
         using BASIC_ENGINE::BASIC_ENGINE;
 
-        virtual CORE::BODY_STATE_VEC execute(int n_iter) override;
+        virtual CORE::SYSTEM_STATE execute(int n_iter) override;
 
     private:
         void compute_acceleration(std::vector<CORE::ACC> &acc,

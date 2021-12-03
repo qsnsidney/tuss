@@ -4,11 +4,11 @@
 # /// - rest: (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS) for each BODY_STATE
 # /// Everything in binary
 
-# void serialize_body_state_vec_to_bin(std::ostream &, const BODY_STATE_VEC &);
-# void serialize_body_state_vec_to_bin(const std::string &, const BODY_STATE_VEC &);
+# void serialize_system_state_to_bin(std::ostream &, const SYSTEM_STATE &);
+# void serialize_system_state_to_bin(const std::string &, const SYSTEM_STATE &);
 
-# BODY_STATE_VEC deserialize_body_state_vec_from_bin(std::istream &);
-# BODY_STATE_VEC deserialize_body_state_vec_from_bin(const std::string &);
+# SYSTEM_STATE deserialize_system_state_from_bin(std::istream &);
+# SYSTEM_STATE deserialize_system_state_from_bin(const std::string &);
 import struct
 
 
@@ -17,7 +17,7 @@ def parse_body_state_from_bin(f, floating_type_size, floating_type_sym):
     return struct.unpack(floating_type_sym * 7, body_state_bytes)
 
 
-def deserialize_body_state_vec_from_bin(filename):
+def deserialize_system_state_from_bin(filename):
     with open(filename, 'rb') as f:
         floating_type_size = int.from_bytes(f.read(4), 'little')
         assert floating_type_size == 4 or floating_type_size == 8

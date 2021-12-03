@@ -34,15 +34,15 @@ namespace CPUSIM
         return os;
     }
 
-    CORE::BODY_STATE_VEC generate_body_state_vec(const BUFFER &buffer, const std::vector<CORE::MASS> &mass)
+    CORE::SYSTEM_STATE generate_system_state(const BUFFER &buffer, const std::vector<CORE::MASS> &mass)
     {
-        CORE::BODY_STATE_VEC body_states;
-        body_states.reserve(mass.size());
+        CORE::SYSTEM_STATE system_state;
+        system_state.reserve(mass.size());
         for (size_t i_body = 0; i_body < mass.size(); i_body++)
         {
-            body_states.emplace_back(buffer.pos[i_body], buffer.vel[i_body], mass[i_body]);
+            system_state.emplace_back(buffer.pos[i_body], buffer.vel[i_body], mass[i_body]);
         }
-        return body_states;
+        return system_state;
     }
 
     void debug_workspace(const BUFFER &buffer, const std::vector<CORE::MASS> &mass)
