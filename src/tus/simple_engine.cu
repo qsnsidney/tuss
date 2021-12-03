@@ -202,7 +202,6 @@ namespace TUS
 
         auto system_state_result = generate_system_state(h_output_X, h_output_V, h_M, nBody);
 
-        std::cout <<"0";
         cudaFreeHost(h_X);
         cudaFreeHost(h_A);
         cudaFreeHost(h_V);
@@ -211,7 +210,6 @@ namespace TUS
         cudaFreeHost(h_M);
 
         std::vector<unsigned> device_indexes {src_index, dest_index};
-        std::cout <<"1";
         for(const auto i : device_indexes){
             cudaFree(d_X[i]);
             cudaFree(d_V[i]);
@@ -219,7 +217,6 @@ namespace TUS
         }
         cudaFree(d_V_half);
         cudaFree(d_M);
-        std::cout <<"2";
         cudaDeviceReset();
 
         return system_state_result;

@@ -195,6 +195,23 @@ namespace TUS
         //    printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
         // }
 
-        return generate_system_state(h_output_X, h_output_V, nBody);
+        auto system_state_result = generate_system_state(h_output_X, h_output_V, nBody);
+
+        cudaFreeHost(h_X);
+        cudaFreeHost(h_A);
+        cudaFreeHost(h_V);
+        cudaFreeHost(h_output_X);
+        cudaFreeHost(h_output_V);
+
+        std::vector<unsigned> device_indexes {src_index, dest_index};
+        for(const auto i : device_indexes){
+            cudaFree(d_X[i]);
+            cudaFree(d_V[i]);
+            cudaFree(d_A[i]);
+        }
+        cudaFree(d_V_half);
+        cudaDeviceReset();
+
+        return system_state_result;
     }
 }
