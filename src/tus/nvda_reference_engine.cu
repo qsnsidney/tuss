@@ -51,7 +51,6 @@ namespace TUS
         const auto &ic = system_state_snapshot();
 
         // random initializer just for now
-        srand(time(NULL));
         size_t vector_size_3d = sizeof(data_t_3d) * nBody;
         size_t vector_size_4d = sizeof(float4) * nBody;
 
@@ -203,8 +202,7 @@ namespace TUS
         cudaFreeHost(h_output_X);
         cudaFreeHost(h_output_V);
 
-        std::vector<unsigned> device_indexes {src_index, dest_index};
-        for(const auto i : device_indexes){
+        for(const auto i : {src_index, dest_index}){
             cudaFree(d_X[i]);
             cudaFree(d_V[i]);
             cudaFree(d_A[i]);
