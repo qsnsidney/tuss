@@ -137,14 +137,14 @@ make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 10"
 
 #### cpusim
 ```
-make run_cpusim ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 1 --verify"
-make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 10 -t 4 --verify"
+make run_cpusim ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 2 --verify"
+make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 2 -t 4 --verify"
 ```
 
 #### tus
 ```
-make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 1 --verify"
-make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 10 --verify"
+make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 2 --verify"
+make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 2 --verify"
 ```
 
 ## CMake and Makefile
