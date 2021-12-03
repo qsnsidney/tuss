@@ -123,14 +123,19 @@ rm -rf ./tmp/solar_sys_tus_log
 #### cpusim
 ```
 make run_cpusim ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000"
-make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 10 -t 1 -V 0"
-make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 10 -t 4"
+# Base reference
+make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n10 -v -t1 -V0"
+# Latest version
+make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n10 -v -t4 -V1"
 ```
 
 #### tus
 ```
 make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000"
-make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n 10"
+# Base reference
+make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n10 -v -V0"
+# Latest version
+make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -d 0.001 -n10 -v -V1"
 ```
 
 ### Verification
