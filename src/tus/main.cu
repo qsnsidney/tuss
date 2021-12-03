@@ -6,7 +6,6 @@
 #include "core/physics.hpp"
 #include "core/serde.h"
 #include "helper.cuh"
-#include "constant.h"
 #include "core/timer.h"
 #include "core/macros.hpp"
 #include "simple_engine.cuh"
