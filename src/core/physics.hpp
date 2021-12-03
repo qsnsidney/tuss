@@ -75,6 +75,12 @@ namespace CORE
         ASSERT(expected_state_vec.size() == actual_state_vec.size());
         const size_t n_body = expected_state_vec.size();
 
+        bool is_good = true;
+
+        // Sum([norm_square(expected[i_body], actual[i_body]) for i_body in range(n_body)])
+        UNIVERSE::floating_value_type total_pos_loss = 0;
+        UNIVERSE::floating_value_type total_vel_loss = 0;
+
         auto compute_xyz_epislon = [](const XYZ &expected)
         {
             return UNIVERSE::epislon_square * expected.norm_square();
@@ -92,30 +98,36 @@ namespace CORE
             }
 
             const auto pos_err_square = (std::get<POS>(expected_state_vec[i_body]) - std::get<POS>(actual_state_vec[i_body])).norm_square();
+            total_pos_loss += pos_err_square;
             const auto pos_epislon = compute_xyz_epislon(std::get<POS>(expected_state_vec[i_body]));
-            if (pos_err_square > pos_epislon)
+            if (is_good && pos_err_square > pos_epislon)
             {
                 std::cout << "body " << i_body << ": "
                           << "error_square of POS " << pos_err_square
                           << " is larger than acceptance " << pos_epislon << std::endl;
                 std::cout << "expected: " << std::get<POS>(expected_state_vec[i_body]) << std::endl;
                 std::cout << "actual: " << std::get<POS>(actual_state_vec[i_body]) << std::endl;
-                return false;
+                is_good = false;
             }
 
             const auto vel_err_square = (std::get<VEL>(expected_state_vec[i_body]) - std::get<VEL>(actual_state_vec[i_body])).norm_square();
+            total_vel_loss += vel_err_square;
             const auto vel_epislon = compute_xyz_epislon(std::get<VEL>(expected_state_vec[i_body]));
-            if (vel_err_square > vel_epislon)
+            if (is_good && vel_err_square > vel_epislon)
             {
                 std::cout << "body " << i_body << ": "
                           << "error_square of VEL " << vel_err_square
                           << " is larger than acceptance " << vel_epislon << std::endl;
                 std::cout << "expected: " << std::get<VEL>(expected_state_vec[i_body]) << std::endl;
                 std::cout << "actual: " << std::get<VEL>(actual_state_vec[i_body]) << std::endl;
-                return false;
+                is_good = false;
             }
         }
 
-        return true;
+        std::cout << "n_body = " << n_body << std::endl;
+        std::cout << "total_pos_loss = " << total_pos_loss << std::endl;
+        std::cout << "total_vel_loss = " << total_vel_loss << std::endl;
+
+        return is_good;
     }
 }
