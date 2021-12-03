@@ -17,38 +17,38 @@
 
 namespace
 {
-    CORE::BODY_STATE_VEC generate_body_state_vec(const float4 *h_X, const data_t_3d *h_V, const size_t nbody)
+    CORE::SYSTEM_STATE generate_system_state(const float4 *h_X, const data_t_3d *h_V, const size_t nbody)
     {
-        CORE::BODY_STATE_VEC body_states;
-        body_states.reserve(nbody);
+        CORE::SYSTEM_STATE system_state;
+        system_state.reserve(nbody);
         for (size_t i_body = 0; i_body < nbody; i_body++)
         {
             CORE::POS pos_temp{h_X[i_body].x, h_X[i_body].y, h_X[i_body].z};
             CORE::VEL vel_temp{h_V[i_body].x, h_V[i_body].y, h_V[i_body].z};
-            body_states.emplace_back(pos_temp, vel_temp, h_X[i_body].w);
+            system_state.emplace_back(pos_temp, vel_temp, h_X[i_body].w);
         }
-        return body_states;
+        return system_state;
     }
 }
 
 namespace TUS
 {
-    REFERENCE_ENGINE::REFERENCE_ENGINE(CORE::BODY_STATE_VEC body_states_ic,
+    REFERENCE_ENGINE::REFERENCE_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                                        CORE::DT dt,
                                        int block_size,
-                                       std::optional<std::string> body_states_log_dir_opt) : ENGINE(std::move(body_states_ic), dt, std::move(body_states_log_dir_opt)),
-                                                                                                    block_size_(block_size)
+                                       std::optional<std::string> system_state_log_dir_opt) : ENGINE(std::move(system_state_ic), dt, std::move(system_state_log_dir_opt)),
+                                                                                              block_size_(block_size)
     {
     }
 
-    CORE::BODY_STATE_VEC REFERENCE_ENGINE::execute(int n_iter)
+    CORE::SYSTEM_STATE REFERENCE_ENGINE::execute(int n_iter)
     {
-        size_t nBody = body_states_ic().size();
+        size_t nBody = system_state_snapshot().size();
 
         CORE::TIMER timer(std::string("SIMPLE_ENGINE(") + std::to_string(nBody) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         /* BIN file of initial conditions */
-        const auto &ic = body_states_ic();
+        const auto &ic = system_state_snapshot();
 
         // random initializer just for now
         srand(time(NULL));
@@ -135,20 +135,20 @@ namespace TUS
 
                 timer.elapsed_previous(std::string("iter") + std::to_string(i_iter), CORE::TIMER::TRIGGER_LEVEL::INFO);
 
-                if (is_body_states_logging_enabled())
+                if (is_system_state_logging_enabled())
                 {
                     cudaMemcpy(h_output_X, d_X[dest_index], vector_size_4d, cudaMemcpyDeviceToHost);
                     cudaMemcpy(h_output_V, d_V[dest_index], vector_size_4d, cudaMemcpyDeviceToHost);
 
                     if (i_iter == 0)
                     {
-                        push_body_states_to_log(generate_body_state_vec(h_X, h_V, nBody));
+                        push_system_state_to_log(generate_system_state(h_X, h_V, nBody));
                     }
-                    push_body_states_to_log(generate_body_state_vec(h_output_X, h_output_V, nBody));
+                    push_system_state_to_log(generate_system_state(h_output_X, h_output_V, nBody));
 
                     if (i_iter % 10 == 0)
                     {
-                        serialize_body_states_log();
+                        serialize_system_state_log();
                     }
 
                     timer.elapsed_previous(std::string("Transfer to CPU"), CORE::TIMER::TRIGGER_LEVEL::INFO);
@@ -193,6 +193,6 @@ namespace TUS
         //    printf("object = %d, %f, %f, %f\n", i, h_output_X[i].x, h_output_X[i].y, h_output_X[i].z);
         // }
 
-        return generate_body_state_vec(h_output_X, h_output_V, nBody);
+        return generate_system_state(h_output_X, h_output_V, nBody);
     }
 }

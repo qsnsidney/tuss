@@ -58,7 +58,7 @@ inline __host__ void parse_ic(data_t_3d *input_x, data_t_3d *input_v, data_t *in
     }
 }
 
-inline __host__ void parse_ic_f4(float4 *input_x, data_t_3d *input_v, const CORE::BODY_STATE_VEC &ic)
+inline __host__ void parse_ic_f4(float4 *input_x, data_t_3d *input_v, const CORE::SYSTEM_STATE &ic)
 {
     size_t length_to_parse = ic.size();
     std::cout << "parsing " << length_to_parse << " bodies\n";
