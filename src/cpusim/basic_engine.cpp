@@ -19,11 +19,9 @@ namespace CPUSIM
         std::cout << "Using " << n_thread << " threads " << (use_thread_pool ? "WITH" : "without") << " threadpool" << std::endl;
     }
 
-    CORE::SYSTEM_STATE BASIC_ENGINE::execute(int n_iter)
+    CORE::SYSTEM_STATE BASIC_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
         const size_t n_body = system_state_snapshot().size();
-
-        CORE::TIMER timer(std::string("BASIC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);

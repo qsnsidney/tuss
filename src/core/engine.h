@@ -2,7 +2,9 @@
 
 #include <vector>
 #include <optional>
+#include <string>
 #include "physics.hpp"
+#include "timer.h"
 
 namespace CORE
 {
@@ -13,13 +15,17 @@ namespace CORE
         ENGINE(CORE::SYSTEM_STATE system_state_ic, CORE::DT dt, std::optional<std::string> system_state_log_dir_opt = {});
         virtual ~ENGINE() = 0;
 
-        // Main entrance
-        virtual const CORE::SYSTEM_STATE &run(int n_iter) final;
+        /// To be defined
+        virtual std::string name() = 0;
 
     protected:
-        // To be defined
-        // Continues execution from previous SYSTEM_STATE
-        virtual CORE::SYSTEM_STATE execute(int n_iter) = 0;
+        /// To be defined
+        /// Continues execution from previous SYSTEM_STATE
+        virtual CORE::SYSTEM_STATE execute(int n_iter, TIMER &timer) = 0;
+
+    public:
+        // Main entrance
+        virtual const CORE::SYSTEM_STATE &run(int n_iter) final;
 
     protected:
         const CORE::SYSTEM_STATE &system_state_snapshot() const { return system_state_snapshot_; }

@@ -17,7 +17,8 @@ namespace CPUSIM
                      bool use_thread_pool,
                      std::optional<std::string> system_state_log_dir_opt = {});
 
-        virtual CORE::SYSTEM_STATE execute(int n_iter) override;
+        virtual std::string name() override { return "BASIC_ENGINE"; }
+        virtual CORE::SYSTEM_STATE execute(int n_iter, CORE::TIMER &timer) override;
 
     protected:
         /// Function signature: void(size_t i)

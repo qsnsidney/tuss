@@ -90,11 +90,9 @@ namespace CPUSIM
 #endif
     }
 
-    CORE::SYSTEM_STATE SHARED_ACC_ENGINE::execute(int n_iter)
+    CORE::SYSTEM_STATE SHARED_ACC_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
         const size_t n_body = system_state_snapshot().size();
-
-        CORE::TIMER timer(std::string("SHARED_ACC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         std::vector<CORE::MASS> mass(n_body, 0);
         BUFFER buf_in(n_body);

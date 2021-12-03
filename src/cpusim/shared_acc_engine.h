@@ -10,11 +10,12 @@ namespace CPUSIM
 
         using BASIC_ENGINE::BASIC_ENGINE;
 
-        virtual CORE::SYSTEM_STATE execute(int n_iter) override;
+        virtual std::string name() override { return "SHARED_ACC_ENGINE"; }
+        virtual CORE::SYSTEM_STATE execute(int n_iter, CORE::TIMER &timer) override;
 
     private:
         void compute_acceleration(std::vector<CORE::ACC> &acc,
-                                    const std::vector<CORE::POS> &pos,
-                                    const std::vector<CORE::MASS> &mass);
+                                  const std::vector<CORE::POS> &pos,
+                                  const std::vector<CORE::MASS> &mass);
     };
 }

@@ -40,11 +40,9 @@ namespace TUS
     {
     }
 
-    CORE::SYSTEM_STATE NVDA_REFERENCE_ENGINE::execute(int n_iter)
+    CORE::SYSTEM_STATE NVDA_REFERENCE_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
         size_t nBody = system_state_snapshot().size();
-
-        CORE::TIMER timer(std::string("NVDA_REFERENCE_ENGINE(") + std::to_string(nBody) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         /* BIN file of initial conditions */
         const auto &ic = system_state_snapshot();
