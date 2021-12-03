@@ -1,4 +1,4 @@
-#include "reference_engine.cuh"
+#include "nvda_reference_engine.cuh"
 #include "core/timer.h"
 
 #include <stdlib.h>
@@ -13,7 +13,7 @@
 #include "helper.cuh"
 #include "data_t.cuh"
 #include "constant.h"
-#include "reference_kernel.cuh"
+#include "nvda_reference_kernel.cuh"
 
 namespace
 {
@@ -33,7 +33,7 @@ namespace
 
 namespace TUS
 {
-    REFERENCE_ENGINE::REFERENCE_ENGINE(CORE::SYSTEM_STATE system_state_ic,
+    NVDA_REFERENCE_ENGINE::NVDA_REFERENCE_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                                        CORE::DT dt,
                                        int block_size,
                                        std::optional<std::string> system_state_log_dir_opt) : ENGINE(std::move(system_state_ic), dt, std::move(system_state_log_dir_opt)),
@@ -41,11 +41,11 @@ namespace TUS
     {
     }
 
-    CORE::SYSTEM_STATE REFERENCE_ENGINE::execute(int n_iter)
+    CORE::SYSTEM_STATE NVDA_REFERENCE_ENGINE::execute(int n_iter)
     {
         size_t nBody = system_state_snapshot().size();
 
-        CORE::TIMER timer(std::string("SIMPLE_ENGINE(") + std::to_string(nBody) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
+        CORE::TIMER timer(std::string("NVDA_REFERENCE_ENGINE(") + std::to_string(nBody) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         /* BIN file of initial conditions */
         const auto &ic = system_state_snapshot();
