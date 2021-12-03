@@ -119,7 +119,7 @@ namespace TUS
             CORE::TIMER core_timer("all_iters");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
-                update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], //input
+                update_step_pos_f4<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], //input
                                                             d_X[dest_index], d_V_half);                                               // output
 
                 cudaDeviceSynchronize();
@@ -129,7 +129,7 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_A[dest_index], d_V_half, //input
+                update_step_vel_f4<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_A[dest_index], d_V_half, //input
                                                             d_V[dest_index]);                                    // output
                 cudaDeviceSynchronize();
 
@@ -162,6 +162,8 @@ namespace TUS
         // at end, the final data is actually at src_index because the last swap
         cudaMemcpy(h_output_X, d_X[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size_3d, cudaMemcpyDeviceToHost);
+
+        // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
 
         std::ofstream X_file;

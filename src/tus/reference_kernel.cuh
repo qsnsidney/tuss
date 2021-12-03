@@ -1,7 +1,7 @@
 #pragma once
 #include "data_t.cuh"
 
-__global__ inline void update_step_pos(unsigned nbody, data_t step_size, float4 *i_location, data_t_3d *i_velocity, float4 *i_accer, // new accer is accer at i+1 iteration
+__global__ inline void update_step_pos_f4(unsigned nbody, data_t step_size, float4 *i_location, data_t_3d *i_velocity, float4 *i_accer, // new accer is accer at i+1 iteration
                             float4 *o_location, data_t_3d *velocity_half)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
@@ -21,7 +21,7 @@ __global__ inline void update_step_pos(unsigned nbody, data_t step_size, float4 
     }
 }
 
-__global__ inline void update_step_vel(unsigned nbody, data_t step_size, float4 *new_accer, data_t_3d *velocity_half,// new accer is accer at i+1 iteration
+__global__ inline void update_step_vel_f4(unsigned nbody, data_t step_size, float4 *new_accer, data_t_3d *velocity_half,// new accer is accer at i+1 iteration
                             data_t_3d *o_velocity)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
@@ -34,7 +34,7 @@ __global__ inline void update_step_vel(unsigned nbody, data_t step_size, float4 
     }
 }
 
-__global__ inline void calculate_acceleration(unsigned nbody, float4 *location, float4 *acceleration)
+__global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *location, float4 *acceleration)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
     if (tid < nbody)

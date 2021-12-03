@@ -166,6 +166,8 @@ namespace TUS
                 // at end, the final data is actually at src_index because the last swap
         cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
+
+        // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size, cudaMemcpyDeviceToHost);
 
         std::ofstream X_file;
