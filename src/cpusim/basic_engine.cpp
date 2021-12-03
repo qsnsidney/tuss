@@ -16,6 +16,7 @@ namespace CPUSIM
           n_thread_(n_thread),
           thread_pool_opt_(use_thread_pool ? std::make_optional<THREAD_POOL>(n_thread_) : std::nullopt)
     {
+        std::cout << "Using " << n_thread << " threads " << (use_thread_pool ? "WITH" : "without") << " threadpool" << std::endl;
     }
 
     CORE::SYSTEM_STATE BASIC_ENGINE::execute(int n_iter)

@@ -8,8 +8,9 @@ namespace CORE
         CORE::DT dt,
         std::optional<std::string> system_state_log_dir_opt) : system_state_snapshot_(std::move(system_state_ic)),
                                                                dt_(dt),
-                                                               system_state_log_dir_opt_(system_state_log_dir_opt)
+                                                               system_state_log_dir_opt_(std::move(system_state_log_dir_opt))
     {
+        std::cout << "Dumping System State Logs to " << (system_state_log_dir_opt_ ? *system_state_log_dir_opt_ : std::string("null")) << std::endl;
     }
 
     ENGINE::~ENGINE()
@@ -19,6 +20,7 @@ namespace CORE
 
     const CORE::SYSTEM_STATE &ENGINE::run(int n_iter)
     {
+        std::cout << "Running " << system_state_snapshot().size() << " bodies, " << dt() << " dt, " << n_iter << " iterations" << std::endl;
         set_system_state_snapshot(execute(n_iter));
         return system_state_snapshot();
     }

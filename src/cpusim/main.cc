@@ -63,7 +63,7 @@ int main(int argc, const char *argv[])
     const std::string ic_file_path = arg_result["ic_file"].as<std::string>();
     const int max_n_body = arg_result["num_bodies"].as<int>();
     const CORE::DT dt = arg_result["dt"].as<CORE::UNIVERSE::floating_value_type>();
-    const int n_iteration = arg_result["num_iterations"].as<int>();
+    int n_iteration = arg_result["num_iterations"].as<int>();
     const int n_thread = arg_result["num_threads"].as<int>();
     const bool use_thread_pool = static_cast<bool>(arg_result.count("thread_pool"));
     const VERSION version = static_cast<VERSION>(arg_result["version"].as<int>());
@@ -90,6 +90,19 @@ int main(int argc, const char *argv[])
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
+    // Verification flow setting
+    if (verify)
+    {
+        std::cout << "--------------------" << std::endl;
+        std::cout << "VERIFICATION FLOW" << std::endl;
+        n_iteration = 1;
+        system_state_log_dir_opt = std::nullopt;
+        std::cout << "OVERRIDE:" << std::endl;
+        std::cout << "n_iteration: " << n_iteration << std::endl;
+        std::cout << "system_state_log_dir: " << (system_state_log_dir_opt ? *system_state_log_dir_opt : std::string("null")) << std::endl;
+        std::cout << "--------------------" << std::endl;
+    }
+
     // Load ic
     CORE::SYSTEM_STATE
         system_state_ic = CORE::deserialize_system_state_from_file(ic_file_path);
@@ -112,25 +125,23 @@ int main(int argc, const char *argv[])
     }
     timer.elapsed_previous("initializing_engine");
 
-    // Determine the actual number of iterations to run
-    const int n_iteration_to_run = verify ? 1 : n_iteration;
-    std::cout << "INFO: Ready to run " << n_iteration_to_run << " iterations" << std::endl;
-
     // Execute engine
-    const CORE::SYSTEM_STATE &actual_system_state_result = engine->run(n_iteration_to_run);
+    const CORE::SYSTEM_STATE &actual_system_state_result = engine->run(n_iteration);
     timer.elapsed_previous("running_engine");
 
     if (verify)
     {
         std::cout << "====================" << std::endl;
         std::cout << "VERIFYING.." << std::endl;
-        if (CPUSIM::run_verify_with_reference_engine(system_state_ic, actual_system_state_result, dt, n_iteration_to_run))
+        const bool result = CPUSIM::run_verify_with_reference_engine(system_state_ic, actual_system_state_result, dt, n_iteration);
+        std::cout << "VERFICATION RESULT:" << std::endl;
+        if (result)
         {
-            std::cout << "VERIFICATION: SUCCESSFUL!" << std::endl;
+            std::cout << "    SUCCESSFUL" << std::endl;
         }
         else
         {
-            std::cout << "VERIFICATION: FAILED!" << std::endl;
+            std::cout << "    FAILED" << std::endl;
         }
         std::cout << "====================" << std::endl;
     }
