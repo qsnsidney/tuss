@@ -42,12 +42,12 @@ namespace TUS
 
     CORE::BODY_STATE_VEC SIMPLE_ENGINE::execute(int n_iter)
     {
-        size_t nBody = body_states_ic().size();
+        size_t nBody = body_states_snapshot().size();
 
         CORE::TIMER timer(std::string("SIMPLE_ENGINE(") + std::to_string(nBody) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
         /* BIN file of initial conditions */
-        const auto &ic = body_states_ic();
+        const auto &ic = body_states_snapshot();
 
         // random initializer just for now
         srand(time(NULL));

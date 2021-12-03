@@ -92,7 +92,7 @@ namespace CPUSIM
 
     CORE::BODY_STATE_VEC SHARED_ACC_ENGINE::execute(int n_iter)
     {
-        const size_t n_body = body_states_ic().size();
+        const size_t n_body = body_states_snapshot().size();
 
         CORE::TIMER timer(std::string("SHARED_ACC_ENGINE(") + std::to_string(n_body) + "," + std::to_string(dt()) + "*" + std::to_string(n_iter) + ")");
 
@@ -101,7 +101,7 @@ namespace CPUSIM
         // Step 1: Prepare ic
         for (size_t i_body = 0; i_body < n_body; i_body++)
         {
-            const auto &[body_pos, body_vel, body_mass] = body_states_ic()[i_body];
+            const auto &[body_pos, body_vel, body_mass] = body_states_snapshot()[i_body];
             buf_in.pos[i_body] = body_pos;
             buf_in.vel[i_body] = body_vel;
             mass[i_body] = body_mass;

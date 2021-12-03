@@ -6,7 +6,7 @@ namespace CORE
     ENGINE::ENGINE(
         CORE::BODY_STATE_VEC body_states_ic,
         CORE::DT dt,
-        std::optional<std::string> body_states_log_dir_opt) : body_states_ic_(body_states_ic),
+        std::optional<std::string> body_states_log_dir_opt) : body_states_snapshot_(body_states_ic),
                                                               dt_(dt),
                                                               body_states_log_dir_opt_(body_states_log_dir_opt)
     {
@@ -19,12 +19,7 @@ namespace CORE
 
     void ENGINE::run(int n_iter)
     {
-        set_body_states_ic(execute(n_iter));
-    }
-
-    void ENGINE::set_body_states_ic(CORE::BODY_STATE_VEC body_states_ic)
-    {
-        body_states_ic_ = std::move(body_states_ic);
+        set_body_states_snapshot(execute(n_iter));
     }
 
     void ENGINE::push_body_states_to_log(CORE::BODY_STATE_VEC body_states)
