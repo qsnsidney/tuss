@@ -17,9 +17,10 @@ namespace CORE
         serialize_system_state_log();
     }
 
-    void ENGINE::run(int n_iter)
+    const CORE::SYSTEM_STATE &ENGINE::run(int n_iter)
     {
         set_system_state_snapshot(execute(n_iter));
+        return system_state_snapshot();
     }
 
     void ENGINE::push_system_state_to_log(CORE::SYSTEM_STATE system_state)

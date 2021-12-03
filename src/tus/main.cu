@@ -11,8 +11,12 @@
 #include "core/macros.hpp"
 #include "simple_engine.cuh"
 #include "core/cxxopts.hpp"
+#include "cpusim/reference.h"
 
-#define DEFAULT_BLOCK_SIZE 32
+namespace
+{
+    constexpr size_t default_block_size = 32;
+}
 
 auto parse_args(int argc, const char *argv[])
 {
@@ -28,7 +32,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("b,num_bodies", "max_n_bodies: optional (default -1), no effect if < 0 or >= n_body from ic_file", cxxopts::value<int>()->default_value("-1"));
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
-    option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(DEFAULT_BLOCK_SIZE)));
+    option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(::default_block_size)));
     option_group("o,out", "system_state_log_dir: optional", cxxopts::value<std::string>());
     option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional");
@@ -83,24 +87,41 @@ int main(int argc, const char *argv[])
 
     /* BIN file of initial conditions */
     CORE::SYSTEM_STATE
-        system_state = CORE::deserialize_system_state_from_file(ic_file_path);
-    if (max_n_body >= 0 && max_n_body < static_cast<int>(system_state.size()))
+        system_state_ic = CORE::deserialize_system_state_from_file(ic_file_path);
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(system_state_ic.size()))
     {
-        system_state.resize(max_n_body);
+        system_state_ic.resize(max_n_body);
         std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
     }
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
-    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(std::move(system_state), dt, block_size, system_state_log_dir_opt));
+    std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(system_state_ic, dt, block_size, system_state_log_dir_opt));
     timer.elapsed_previous("initializing_engine");
 
+    // Determine the actual number of iterations to run
     const int n_iteration_to_run = verify ? 1 : n_iteration;
     std::cout << "INFO: Ready to run " << n_iteration_to_run << " iterations" << std::endl;
 
     // Execute engine
-    engine->run(n_iteration_to_run);
+    const CORE::SYSTEM_STATE &actual_system_state_result = engine->run(n_iteration_to_run);
     timer.elapsed_previous("running_engine");
+
+    if (verify)
+    {
+        std::cout << "====================" << std::endl;
+        std::cout << "VERIFYING.." << std::endl;
+        if (CPUSIM::run_verify_with_reference_engine(system_state_ic, actual_system_state_result, dt, n_iteration_to_run))
+        {
+            std::cout << "VERIFICATION: SUCCESSFUL!" << std::endl;
+        }
+        else
+        {
+            std::cout << "VERIFICATION: FAILED!" << std::endl;
+        }
+        std::cout << "====================" << std::endl;
+    }
+    timer.elapsed_previous("verify");
 
     return 0;
 }

@@ -104,7 +104,7 @@ mkdir -p ./tmp/solar_sys_cpu_log
 make run_cpusim ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_cpu_log"
 python3 -m scripts.tussgui still ./tmp/solar_sys_cpu_log
 # Or, some animation
-# python3 -m scripts.tussgui live ./tmp/solar_sys_cpu_log
+python3 -m scripts.tussgui live ./tmp/solar_sys_cpu_log
 rm -rf ./tmp/solar_sys_cpu_log
 ```
 
@@ -114,7 +114,7 @@ mkdir -p ./tmp/solar_sys_tus_log
 make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000 -o ./tmp/solar_sys_tus_log"
 python3 -m scripts.tussgui still ./tmp/solar_sys_tus_log
 # Or, some animation
-# python3 -m scripts.tussgui live ./tmp/solar_sys_tus_log
+python3 -m scripts.tussgui live ./tmp/solar_sys_tus_log
 rm -rf ./tmp/solar_sys_tus_log
 ```
 
@@ -133,6 +133,17 @@ make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 10000"
 make run_tus ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 -n 10"
 ```
 
+### Verification
+
+#### cpusim
+```
+make run_cpusim ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 1 --verify"
+```
+
+#### tus
+```
+make run_tus ARGS="-i ./benchmark/ic/solar_system.csv -d 0.05 -n 1 --verify"
+```
 
 ## CMake and Makefile
 

@@ -9,6 +9,7 @@
 #include "core/cxxopts.hpp"
 #include "basic_engine.h"
 #include "shared_acc_engine.h"
+#include "reference.h"
 
 namespace
 {
@@ -91,10 +92,10 @@ int main(int argc, const char *argv[])
 
     // Load ic
     CORE::SYSTEM_STATE
-        system_state = CORE::deserialize_system_state_from_file(ic_file_path);
-    if (max_n_body >= 0 && max_n_body < static_cast<int>(system_state.size()))
+        system_state_ic = CORE::deserialize_system_state_from_file(ic_file_path);
+    if (max_n_body >= 0 && max_n_body < static_cast<int>(system_state_ic.size()))
     {
-        system_state.resize(max_n_body);
+        system_state_ic.resize(max_n_body);
         std::cout << "Limiting number of bodies to " << max_n_body << std::endl;
     }
     timer.elapsed_previous("loading_ic");
@@ -103,21 +104,37 @@ int main(int argc, const char *argv[])
     std::unique_ptr<CORE::ENGINE> engine;
     if (version == VERSION::SHARED_ACC)
     {
-        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(std::move(system_state), dt, n_thread, use_thread_pool, system_state_log_dir_opt));
+        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(system_state_ic, dt, n_thread, use_thread_pool, system_state_log_dir_opt));
     }
     else
     {
-        engine.reset(new CPUSIM::BASIC_ENGINE(std::move(system_state), dt, n_thread, use_thread_pool, system_state_log_dir_opt));
+        engine.reset(new CPUSIM::BASIC_ENGINE(system_state_ic, dt, n_thread, use_thread_pool, system_state_log_dir_opt));
     }
-
     timer.elapsed_previous("initializing_engine");
 
+    // Determine the actual number of iterations to run
     const int n_iteration_to_run = verify ? 1 : n_iteration;
     std::cout << "INFO: Ready to run " << n_iteration_to_run << " iterations" << std::endl;
 
     // Execute engine
-    engine->run(n_iteration_to_run);
+    const CORE::SYSTEM_STATE &actual_system_state_result = engine->run(n_iteration_to_run);
     timer.elapsed_previous("running_engine");
+
+    if (verify)
+    {
+        std::cout << "====================" << std::endl;
+        std::cout << "VERIFYING.." << std::endl;
+        if (CPUSIM::run_verify_with_reference_engine(system_state_ic, actual_system_state_result, dt, n_iteration_to_run))
+        {
+            std::cout << "VERIFICATION: SUCCESSFUL!" << std::endl;
+        }
+        else
+        {
+            std::cout << "VERIFICATION: FAILED!" << std::endl;
+        }
+        std::cout << "====================" << std::endl;
+    }
+    timer.elapsed_previous("verify");
 
     return 0;
 }

@@ -14,9 +14,7 @@ namespace CORE
         virtual ~ENGINE() = 0;
 
         // Main entrance
-        virtual void run(int n_iter) final;
-
-        const CORE::SYSTEM_STATE &system_state_snapshot() const { return system_state_snapshot_; }
+        virtual const CORE::SYSTEM_STATE &run(int n_iter) final;
 
     protected:
         // To be defined
@@ -24,6 +22,7 @@ namespace CORE
         virtual CORE::SYSTEM_STATE execute(int n_iter) = 0;
 
     protected:
+        const CORE::SYSTEM_STATE &system_state_snapshot() const { return system_state_snapshot_; }
         CORE::DT dt() const { return dt_; }
 
         bool is_system_state_logging_enabled() const { return system_state_log_dir_opt_.has_value(); }
