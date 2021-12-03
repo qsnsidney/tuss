@@ -167,7 +167,7 @@ namespace TUS
         cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
 
-#ifdef 0
+#if 0
         // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size, cudaMemcpyDeviceToHost);
 
