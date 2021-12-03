@@ -167,6 +167,7 @@ namespace TUS
         cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
 
+#ifdef 0
         // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size, cudaMemcpyDeviceToHost);
 
@@ -190,6 +191,7 @@ namespace TUS
         X_file.close();
         V_file.close();
         A_file.close();
+#endif
         timer.elapsed_previous("copied output back to host");
 
         // Just for debug purpose on small inputs

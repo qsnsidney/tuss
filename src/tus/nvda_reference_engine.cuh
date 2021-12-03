@@ -4,12 +4,12 @@
 
 namespace TUS
 {
-    class REFERENCE_ENGINE final : public CORE::ENGINE
+    class NVDA_REFERENCE_ENGINE final : public CORE::ENGINE
     {
     public:
-        virtual ~REFERENCE_ENGINE() = default;
+        virtual ~NVDA_REFERENCE_ENGINE() = default;
 
-        REFERENCE_ENGINE(CORE::SYSTEM_STATE body_states_ic,
+        NVDA_REFERENCE_ENGINE(CORE::SYSTEM_STATE body_states_ic,
                          CORE::DT dt,
                          int block_size,
                          std::optional<std::string> system_state_log_dir_opt = {});

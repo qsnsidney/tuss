@@ -9,14 +9,20 @@
 #include "constant.h"
 #include "core/timer.h"
 #include "core/macros.hpp"
-//#include "simple_engine.cuh"
-#include "reference_engine.cuh"
+#include "simple_engine.cuh"
+#include "nvda_reference_engine.cuh"
 #include "core/cxxopts.hpp"
 #include "cpusim/reference.h"
 
 namespace
 {
     constexpr size_t default_block_size = 32;
+
+    enum class VERSION
+    {
+        BASIC = 0,
+        NVDA_REFERENCE
+    };
 }
 
 auto parse_args(int argc, const char *argv[])
@@ -34,6 +40,8 @@ auto parse_args(int argc, const char *argv[])
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(::default_block_size)));
+    option_group("version", "version of optimization (0 - basic, 1 - nvda reference): optional (default 0)",
+                 cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::BASIC))));
     option_group("o,out", "system_state_log_dir: optional", cxxopts::value<std::string>());
     option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional");
@@ -65,6 +73,7 @@ int main(int argc, const char *argv[])
     // but incase someone enter a dumb number, assert it here
     // later this can be removed
     ASSERT(IsPowerOfTwo(block_size));
+    const VERSION version = static_cast<VERSION>(arg_result["version"].as<int>());
     std::optional<std::string> system_state_log_dir_opt = {};
     if (arg_result.count("out"))
     {
@@ -80,6 +89,7 @@ int main(int argc, const char *argv[])
     std::cout << "dt: " << dt << std::endl;
     std::cout << "n_iteration: " << n_iteration << std::endl;
     std::cout << "block_size: " << block_size << std::endl;
+    std::cout << "version: " << static_cast<int>(version) << std::endl;
     std::cout << "system_state_log_dir: " << (system_state_log_dir_opt ? *system_state_log_dir_opt : std::string("null")) << std::endl;
     std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
@@ -110,8 +120,15 @@ int main(int argc, const char *argv[])
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
-    //std::unique_ptr<CORE::ENGINE> engine(new TUS::SIMPLE_ENGINE(system_state_ic, dt, block_size, system_state_log_dir_opt));
-    std::unique_ptr<CORE::ENGINE> engine(new TUS::REFERENCE_ENGINE(system_state_ic, dt, block_size, system_state_log_dir_opt));
+    std::unique_ptr<CORE::ENGINE> engine;
+    if (version == VERSION::NVDA_REFERENCE)
+    {
+        engine.reset(new TUS::NVDA_REFERENCE_ENGINE(system_state_ic, dt, block_size, system_state_log_dir_opt));
+    }
+    else
+    {
+        engine.reset(new TUS::SIMPLE_ENGINE(system_state_ic, dt, block_size, system_state_log_dir_opt));
+    }
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine
