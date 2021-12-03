@@ -36,7 +36,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,num_threads", "num_threads for CPU", cxxopts::value<int>()->default_value("1"));
     option_group("thread_pool", "use thread pool for multithreading: optional (default off)");
-    option_group("version", "version of optimization (0 - basic, 1 - shared acc edge): optional (default 1)",
+    option_group("V,version", "version of optimization (0 - basic, 1 - shared acc edge): optional (default 1)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::SHARED_ACC))));
     option_group("o,out", "system_state_log_dir: optional (default null)", cxxopts::value<std::string>());
     option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
