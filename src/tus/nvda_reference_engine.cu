@@ -12,7 +12,6 @@
 #include "core/serde.h"
 #include "helper.cuh"
 #include "data_t.cuh"
-#include "constant.h"
 #include "nvda_reference_kernel.cuh"
 
 namespace
