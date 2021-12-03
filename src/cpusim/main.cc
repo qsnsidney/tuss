@@ -63,7 +63,7 @@ int main(int argc, const char *argv[])
     const std::string ic_file_path = arg_result["ic_file"].as<std::string>();
     const int max_n_body = arg_result["num_bodies"].as<int>();
     const CORE::DT dt = arg_result["dt"].as<CORE::UNIVERSE::floating_value_type>();
-    int n_iteration = arg_result["num_iterations"].as<int>();
+    const int n_iteration = arg_result["num_iterations"].as<int>();
     const int n_thread = arg_result["num_threads"].as<int>();
     const bool use_thread_pool = static_cast<bool>(arg_result.count("thread_pool"));
     const VERSION version = static_cast<VERSION>(arg_result["version"].as<int>());
@@ -95,11 +95,7 @@ int main(int argc, const char *argv[])
     {
         std::cout << "--------------------" << std::endl;
         std::cout << "VERIFICATION FLOW" << std::endl;
-        n_iteration = 1;
-        system_state_log_dir_opt = std::nullopt;
         std::cout << "OVERRIDE:" << std::endl;
-        std::cout << "n_iteration: " << n_iteration << std::endl;
-        std::cout << "system_state_log_dir: " << (system_state_log_dir_opt ? *system_state_log_dir_opt : std::string("null")) << std::endl;
         std::cout << "--------------------" << std::endl;
     }
 
