@@ -28,11 +28,11 @@ UTST_IGNORED_TEST(bin_to_csv_converter)
 {
     TIMER timer("bin_to_csv_converter");
 
-    std::string bin_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.bin";
+    std::string bin_file = "/Users/lichenliu/p/tuss/data/ic/benchmark_100000.bin";
     SYSTEM_STATE data = deserialize_system_state_from_bin(bin_file);
     timer.elapsed_previous("deserialize_system_state_from_bin");
 
-    std::string csv_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.csv";
+    std::string csv_file = "/Users/lichenliu/p/tuss/data/ic/benchmark_100000.csv";
     serialize_system_state_to_csv(csv_file, data);
     timer.elapsed_previous("serialize_system_state_to_csv");
 
@@ -47,11 +47,11 @@ UTST_IGNORED_TEST(csv_to_bin_converter)
 {
     TIMER timer("csv_to_bin_converter");
 
-    std::string csv_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.csv";
+    std::string csv_file = "/Users/lichenliu/p/tuss/data/ic/benchmark_100000.csv";
     SYSTEM_STATE data = deserialize_system_state_from_csv(csv_file);
     timer.elapsed_previous("deserialize_system_state_from_csv");
 
-    std::string bin_file = "/Users/lichenliu/p/tuss/benchmark/ic/benchmark_100000.bin";
+    std::string bin_file = "/Users/lichenliu/p/tuss/data/ic/benchmark_100000.bin";
     serialize_system_state_to_bin(bin_file, data);
     timer.elapsed_previous("serialize_system_state_to_bin");
 

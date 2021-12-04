@@ -1,4 +1,4 @@
-make run_cpusim ARGS="-i ./benchmark/ic/benchmark_100000.bin -b 100000 -d 0.001 -n 2 -v"
+make run_cpusim ARGS="-i ./data/ic/benchmark_100000.bin -b 100000 -d 0.001 -n 2 -v"
 
 per iteration seconds
 

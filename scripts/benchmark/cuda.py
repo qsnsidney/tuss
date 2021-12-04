@@ -16,7 +16,7 @@ if __name__=='__main__':
     AVG_ITERATION = 1
     CUDA_EXECUTABLE = "build/tus/tus_exe"
     GPU_TIME_PATTERN = "Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)"
-    BENCHMARK_DATA = "benchmark/ic/benchmark_500000.bin"
+    BENCHMARK_DATA = "data/ic/benchmark_500000.bin"
     BENCHMARK_OUTPUT_FILE = "gpu_benchmark.csv"
     STDOUT_OUTPUT = "benchmark.stdout"
 
