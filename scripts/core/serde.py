@@ -53,6 +53,7 @@ def serialize_system_state_into_bin(system_state, filename):
     with open(filename, 'wb') as f:
         floating_type_sym = 'f' if type(system_state[0][0]) is float else 'd'
         floating_type_size = 4 if floating_type_sym == 'f' else 8
+        print('Info:', "BIN file floating type size", floating_type_size)
         f.write(floating_type_size.to_bytes(4, "little"))
         f.write(len(system_state).to_bytes(4, 'little'))
         for body_state in system_state:
