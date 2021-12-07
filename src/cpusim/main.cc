@@ -7,6 +7,7 @@
 #include "core/engine.h"
 #include "core/timer.h"
 #include "core/cxxopts.hpp"
+#include "core/utility.hpp"
 #include "basic_engine.h"
 #include "shared_acc_engine.h"
 #include "reference.h"
@@ -39,6 +40,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("V,version", "version of optimization (0 - basic, 1 - shared acc edge): optional (default 1)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::SHARED_ACC))));
     option_group("o,out", "system_state_log_dir: optional (default null)", cxxopts::value<std::string>());
+    option_group("snapshot", "only dump out the final view, combined with --out: optional (default false)");
     option_group("verify", "verify 1 iteration result with reference algorithm: optional (default off)");
     option_group("v,verbose", "verbosity: can stack, optional (default off)");
     option_group("h,help", "Print usage");
@@ -72,6 +74,7 @@ int main(int argc, const char *argv[])
     {
         system_state_log_dir_opt = arg_result["out"].as<std::string>();
     }
+    const bool snapshot = static_cast<bool>(arg_result.count("snapshot"));
     const bool verify = static_cast<bool>(arg_result.count("verify"));
     const int verbosity = arg_result.count("verbose");
     CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
@@ -85,6 +88,7 @@ int main(int argc, const char *argv[])
     std::cout << "use_thread_pool: " << use_thread_pool << std::endl;
     std::cout << "version: " << static_cast<int>(version) << std::endl;
     std::cout << "system_state_log_dir: " << (system_state_log_dir_opt ? *system_state_log_dir_opt : std::string("null")) << std::endl;
+    std::cout << "snapshot: " << snapshot << std::endl;
     std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
     std::cout << std::endl;
@@ -110,20 +114,32 @@ int main(int argc, const char *argv[])
     timer.elapsed_previous("loading_ic");
 
     // Select engine here
+    const std::optional<std::string> system_state_engine_log_dir_opt = snapshot ? std::nullopt : system_state_log_dir_opt;
     std::unique_ptr<CORE::ENGINE> engine;
     if (version == VERSION::SHARED_ACC)
     {
-        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(system_state_ic, dt, n_thread, use_thread_pool, system_state_log_dir_opt));
+        engine.reset(new CPUSIM::SHARED_ACC_ENGINE(
+            system_state_ic, dt, n_thread, use_thread_pool, system_state_engine_log_dir_opt));
     }
     else
     {
-        engine.reset(new CPUSIM::BASIC_ENGINE(system_state_ic, dt, n_thread, use_thread_pool, system_state_log_dir_opt));
+        engine.reset(new CPUSIM::BASIC_ENGINE(
+            system_state_ic, dt, n_thread, use_thread_pool, system_state_engine_log_dir_opt));
     }
     timer.elapsed_previous("initializing_engine");
 
     // Execute engine
     const CORE::SYSTEM_STATE &actual_system_state_result = engine->run(n_iteration);
     timer.elapsed_previous("running_engine");
+
+    if (snapshot && system_state_log_dir_opt)
+    {
+        const std::string delim = "/";
+        const std::string snapshot_filename =
+            *system_state_log_dir_opt + delim + CORE::base_name(ic_file_path) +
+            "_" + std::to_string(static_cast<size_t>(dt * n_iteration)) + ".bin";
+        CORE::serialize_system_state_to_bin(snapshot_filename, actual_system_state_result);
+    }
 
     if (verify)
     {
