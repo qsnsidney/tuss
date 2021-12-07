@@ -10,6 +10,46 @@ from .. import core
 from . import data
 
 
+def plot_snapshot(bin_file):
+    # Create figure
+    fig = plt.figure()
+    fig.set_size_inches(16/1.3, 9/1.3)
+
+    ax1 = plt.subplot2grid((2, 3), (0, 1), rowspan=2, colspan=2)
+    ax2 = plt.subplot2grid((2, 3), (0, 0), colspan=1)
+    ax3 = plt.subplot2grid((2, 3), (1, 0), colspan=1)
+
+    system_state = core.serde.deserialize_system_state_from_bin(bin_file)
+    pos_xs, pos_ys, pos_zs, _, _, _, masses = zip(*system_state)
+    log_masses = np.log10(masses)
+
+    print('Info:', 'len(pos_xs):', len(pos_xs))
+    print('Info:', 'len(pos_ys):', len(pos_ys))
+    print('Info:', 'len(pos_zs):', len(pos_zs))
+    print('Info:', 'len(masses):', len(masses))
+
+    ax1.set_title('XY Plane')
+    xy_scatter = ax1.scatter(pos_xs, pos_ys, c=log_masses, s=log_masses-np.min(log_masses),
+                             marker='.', edgecolor='none')
+    xy_cb = fig.colorbar(xy_scatter, ax=ax1)
+    xy_cb.set_label('$\log_{10}$ Mass')
+
+    ax2.set_title('XZ Plane')
+    xz_scatter = ax2.scatter(pos_xs, pos_zs, c=log_masses, s=log_masses-np.min(log_masses),
+                             marker='.', edgecolor='none')
+    xz_cb = fig.colorbar(xz_scatter, ax=ax2)
+    xz_cb.set_label('$\log_{10}$ Mass')
+
+    ax3.set_title('YZ Plane')
+    yz_scatter = ax3.scatter(pos_ys, pos_zs, c=log_masses, s=log_masses-np.min(log_masses),
+                             marker='.', edgecolor='none')
+    yz_cb = fig.colorbar(yz_scatter, ax=ax3)
+    yz_cb.set_label('$\log_{10}$ Mass')
+
+    plt.tight_layout()
+    plt.show()
+
+
 def plot_still_trajectory(dir, max_iterations=-1):
     # Create figure
     fig = plt.figure()

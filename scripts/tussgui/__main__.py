@@ -6,6 +6,10 @@ from . import plot
 def init(parser):
     subparsers = parser.add_subparsers(dest='target', required=True)
 
+    parser_snapshot = subparsers.add_parser('snapshot')
+    parser_snapshot.add_argument('bin_file', type=str,
+                                 help='path to system_state bin file')
+
     parser_still = subparsers.add_parser('still')
     parser_still.add_argument('dir', type=str,
                               help='path to system_states')
@@ -21,7 +25,9 @@ def init(parser):
 
 
 def main(args):
-    if args.target == 'still':
+    if args.target == 'snapshot':
+        plot.plot_snapshot(args.bin_file)
+    elif args.target == 'still':
         plot.plot_still_trajectory(args.dir, args.max_iterations)
     elif args.target == 'live':
         plot.plot_live_trajectory(args.dir, args.fps)

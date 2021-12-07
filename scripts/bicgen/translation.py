@@ -42,19 +42,19 @@ def deserialize_system_state_from_tipsy(tipsy_file_path=None, body_types=None):
     ad = ds.all_data()
     system_state = list()
     for body_type in body_types:
-        pos_x_coords = ad[body_type, 'Coordinates'][:, 0].v
-        pos_y_coords = ad[body_type, 'Coordinates'][:, 1].v
-        pos_z_coords = ad[body_type, 'Coordinates'][:, 2].v
+        pos_xs = ad[body_type, 'Coordinates'][:, 0].v
+        pos_ys = ad[body_type, 'Coordinates'][:, 1].v
+        pos_zs = ad[body_type, 'Coordinates'][:, 2].v
 
-        vel_x_coords = ad[body_type, 'Velocities'][:, 0].v
-        vel_y_coords = ad[body_type, 'Velocities'][:, 1].v
-        vel_z_coords = ad[body_type, 'Velocities'][:, 2].v
+        vel_xs = ad[body_type, 'Velocities'][:, 0].v
+        vel_ys = ad[body_type, 'Velocities'][:, 1].v
+        vel_zs = ad[body_type, 'Velocities'][:, 2].v
 
         masses = ad[body_type, 'Mass'][:].v
 
         prev_len_system_state = len(system_state)
-        system_state.extend(zip(pos_x_coords, pos_y_coords, pos_z_coords,
-                                vel_x_coords, vel_y_coords, vel_z_coords, masses))
+        system_state.extend(zip(pos_xs, pos_ys, pos_zs,
+                                vel_xs, vel_ys, vel_zs, masses))
         print('Info:', 'Num bodies loaded -', str(
             body_type) + ':', len(system_state)-prev_len_system_state)
 
