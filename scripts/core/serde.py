@@ -11,6 +11,8 @@
 # SYSTEM_STATE deserialize_system_state_from_bin(const std::string &);
 import struct
 
+from . import fileio
+
 
 def parse_body_state_from_bin(f, floating_type_size, floating_type_sym):
     '''
@@ -38,7 +40,7 @@ def deserialize_system_state_from_bin(filename):
 
 def write_body_state_into_bin(f, floating_type_sym, body_state):
     '''
-    [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
+    (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)
     '''
     f.write(struct.pack(floating_type_sym*7, *body_state))
 
@@ -47,6 +49,7 @@ def serialize_system_state_into_bin(system_state, filename):
     '''
     [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
     '''
+    fileio.create_file_dir_if_necessary(filename)
     with open(filename, 'wb') as f:
         floating_type_sym = 'f' if type(system_state[0][0]) is float else 'd'
         floating_type_size = 4 if floating_type_sym == 'f' else 8
