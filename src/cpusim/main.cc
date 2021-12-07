@@ -136,7 +136,7 @@ int main(int argc, const char *argv[])
     {
         const std::string delim = "/";
         const std::string snapshot_filename =
-            *system_state_log_dir_opt + delim + CORE::base_name(ic_file_path) +
+            *system_state_log_dir_opt + delim + CORE::remove_extension(CORE::base_name(ic_file_path)) +
             "_" + std::to_string(static_cast<size_t>(dt * n_iteration)) + ".bin";
         CORE::serialize_system_state_to_bin(snapshot_filename, actual_system_state_result);
     }
