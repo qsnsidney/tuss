@@ -57,6 +57,7 @@ make test_core ARGS=-h
 
 ### bicgen
 - Bodies Initial Condition GENerator
+- Load in tipsy format, and translate into in-house bin format
 - Located in ./scripts/bicgen
 - `python3 -m scripts.bicgen`
 
@@ -65,6 +66,7 @@ make test_core ARGS=-h
 - Visualiation of trajectories via `SYSTEM_STATE`s
 - Input files are expected to be ordered by integer
 - Supports Live and Still trajectory mode
+- Supports Still snapshot mode
 - `python3 -m scripts.tussgui`
 
 
@@ -103,9 +105,9 @@ Solar System
 ```
 mkdir -p ./tmp/solar_sys_cpu_log
 make run_cpusim ARGS="-i ./data/ic/solar_system.csv -d 0.05 -n10000 -o ./tmp/solar_sys_cpu_log"
-python3 -m scripts.tussgui still ./tmp/solar_sys_cpu_log
+python3 -m scripts.tussgui trajectory_still ./tmp/solar_sys_cpu_log
 # Or, some animation
-python3 -m scripts.tussgui live ./tmp/solar_sys_cpu_log
+python3 -m scripts.tussgui trajectory_live ./tmp/solar_sys_cpu_log
 rm -rf ./tmp/solar_sys_cpu_log
 ```
 
@@ -122,9 +124,9 @@ Solar System
 ```
 mkdir -p ./tmp/solar_sys_tus_log
 make run_tus ARGS="-i ./data/ic/solar_system.csv -d 0.05 -n10000 -o ./tmp/solar_sys_tus_log"
-python3 -m scripts.tussgui still ./tmp/solar_sys_tus_log
+python3 -m scripts.tussgui trajectory_still ./tmp/solar_sys_tus_log
 # Or, some animation
-python3 -m scripts.tussgui live ./tmp/solar_sys_tus_log
+python3 -m scripts.tussgui trajectory_live ./tmp/solar_sys_tus_log
 rm -rf ./tmp/solar_sys_tus_log
 ```
 
