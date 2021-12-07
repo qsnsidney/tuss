@@ -141,7 +141,12 @@ namespace CORE
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
         const int expected_size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
         const auto size_floating_value_type = read_as_binary<int>(bin_istream);
-        ASSERT(expected_size_floating_value_type == size_floating_value_type);
+        if (expected_size_floating_value_type != size_floating_value_type)
+        {
+            std::cout << "expected_size_floating_value_type=" << expected_size_floating_value_type << std::endl;
+            std::cout << "size_floating_value_type=" << size_floating_value_type << std::endl;
+            ASSERT(expected_size_floating_value_type == size_floating_value_type);
+        }
 
         /// - second 4 bytes: number of bodies
         const auto num_bodies = read_as_binary<int>(bin_istream);
