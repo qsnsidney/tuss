@@ -139,13 +139,13 @@ namespace CORE
         SYSTEM_STATE system_state;
 
         // - first 4 bytes: size of floating type (ie., 4 for floating, 8 for double)
-        const int expected_size_floating_value_type = sizeof(UNIVERSE::floating_value_type);
         const auto size_floating_value_type = read_as_binary<int>(bin_istream);
-        if (expected_size_floating_value_type != size_floating_value_type)
+        if (sizeof(UNIVERSE::floating_value_type) != size_floating_value_type)
         {
-            std::cout << "expected_size_floating_value_type=" << expected_size_floating_value_type << std::endl;
+            std::cout << "Warning: unmatched floating value sizes! Will cast!" << std::endl;
+            std::cout << "sizeof(UNIVERSE::floating_value_type)=" << sizeof(UNIVERSE::floating_value_type) << std::endl;
             std::cout << "size_floating_value_type=" << size_floating_value_type << std::endl;
-            ASSERT(expected_size_floating_value_type == size_floating_value_type);
+            // ASSERT(sizeof(UNIVERSE::floating_value_type) == size_floating_value_type);
         }
 
         /// - second 4 bytes: number of bodies
@@ -159,13 +159,30 @@ namespace CORE
             VEL body_vel;
             MASS body_mass;
 
-            body_pos.x = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
-            body_pos.y = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
-            body_pos.z = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
-            body_vel.x = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
-            body_vel.y = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
-            body_vel.z = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
-            body_mass = read_as_binary<UNIVERSE::floating_value_type>(bin_istream);
+            if (size_floating_value_type == sizeof(double))
+            {
+                body_pos.x = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+                body_pos.y = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+                body_pos.z = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+                body_vel.x = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+                body_vel.y = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+                body_vel.z = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+                body_mass = static_cast<UNIVERSE::floating_value_type>(read_as_binary<double>(bin_istream));
+            }
+            else if (size_floating_value_type == sizeof(float))
+            {
+                body_pos.x = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+                body_pos.y = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+                body_pos.z = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+                body_vel.x = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+                body_vel.y = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+                body_vel.z = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+                body_mass = static_cast<UNIVERSE::floating_value_type>(read_as_binary<float>(bin_istream));
+            }
+            else
+            {
+                ASSERT(false && "Unsupported floating value size!");
+            }
 
             system_state.emplace_back(body_pos, body_vel, body_mass);
         }
