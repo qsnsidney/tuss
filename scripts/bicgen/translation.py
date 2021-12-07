@@ -11,6 +11,8 @@ from .. import core
 
 
 def from_tipsy_into_bin(in_tipsy_file_path, out_bin_file_path, body_types=None):
+    print('Info:', 'Loading from tipsy', in_tipsy_file_path)
+    print('Info:', 'Writing into bin', out_bin_file_path)
     system_state = deserialize_system_state_from_tipsy(
         in_tipsy_file_path, body_types=body_types)
     core.serde.serialize_system_state_into_bin(system_state, out_bin_file_path)
@@ -38,6 +40,9 @@ def deserialize_system_state_from_tipsy(tipsy_file_path=None, body_types=None):
 
     print('Info:', 'Available:', ds.particle_type_counts)
     print('Info:', 'Selected:', body_types)
+
+    if len(body_types) == 0:
+        return list()
 
     ad = ds.all_data()
     system_state = list()
