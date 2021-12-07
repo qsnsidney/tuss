@@ -22,7 +22,7 @@ namespace CORE
     /// Everything in binary
 
     void serialize_system_state_to_bin(std::ostream &, const SYSTEM_STATE &);
-    void serialize_system_state_to_bin(const std::string &, const SYSTEM_STATE &);
+    void serialize_system_state_to_bin(const std::string &, const SYSTEM_STATE &, bool print_file_name = false);
 
     SYSTEM_STATE deserialize_system_state_from_bin(std::istream &);
     SYSTEM_STATE deserialize_system_state_from_bin(const std::string &);

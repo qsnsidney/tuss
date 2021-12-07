@@ -122,7 +122,7 @@ namespace CORE
         }
     }
 
-    void serialize_system_state_to_bin(const std::string &bin_file_path, const SYSTEM_STATE &system_state)
+    void serialize_system_state_to_bin(const std::string &bin_file_path, const SYSTEM_STATE &system_state, bool print_file_name)
     {
         std::ofstream bin_file_ofstream(bin_file_path, std::ios::binary);
         if (!bin_file_ofstream.is_open())
@@ -132,6 +132,10 @@ namespace CORE
         }
 
         serialize_system_state_to_bin(bin_file_ofstream, system_state);
+        if (print_file_name)
+        {
+            std::cout << "Successfully wrote to " << bin_file_path << std::endl;
+        }
     }
 
     SYSTEM_STATE deserialize_system_state_from_bin(std::istream &bin_istream)
