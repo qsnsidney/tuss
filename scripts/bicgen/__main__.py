@@ -1,5 +1,8 @@
 from . import translation
 
+# IC Data
+# https://nbody.shop/data.html
+
 # in_tipsy_file_path = './data/tipsy/LOW/LOW.bin'
 in_tipsy_file_path = None
 print('Info:', 'Loading from', in_tipsy_file_path)
