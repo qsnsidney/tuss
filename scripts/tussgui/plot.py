@@ -10,16 +10,17 @@ from .. import core
 from . import data
 
 
-def plot_snapshot(bin_file):
+def plot_snapshot(bin_file_path):
     # Create figure
     fig = plt.figure()
+    fig.suptitle(bin_file_path)
     fig.set_size_inches(16/1.3, 9/1.3)
 
     ax1 = plt.subplot2grid((2, 3), (0, 1), rowspan=2, colspan=2)
     ax2 = plt.subplot2grid((2, 3), (0, 0), colspan=1)
     ax3 = plt.subplot2grid((2, 3), (1, 0), colspan=1)
 
-    system_state = core.serde.deserialize_system_state_from_bin(bin_file)
+    system_state = core.serde.deserialize_system_state_from_bin(bin_file_path)
     pos_xs, pos_ys, pos_zs, _, _, _, masses = zip(*system_state)
     log_masses = np.log10(masses)
 
