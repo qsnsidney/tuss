@@ -36,9 +36,21 @@ def deserialize_system_state_from_bin(filename):
         return [parse_body_state_from_bin(f, floating_type_size, floating_type_sym) for _ in range(num_bodies)]
 
 
+def write_body_state_into_bin(f, floating_type_sym, body_state):
+    '''
+    [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
+    '''
+    f.write(struct.pack(floating_type_sym*7, *body_state))
+
+
 def serialize_system_state_into_bin(system_state, filename):
     '''
     [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
     '''
-
-    pass
+    with open(filename, 'wb') as f:
+        floating_type_sym = 'f' if type(system_state[0][0]) is float else 'd'
+        floating_type_size = 4 if floating_type_sym == 'f' else 8
+        f.write(floating_type_size.to_bytes(4, "little"))
+        f.write(len(system_state).to_bytes(4, 'little'))
+        for body_state in system_state:
+            write_body_state_into_bin(f, floating_type_sym, body_state)
