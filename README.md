@@ -127,7 +127,7 @@ Galaxy
 ```
 mkdir -p ./tmp/
 make run_cpusim ARGS="-i ./data/ic/s0_s112500_g100000_d100000.bin -d 10 -n20 -v -t4 -V1 -o ./tmp --snapshot"
-python3 -m scripts.tussgui snapshot ./data/ic/s0_s112500_g100000_d100000.bin &
+python3 -m scripts.tussgui snapshot ./data/ic/s0_s112500_g100000_d100000.bin
 python3 -m scripts.tussgui snapshot ./tmp/s0_s112500_g100000_d100000*
 rm -rf ./tmp
 ```
