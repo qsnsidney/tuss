@@ -72,6 +72,18 @@ make test_core ARGS=-h
 
 ## Input/Output Data
 
+### Units
+No particular units are expected, but simulation uses 1 as the gravitational constant G.
+If converting from realistic data, make sure the transformed numerical values are converted,
+such that the gravitational equation with converted values gives identical result, 
+as in its original values with gravitational constant that suits the original units, 
+but with a gravitational constant G value of 1 instead.
+
+An example conversion scheme:
+mass: [in Msolar] * G_solar_mass_parsec_kmps(4.3009e-3)
+distance: [in ps]
+velocity: [in km/s]
+
 ### `BODY_STATE`
 The state of a single body, consists of `(POS, VEC, MASS)`.  
 The serialization format expands each field, so that looks like:
