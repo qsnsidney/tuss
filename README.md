@@ -80,7 +80,7 @@ as in its original values with gravitational constant that suits the original un
 but with a gravitational constant G value of 1 instead.
 
 An example conversion scheme:
-mass: [in Msolar] * G_solar_mass_parsec_kmps(4.3009e-3)
+mass: [in Msun] * G_solar_mass_parsec_kmps(4.3009e-3)
 distance: [in ps]
 velocity: [in km/s]
 

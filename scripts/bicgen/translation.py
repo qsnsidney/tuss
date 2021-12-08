@@ -25,7 +25,7 @@ def deserialize_system_state_from_tipsy(tipsy_file_path=None, body_types=None):
 
     Original values are normalized to equivalent numerical values in following units, such that
     with the following values, the constant G for calculating gravity has a numerical value 1:
-    mass: [in Msolar] * G_solar_mass_parsec_kmps(4.3009e-3)
+    mass: [in Msun] * G_solar_mass_parsec_kmps(4.3009e-3)
     distance: [in ps]
     velocity: [in km/s]
 
@@ -53,19 +53,15 @@ def deserialize_system_state_from_tipsy(tipsy_file_path=None, body_types=None):
     ad = ds.all_data()
     system_state = list()
     for body_type in body_types:
-        ad[body_type, 'Coordinates'].to('pc')
-        ad[body_type, 'Velocities'].to('km/s')
-        ad[body_type, 'Mass'].to('Msun')
+        pos_xs = ad[body_type, 'Coordinates'][:, 0].to('pc').v
+        pos_ys = ad[body_type, 'Coordinates'][:, 1].to('pc').v
+        pos_zs = ad[body_type, 'Coordinates'][:, 2].to('pc').v
 
-        pos_xs = ad[body_type, 'Coordinates'][:, 0].v
-        pos_ys = ad[body_type, 'Coordinates'][:, 1].v
-        pos_zs = ad[body_type, 'Coordinates'][:, 2].v
+        vel_xs = ad[body_type, 'Velocities'][:, 0].to('km/s').v
+        vel_ys = ad[body_type, 'Velocities'][:, 1].to('km/s').v
+        vel_zs = ad[body_type, 'Velocities'][:, 2].to('km/s').v
 
-        vel_xs = ad[body_type, 'Velocities'][:, 0].v
-        vel_ys = ad[body_type, 'Velocities'][:, 1].v
-        vel_zs = ad[body_type, 'Velocities'][:, 2].v
-
-        masses = ad[body_type, 'Mass'][:].v * 4.3009e-3
+        masses = ad[body_type, 'Mass'][:].to('Msun').v * 4.3009e-3
 
         prev_len_system_state = len(system_state)
         system_state.extend(zip(pos_xs, pos_ys, pos_zs,
