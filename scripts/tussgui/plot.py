@@ -12,8 +12,7 @@ from . import data
 
 def plot_snapshot(bin_file_path):
     # Create figure
-    fig = plt.figure()
-    fig.suptitle(bin_file_path)
+    fig = plt.figure(bin_file_path)
     fig.set_size_inches(16/1.3, 9/1.3)
 
     ax1 = plt.subplot2grid((2, 3), (0, 1), rowspan=2, colspan=2)
