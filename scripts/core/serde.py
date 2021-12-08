@@ -84,7 +84,7 @@ def serialize_system_state(system_state, filename):
     [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
     '''
     ext = fileio.get_filename_extension(filename)
-    if ext.lower() == 'csv':
+    if ext.lower() == '.csv':
         serialize_system_state_into_csv(system_state, filename)
     else:
         serialize_system_state_into_bin(system_state, filename)
