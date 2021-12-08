@@ -126,9 +126,9 @@ rm -rf ./tmp/solar_sys_cpu_log
 Galaxy
 ```
 mkdir -p ./tmp/
-make run_cpusim ARGS="-i ./data/ic/stars_138410.bin -d 100 -n20 -v -t4 -V1 -o ./tmp --snapshot"
-python3 -m scripts.tussgui snapshot ./tmp/stars_138410_2000.bin &
-python3 -m scripts.tussgui snapshot ./data/ic/stars_138410.bin
+make run_cpusim ARGS="-i ./data/ic/one_galaxy_138410.bin -d 100 -n20 -v -t4 -V1 -o ./tmp --snapshot"
+python3 -m scripts.tussgui snapshot ./tmp/one_galaxy_138410_2000.bin &
+python3 -m scripts.tussgui snapshot ./data/ic/one_galaxy_138410.bin
 rm -rf ./tmp
 ```
 
