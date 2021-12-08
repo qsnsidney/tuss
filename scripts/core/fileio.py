@@ -13,3 +13,7 @@ def create_dir_if_necessary(dir_path):
 def create_file_dir_if_necessary(file_path):
     path, _ = os.path.split(file_path)
     create_dir_if_necessary(path)
+
+
+def get_filename_extension(filename):
+    return os.path.splitext(filename)[1]

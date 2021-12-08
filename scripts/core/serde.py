@@ -58,3 +58,33 @@ def serialize_system_state_into_bin(system_state, filename):
         f.write(len(system_state).to_bytes(4, 'little'))
         for body_state in system_state:
             write_body_state_into_bin(f, floating_type_sym, body_state)
+        print('Info:', 'Wrote into', filename)
+
+
+def write_body_state_into_csv(f, body_state):
+    '''
+    (POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)
+    '''
+    print(*body_state, sep=',', file=f)
+
+
+def serialize_system_state_into_csv(system_state, filename):
+    '''
+    [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
+    '''
+    fileio.create_file_dir_if_necessary(filename)
+    with open(filename, 'w') as f:
+        for body_state in system_state:
+            write_body_state_into_csv(f, body_state)
+        print('Info:', 'Wrote into', filename)
+
+
+def serialize_system_state(system_state, filename):
+    '''
+    [(POS.x,POS.y,POS.z,VEL.x,VEL.y,VEL.z, MASS)]
+    '''
+    ext = fileio.get_filename_extension(filename)
+    if ext.lower() == 'csv':
+        serialize_system_state_into_csv(system_state, filename)
+    else:
+        serialize_system_state_into_bin(system_state, filename)

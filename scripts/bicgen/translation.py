@@ -15,7 +15,7 @@ def from_tipsy_into_bin(in_tipsy_file_path, out_bin_file_path, body_types=None):
     print('Info:', 'Writing into bin', out_bin_file_path)
     system_state = deserialize_system_state_from_tipsy(
         in_tipsy_file_path, body_types=body_types)
-    core.serde.serialize_system_state_into_bin(system_state, out_bin_file_path)
+    core.serde.serialize_system_state(system_state, out_bin_file_path)
 
 
 def deserialize_system_state_from_tipsy(tipsy_file_path=None, body_types=None):
@@ -53,9 +53,9 @@ def deserialize_system_state_from_tipsy(tipsy_file_path=None, body_types=None):
     ad = ds.all_data()
     system_state = list()
     for body_type in body_types:
-        ad[body_type,'Coordinates'].to('pc')
-        ad[body_type,'Velocities'].to('km/s')
-        ad[body_type,'Mass'].to('Msun')
+        ad[body_type, 'Coordinates'].to('pc')
+        ad[body_type, 'Velocities'].to('km/s')
+        ad[body_type, 'Mass'].to('Msun')
 
         pos_xs = ad[body_type, 'Coordinates'][:, 0].v
         pos_ys = ad[body_type, 'Coordinates'][:, 1].v
