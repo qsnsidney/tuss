@@ -161,6 +161,7 @@ make run_tus ARGS="-i ./data/ic/solar_system.csv -d 0.05 -n 10000"
 make run_tus ARGS="-i ./data/ic/benchmark_100000.bin -d 0.001 -n10 -v -V0"
 # Latest version
 make run_tus ARGS="-i ./data/ic/benchmark_100000.bin -d 0.001 -n10 -v -V1"
+make run_tus ARGS="-i ./data/ic/s0_s112500.bin -d 0.001 -n10 -v -V1 -t32"
 ```
 
 ### Verification
