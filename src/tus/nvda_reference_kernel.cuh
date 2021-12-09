@@ -90,6 +90,28 @@ AccumulatebodyBodyInteraction(float4 bi, float4 bj, float3 ai)
     return ai;
 }
 
+// a version that exact matches with simple test bench
+__device__ inline float3
+AccumulatebodyBodyInteraction_exact_match(float4 bi, float4 bj, float3 ai)
+{
+    float3 r;
+    // r_ij [3 FLOPS]
+    r.x = bj.x - bi.x;
+    r.y = bj.y - bi.y;
+    r.z = bj.z - bi.z;
+    // distSqr = dot(r_ij, r_ij) + EPS^2 [6 FLOPS]
+    float distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z + CORE::UNIVERSE::epislon_square);
+    // invDistCube =1/distSqr^(3/2) [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
+    float distSixth = distSqr * distSqr * distSqr;
+    // s = m_j * invDistCube [1 FLOP]
+    float s = bj.w  / distSixth;
+    // a_i = a_i + s * r_ij [6 FLOPS]
+    ai.x += r.x * s;
+    ai.y += r.y * s;
+    ai.z += r.z * s;
+    return ai;
+}
+
 __device__ inline float3
 tile_calculation(float4 myPosition, float3 accel, int accum_length)
 {
@@ -143,9 +165,6 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // then the thread with gtid 9 will be reading the body1's location
         // in the first iteration. now the thread is done with loading the shared mem
         // so we can skip it.
-        if(gtid >= N) {
-            continue;
-        }
 
         // Ideally, we should take care of the case where the last tile contains less than 
         // num_block of data. only let the tiled function process min(blocksize, remaining elements) 
