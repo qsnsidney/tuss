@@ -77,11 +77,12 @@ AccumulatebodyBodyInteraction(float4 bi, float4 bj, float3 ai)
     r.y = bj.y - bi.y;
     r.z = bj.z - bi.z;
     // distSqr = dot(r_ij, r_ij) + EPS^2 [6 FLOPS]
-    float distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z + CORE::UNIVERSE::epislon_square);
+    float distSqr = r.x * r.x + r.y * r.y + r.z * r.z + CORE::UNIVERSE::epislon_square;
     // invDistCube =1/distSqr^(3/2) [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
     float distSixth = distSqr * distSqr * distSqr;
+    float invDistCube = 1.0f/sqrtf(distSixth);
     // s = m_j * invDistCube [1 FLOP]
-    float s = bj.w  / distSixth;
+    float s = bj.w * invDistCube;
     // a_i = a_i + s * r_ij [6 FLOPS]
     ai.x += r.x * s;
     ai.y += r.y * s;
@@ -117,11 +118,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
     
     // we don't skip the object even if it's gtid > N.
     // reasons explained later.
-    if(gtid < N){
-        myPosition = globalX[gtid];
-    } else {
-        myPosition = {0.0f, 0.0f, 0.0f, 0.0f};
-    }
+    myPosition = globalX[gtid];
     for (i = 0, tile = 0; i < N; i += blockDim.x, tile++) {
         
         // decide which piece of memory to read into the shared mem
@@ -133,12 +130,12 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // for example, when there are 48 bodies with block_size = 32. 
         // in the 2nd iteration, thread of body 24 will try to read sharemem
         // of body 56. but we should not skip body 24's accleration accumulatio
-        if(idx >= N) {
-            shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f, 0.0f};
-        }
-        else {
-            shPosition[threadIdx.x] = globalX[idx];
-        }
+        //if(idx >= N) {
+        //    shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f, 0.0f};
+        //}
+        //else {
+        shPosition[threadIdx.x] = globalX[idx];
+        //
 
         // we have to skip the thread that's greater than gtid here 
         // instead of earlier, because the thread could be reading some
