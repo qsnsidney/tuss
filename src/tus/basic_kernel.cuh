@@ -42,10 +42,11 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
             }
             // source of gravitiy
             data_t_3d x_source = location[j];
-            data_t_3d numerator = (x_source - x_self) * mass[j];
+            data_t_3d numerator = (x_source - x_self);
             data_t denominator = power_norm(x_self, x_source);
-            data_t_3d new_term = (numerator / denominator);
-            accumulated_accer = accumulated_accer + new_term;
+            data_t new_term = (mass[j] / denominator);
+            data_t_3d temp = numerator * new_term;
+            accumulated_accer = accumulated_accer + temp;
             //printf("tid = %d, new_term %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z);
         }
         acceleration[tid] = accumulated_accer;
