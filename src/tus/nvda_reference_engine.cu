@@ -50,7 +50,7 @@ namespace TUS
         // random initializer just for now
         size_t vector_size_3d = sizeof(data_t_3d) * nBody;
         size_t vector_size_4d = sizeof(float4) * nBody;
-
+        size_t vector_size_4dx = sizeof(float4) * ((nBody + (block_size_ - 1))/block_size_) * block_size_;
         /*
      *   host side memory allocation
      */
@@ -60,7 +60,7 @@ namespace TUS
         host_malloc_helper((void **)&h_V, vector_size_3d);
         host_malloc_helper((void **)&h_output_V, vector_size_3d);
 
-        host_malloc_helper((void **)&h_X, vector_size_4d);
+        host_malloc_helper((void **)&h_X, vector_size_4dx);
         host_malloc_helper((void **)&h_A, vector_size_4d);
         host_malloc_helper((void **)&h_output_X, vector_size_4d);
 
@@ -68,6 +68,10 @@ namespace TUS
         /*
      *   input randome initialize
      */
+
+        for(int i = 0; i < ((nBody + (block_size_ - 1))/block_size_) * block_size_; i++) {
+            h_X[i] = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+        }
 
         parse_ic_f4(h_X, h_V, ic);
         timer.elapsed_previous("deserialize_body_state_vec_from_csv");
@@ -79,8 +83,8 @@ namespace TUS
         unsigned src_index = 0;
         unsigned dest_index = 1;
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
-        gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4d));
-        gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4d));
+        gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4dx));
+        gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4dx));
 
         d_A = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size_4d));
@@ -99,7 +103,7 @@ namespace TUS
          *   create double buffer on device side
          */
         // cudaMemcpy(d_A[0], h_A, vector_size, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_X[src_index], h_X, vector_size_4d, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_X[src_index], h_X, vector_size_4dx, cudaMemcpyHostToDevice);
         cudaMemcpy(d_V[src_index], h_V, vector_size_3d, cudaMemcpyHostToDevice);
         timer.elapsed_previous("copied input data from host to device");
 
