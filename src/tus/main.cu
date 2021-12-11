@@ -11,6 +11,7 @@
 #include "core/utility.hpp"
 #include "simple_engine.cuh"
 #include "nvda_reference_engine.cuh"
+#include "coalesced_simple_engine.cuh"
 #include "core/cxxopts.hpp"
 #include "cpusim/reference.h"
 
@@ -21,7 +22,8 @@ namespace
     enum class VERSION
     {
         BASIC = 0,
-        NVDA_REFERENCE
+        NVDA_REFERENCE,
+        COALESCED_BASIC,
     };
 }
 
@@ -126,10 +128,20 @@ int main(int argc, const char *argv[])
         engine.reset(new TUS::NVDA_REFERENCE_ENGINE(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
     }
-    else
+    else if(version == VERSION::BASIC)
     {
         engine.reset(new TUS::SIMPLE_ENGINE(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+    } 
+    else if (version == VERSION::COALESCED_BASIC) 
+    {
+        engine.reset(new TUS::COALESCED_SIMPLE_ENGINE(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+    }
+    else 
+    {
+        std::cout << "INVALID ENGINE VALUE: " << static_cast<std::underlying_type<VERSION>::type>(version) << std::endl;
+        exit(1);
     }
     timer.elapsed_previous("initializing_engine");
 

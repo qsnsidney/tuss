@@ -14,10 +14,11 @@ if __name__=='__main__':
     THREAD_PER_BLOCK = [16,32,64,128,256]
     NBODY = [10000,20000,50000,100000]
     AVG_ITERATION = 1
+    VERSION = 2
     CUDA_EXECUTABLE = "build/tus/tus_exe"
     GPU_TIME_PATTERN = "Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)"
     BENCHMARK_DATA = "data/ic/benchmark_500000.bin"
-    BENCHMARK_OUTPUT_FILE = "gpu_benchmark.csv"
+    BENCHMARK_OUTPUT_FILE = f"gpu_benchmark_{VERSION}.csv"
     STDOUT_OUTPUT = "benchmark.stdout"
 
     parser = argparse.ArgumentParser(description='Simple parser')
@@ -50,7 +51,7 @@ if __name__=='__main__':
                 info_msg = "RUNNING NUMBLOCK : " + str(block_size) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
                 f_stdout.write(info_msg + "\n")
                 print(info_msg)
-                command = [cuda_executable, '-b', str(num_body), '-i', benchmark_path, '-t', str(block_size), '-d', '1', '-n', '10']
+                command = [cuda_executable, '-b', str(num_body), '-i', benchmark_path, '-t', str(block_size), '-d', '1', '-n', '10', '--version', str(VERSION)]
                 try:
                     result = subprocess.check_output(command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
