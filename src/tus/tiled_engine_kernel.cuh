@@ -105,12 +105,13 @@ __device__ inline float3
 tile_calculation(float3 myPosition, float3 accel, int accum_length, float* devM, int offset)
 {
     int i;
-    extern __shared__ float3 shPosition[];
+    extern __shared__ float shPosition[];
     for (i = 0; i < accum_length; i++) {
         // we don't need to check the object index.
         // because the vector subtration of oneself will just yields 0.
         // hence contributes no acceleration.
-        accel = AccumulatebodyBodyInteraction(myPosition, shPosition[i], accel, devM[i + offset]);
+        float3 sharedp = make_float3(shPosition[i * 3], shPosition[i * 3 + 1], shPosition[i * 3 + 2]);
+        accel = AccumulatebodyBodyInteraction(myPosition, sharedp, accel, devM[i + offset]);
     }
     return accel;
 }
@@ -119,7 +120,7 @@ tile_calculation(float3 myPosition, float3 accel, int accum_length, float* devM,
 __global__ inline void
 calculate_forces(int N, void *devX, float *devM, void *devA)
 {
-    extern __shared__ float3 shPosition[];
+    extern __shared__ float shPosition[];
     float3 *globalX = (float3 *)devX;
     float3 *globalA = (float3 *)devA;
     float3 myPosition;
@@ -146,10 +147,15 @@ calculate_forces(int N, void *devX, float *devM, void *devA)
         // in the 2nd iteration, thread of body 24 will try to read sharemem
         // of body 56. but we should not skip body 24's accleration accumulatio
         if(idx >= N) {
-            shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f};
+            shPosition[3 * threadIdx.x] = 0.0f;
+            shPosition[3 * threadIdx.x + 1] = 0.0f;
+            shPosition[3 * threadIdx.x + 2] = 0.0f;
+            
         }
         else {
-            shPosition[threadIdx.x] = globalX[idx];
+            shPosition[3 * threadIdx.x] = globalX[idx].x;
+            shPosition[3 * threadIdx.x + 1] = globalX[idx].y;
+            shPosition[3 * threadIdx.x + 2] = globalX[idx].z;
         }
 
         // we have to skip the thread that's greater than gtid here 
