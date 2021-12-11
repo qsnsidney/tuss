@@ -12,18 +12,20 @@
 #include "simple_engine.cuh"
 #include "nvda_reference_engine.cuh"
 #include "coalesced_simple_engine.cuh"
+#include "tiled_simple_engine.cuh"
 #include "core/cxxopts.hpp"
 #include "cpusim/reference.h"
 
 namespace
 {
-    constexpr size_t default_block_size = 32;
+    constexpr size_t default_block_size = 8;
 
     enum class VERSION
     {
         BASIC = 0,
         NVDA_REFERENCE,
         COALESCED_BASIC,
+        TILED_BASIC,
     };
 }
 
@@ -136,6 +138,11 @@ int main(int argc, const char *argv[])
     else if (version == VERSION::COALESCED_BASIC) 
     {
         engine.reset(new TUS::COALESCED_SIMPLE_ENGINE(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+    }
+    else if (version == VERSION::TILED_BASIC) 
+    {
+        engine.reset(new TUS::TILED_SIMPLE_ENGINE(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
     }
     else 
