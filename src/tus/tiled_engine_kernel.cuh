@@ -102,7 +102,7 @@ AccumulatebodyBodyInteraction(float3 bi, float3 bj, float3 ai, float massj)
 }
 
 __device__ inline float3
-tile_calculation(float3 myPosition, float3 accel, int accum_length, float* devM, int offset)
+tile_calculation(float3 myPosition, float3 accel, int accum_length, int mass_offset, int offset)
 {
     int i;
     extern __shared__ float shPosition[];
@@ -111,7 +111,7 @@ tile_calculation(float3 myPosition, float3 accel, int accum_length, float* devM,
         // because the vector subtration of oneself will just yields 0.
         // hence contributes no acceleration.
         float3 sharedp = make_float3(shPosition[i * 3], shPosition[i * 3 + 1], shPosition[i * 3 + 2]);
-        accel = AccumulatebodyBodyInteraction(myPosition, sharedp, accel, devM[i + offset]);
+        accel = AccumulatebodyBodyInteraction(myPosition, sharedp, accel, shPosition[mass_offset + i]);
     }
     return accel;
 }
@@ -124,6 +124,7 @@ calculate_forces(int N, void *devX, float *devM, void *devA)
     float3 *globalX = (float3 *)devX;
     float3 *globalA = (float3 *)devA;
     float3 myPosition;
+    int mass_offset = 3 * blockDim.x;
     int i, tile;
     float3 acc = {0.0f, 0.0f, 0.0f};
     int gtid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -145,17 +146,19 @@ calculate_forces(int N, void *devX, float *devM, void *devA)
         // but the thread itself is dealing with a valid body
         // for example, when there are 48 bodies with block_size = 32. 
         // in the 2nd iteration, thread of body 24 will try to read sharemem
-        // of body 56. but we should not skip body 24's accleration accumulatio
+        // of body 56. but we should not skip body 24's accleration accumulation
         if(idx >= N) {
             shPosition[3 * threadIdx.x] = 0.0f;
             shPosition[3 * threadIdx.x + 1] = 0.0f;
             shPosition[3 * threadIdx.x + 2] = 0.0f;
+            shPosition[mass_offset + threadIdx.x] = 0.0f;
             
         }
         else {
             shPosition[3 * threadIdx.x] = globalX[idx].x;
             shPosition[3 * threadIdx.x + 1] = globalX[idx].y;
             shPosition[3 * threadIdx.x + 2] = globalX[idx].z;
+            shPosition[mass_offset + threadIdx.x] = devM[idx];
         }
 
         // we have to skip the thread that's greater than gtid here 
@@ -173,7 +176,7 @@ calculate_forces(int N, void *devX, float *devM, void *devA)
         // in length. but because we already load out of bound shared mem with 0s. we don't have to 
         // worry about out of bound anymore.
         __syncthreads();
-        acc = tile_calculation(myPosition, acc, blockDim.x, devM, offset);
+        acc = tile_calculation(myPosition, acc, blockDim.x, mass_offset, offset);
         __syncthreads();
     }
     // Save the result in global memory for the integration step.

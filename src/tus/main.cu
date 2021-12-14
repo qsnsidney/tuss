@@ -18,7 +18,7 @@
 
 namespace
 {
-    constexpr size_t default_block_size = 8;
+    constexpr size_t default_block_size = 32;
 
     enum class VERSION
     {

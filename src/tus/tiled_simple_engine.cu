@@ -113,7 +113,7 @@ namespace TUS
 
         // calculate the initialia acceleration
 
-        calculate_forces<<<nblocks, block_size_, block_size_ * sizeof(float3)>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
+        calculate_forces<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
