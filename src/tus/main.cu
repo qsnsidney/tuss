@@ -27,7 +27,7 @@ namespace
         NVDA_REFERENCE,
         COALESCED_BASIC,
         TILED_BASIC,
-        SMALL_N，
+        SMALL_N,
     };
 }
 
