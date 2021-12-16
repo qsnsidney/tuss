@@ -138,7 +138,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
     float4 myPosition;
     float4 shPosition;
     int i, j;
-    int unrollFactor = 4;
+    const int unrollFactor = 4;
     float3 acc[unrollFactor];
     float4 acc4;
     int gtid = unrollFactor * (blockIdx.x * blockDim.x + threadIdx.x);
