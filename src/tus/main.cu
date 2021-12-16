@@ -11,6 +11,7 @@
 #include "core/utility.hpp"
 #include "simple_engine.cuh"
 #include "nvda_reference_engine.cuh"
+#include "small_N_engine.cuh"
 #include "coalesced_simple_engine.cuh"
 #include "tiled_simple_engine.cuh"
 #include "core/cxxopts.hpp"
@@ -26,6 +27,7 @@ namespace
         NVDA_REFERENCE,
         COALESCED_BASIC,
         TILED_BASIC,
+        SMALL_N，
     };
 }
 
@@ -143,6 +145,11 @@ int main(int argc, const char *argv[])
     else if (version == VERSION::TILED_BASIC) 
     {
         engine.reset(new TUS::TILED_SIMPLE_ENGINE(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+    }
+    else if (version == VERSION::SMALL_N) 
+    {
+        engine.reset(new TUS::SMALL_N_ENGINE(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
     }
     else 
