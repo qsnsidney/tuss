@@ -154,7 +154,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
             // accumulate over 1 bank indicated by the theadIdx
             for (j = 0; j < N; j++) // j - shared mem row index
             {
-                shPosition = globalX[32*j + threadIdx.x]
+                shPosition = globalX[32*j + threadIdx.x];
                 // calculate accumulation
                 acc = AccumulatebodyBodyInteraction(myPosition, shPosition, acc);
             }
