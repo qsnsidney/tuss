@@ -140,7 +140,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
     int i, j;
     float3 acc = {0.0f, 0.0f, 0.0f};
     int unrollFactor = 4;
-    int gtid = unorllFactor * (blockIdx.x * blockDim.x + threadIdx.x);
+    int gtid = unrollFactor * (blockIdx.x * blockDim.x + threadIdx.x);
     
     if (gtid <= N-unrollFactor)
     {
@@ -150,7 +150,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
         {
             myPosition = globalX[gtid+i];
             acc = {0.0f, 0.0f, 0.0f};
-            
+
             // accumulate over 1 bank indicated by the theadIdx
             for (j = 0; j < N; j++) // j - shared mem row index
             {
@@ -160,9 +160,9 @@ calculate_forces(int N, void *devX, void *devA, int p)
             }
             
             // Save the result in global memory for the integration step.
-            float4 acc4 = {acc.x, acc.y, acc.z, 0.0f};
             __syncthreads();
-            globalA[gtid+i] += acc4;
+            float4 acc4 = globalA[gtid+i];
+            globalA[gtid+i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
             __syncthreads();
         }
     }  
