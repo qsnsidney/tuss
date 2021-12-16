@@ -138,7 +138,8 @@ calculate_forces(int N, void *devX, void *devA, int p)
     float4 myPosition;
     float4 shPosition;
     int i, j;
-    float3 acc = {0.0f, 0.0f, 0.0f};
+    float3 acc[];
+    float4 acc4;
     int unrollFactor = 4;
     int gtid = unrollFactor * (blockIdx.x * blockDim.x + threadIdx.x);
     
@@ -149,22 +150,24 @@ calculate_forces(int N, void *devX, void *devA, int p)
         for (i = 0; i < unrollFactor; i++)
         {
             myPosition = globalX[gtid+i];
-            acc = {0.0f, 0.0f, 0.0f};
+            acc[i] = {0.0f, 0.0f, 0.0f};
 
             // accumulate over 1 bank indicated by the theadIdx
             for (j = 0; j < N; j++) // j - shared mem row index
             {
                 shPosition = globalX[32*j + threadIdx.x];
                 // calculate accumulation
-                acc = AccumulatebodyBodyInteraction(myPosition, shPosition, acc);
+                acc[i] = AccumulatebodyBodyInteraction(myPosition, shPosition, acc[i]);
             }
-            
-            // Save the result in global memory for the integration step.
-            __syncthreads();
-            float4 acc4 = globalA[gtid+i];
-            globalA[gtid+i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
-            __syncthreads();
         }
+        // Save the result in global memory for the integration step.
+        __syncthreads();
+        for (i = 0; i < unrollFactor; i++)
+        {
+            acc4 = globalA[gtid+i];
+            globalA[gtid+i] = {acc[i].x+acc4.x, acc[i].y+acc4.y, acc[i].z+acc4.z, 0.0f};
+        }
+        __syncthreads();
     }  
 }
 
