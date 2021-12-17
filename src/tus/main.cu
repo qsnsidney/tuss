@@ -129,23 +129,23 @@ int main(int argc, const char *argv[])
     std::unique_ptr<CORE::ENGINE> engine;
     if (version == VERSION::NVDA_REFERENCE)
     {
-        engine.reset(new TUS::NVDA_REFERENCE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::NVDA_REFERENCE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
     else if (version == VERSION::BASIC)
     {
-        engine.reset(new TUS::SIMPLE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::SIMPLE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
     else if (version == VERSION::COALESCED_BASIC)
     {
-        engine.reset(new TUS::COALESCED_SIMPLE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::COALESCED_SIMPLE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
     else if (version == VERSION::TILED_BASIC)
     {
-        engine.reset(new TUS::TILED_SIMPLE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::TILED_SIMPLE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
     else if (version == VERSION::MAT_MUL)
     {
