@@ -25,7 +25,7 @@ namespace CORE
 
     inline std::pair<size_t, size_t> delinearize_upper_triangle_matrix_index(size_t k, size_t n)
     {
-        size_t i = n - static_cast<size_t>(2) - static_cast<size_t>(std::floor(std::sqrt(-8 * k + 4 * n * (n - 1) - 7) / 2.0 - 0.5));
+        size_t i = n - 2 - static_cast<size_t>(std::floor(std::sqrt(-8 * k + 4 * n * (n - 1) - 7) / 2.0 - 0.5));
         size_t j = k + i + 1 - n * (n - 1) / 2 + (n - i) * ((n - i) - 1) / 2;
         return {i, j};
     }
