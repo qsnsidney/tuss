@@ -147,7 +147,7 @@ int main(int argc, const char *argv[])
         engine.reset(new TUS::TILED_SIMPLE_ENGINE(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
     }
-    else if (version == VERSION::MAT_MUL_ENGINE)
+    else if (version == VERSION::MAT_MUL)
     {
         engine = std::make_unique<TUS::MAT_MUL_ENGINE>(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
