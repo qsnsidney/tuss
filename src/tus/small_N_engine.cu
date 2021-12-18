@@ -43,10 +43,13 @@ namespace TUS
                                                                                               block_size_(block_size), tb_len_(tb_len), tb_wid_(tb_wid), 
                                                                                               unroll_factor_(unroll_factor), tpb_(tpb)
     {
+        std::cout << "Building small N engine" << std::endl;
     }
 
     CORE::SYSTEM_STATE SMALL_N_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
+        std::cout << "Execution starts" << std::endl;
+
         size_t nBody = system_state_snapshot().size();
 
         /* BIN file of initial conditions */
