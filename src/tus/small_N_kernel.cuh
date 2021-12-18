@@ -147,10 +147,13 @@ calculate_forces_2d(int N, void *devX, void *devA, int p, int luf)
 
     if ((i < N) && (j*luf < N))
     {
-        for (int k = 0; j*luf + k < N; k++)
+        for (int k = 0; k < luf; k++)
         {
-            shPosition = globalX[j*luf + k];
-            acc = AccumulatebodyBodyInteraction(myPosition, shPosition, acc);
+            if (j*luf + k < N)
+            {
+                shPosition = globalX[j*luf + k];
+                acc = AccumulatebodyBodyInteraction(myPosition, shPosition, acc);
+            }
         }
 
         // Save the result in global memory for the integration step.
