@@ -134,7 +134,6 @@ calculate_forces_2d(int N, void *devX, void *devA, int p, int luf)
     float4 *globalA = (float4 *)devA;
     float4 myPosition;
     float4 shPosition;
-    int i, j;
     //const int unrollFactor = 4;
     //float3 acc[unrollFactor];
     float4 acc4;
@@ -157,11 +156,8 @@ calculate_forces_2d(int N, void *devX, void *devA, int p, int luf)
     
     // Save the result in global memory for the integration step.
     __syncthreads();
-    for (i = 0; i < unrollFactor; i++)
-    {
-        acc4 = globalA[i];
-        globalA[i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
-    }
+    acc4 = globalA[i];
+    globalA[i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
     __syncthreads();  
 }
 
