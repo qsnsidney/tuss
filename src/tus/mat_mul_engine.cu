@@ -85,7 +85,7 @@ namespace TUS
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size));
         gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size));
 
-        data_t_3d* d_A[2] = {nullptr, nullptr;}
+        data_t_3d* d_A[2] = {nullptr, nullptr};
         gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size));
         gpuErrchk(cudaMalloc((void **)&d_A[dest_index], vector_size));
 
