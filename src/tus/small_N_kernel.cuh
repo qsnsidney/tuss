@@ -152,13 +152,13 @@ calculate_forces_2d(int N, void *devX, void *devA, int p, int luf)
             shPosition = globalX[j*luf + k];
             acc = AccumulatebodyBodyInteraction(myPosition, shPosition, acc);
         }
+
+        // Save the result in global memory for the integration step.
+        __syncthreads();
+        acc4 = globalA[i];
+        globalA[i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
+        __syncthreads();  
     }
-    
-    // Save the result in global memory for the integration step.
-    __syncthreads();
-    acc4 = globalA[i];
-    globalA[i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
-    __syncthreads();  
 }
 
 // Each thread reads 1 bank from the shared memory, but we limit its size (i.e. limit the # of rows)
