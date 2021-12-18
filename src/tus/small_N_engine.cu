@@ -132,8 +132,7 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                calculate_forces_2d<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[dest_index], //input
-                                                                   d_A[dest_index], block_size_);            // output
+                alculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], block_size_, unroll_factor_);
 
                 cudaDeviceSynchronize();
 
