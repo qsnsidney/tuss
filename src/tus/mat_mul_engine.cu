@@ -100,7 +100,7 @@ namespace TUS
         // d_Field[nBody..2*nBody] = field.y
         // d_Field[2*nBody..3*nBody] = field.z
         data_t *d_Field = nullptr;
-        gpuErrchk(cudaMalloc((void**)&d_Field, sizeof(data_t) * nBody * 3);
+        gpuErrchk(cudaMalloc((void**)&d_Field, sizeof(data_t) * nBody * 3));
 
         timer.elapsed_previous("allocated device memory");
         /*
