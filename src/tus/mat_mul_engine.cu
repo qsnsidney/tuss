@@ -12,7 +12,7 @@
 #include "core/serde.h"
 #include "helper.cuh"
 #include "data_t.cuh"
-#include "simple_kernel.cuh"
+#include "mat_mul_kernel.cuh"
 
 namespace
 {
@@ -73,28 +73,34 @@ namespace TUS
         /*
      *  mass 
      */
-        data_t *d_M;
+        data_t *d_M = nullptr;
         gpuErrchk(cudaMalloc((void **)&d_M, data_size));
         /*
      *   create double buffer on device side
      */
-        data_t_3d **d_X, **d_A, **d_V;
-        unsigned src_index = 0;
-        unsigned dest_index = 1;
-        d_X = (data_t_3d **)malloc(2 * sizeof(data_t_3d *));
+        constexpr size_t src_index = 0;
+        constexpr size_t dest_index = 1;
+
+        data_t_3d* d_X[2] = {nullptr, nullptr};
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size));
         gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size));
 
-        d_A = (data_t_3d **)malloc(2 * sizeof(data_t_3d *));
+        data_t_3d* d_A[2] = {nullptr, nullptr;}
         gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size));
         gpuErrchk(cudaMalloc((void **)&d_A[dest_index], vector_size));
 
-        d_V = (data_t_3d **)malloc(2 * sizeof(data_t_3d *));
+        data_t_3d* d_V[2] = {nullptr, nullptr};
         gpuErrchk(cudaMalloc((void **)&d_V[src_index], vector_size));
         gpuErrchk(cudaMalloc((void **)&d_V[dest_index], vector_size));
 
-        data_t_3d *d_V_half;
+        data_t_3d *d_V_half = nullptr;
         gpuErrchk(cudaMalloc((void **)&d_V_half, vector_size));
+
+        // d_Field[0..nBody] = field.x
+        // d_Field[nBody..2*nBody] = field.y
+        // d_Field[2*nBody..3*nBody] = field.z
+        data_t *d_Field = nullptr;
+        gpuErrchk(cudaMalloc((void**)&d_Field, sizeof(data_t) * nBody * 3);
 
         timer.elapsed_previous("allocated device memory");
         /*
@@ -159,35 +165,8 @@ namespace TUS
         }
 
         // at end, the final data is actually at src_index because the last swap
-                // at end, the final data is actually at src_index because the last swap
         cudaMemcpy(h_output_X, d_X[src_index], vector_size, cudaMemcpyDeviceToHost);
         cudaMemcpy(h_output_V, d_V[src_index], vector_size, cudaMemcpyDeviceToHost);
-
-#if 1
-        // Hack Hack Hack. dump out the data
-        cudaMemcpy(h_A, d_A[src_index], vector_size, cudaMemcpyDeviceToHost);
-
-        std::ofstream X_file;
-        std::ofstream V_file;
-        std::ofstream A_file;
-        X_file.open ("simpleX.output");
-        V_file.open ("simpleV.output");
-        A_file.open ("simpleA.output");
-        for(int i = 0; i < nBody; i++) {
-            X_file << h_output_X[i].x << "\n";
-            X_file << h_output_X[i].y << "\n";
-            X_file << h_output_X[i].z << "\n";
-            V_file << h_output_V[i].x << "\n";
-            V_file << h_output_V[i].y << "\n";
-            V_file << h_output_V[i].z << "\n";
-            A_file << h_A[i].x << "\n";
-            A_file << h_A[i].y << "\n";
-            A_file << h_A[i].z << "\n";
-        }
-        X_file.close();
-        V_file.close();
-        A_file.close();
-#endif
         timer.elapsed_previous("copied output back to host");
 
         // Just for debug purpose on small inputs
@@ -212,6 +191,7 @@ namespace TUS
         }
         cudaFree(d_V_half);
         cudaFree(d_M);
+        cudaFree(d_Field);
         cudaDeviceReset();
 
         return system_state_result;
