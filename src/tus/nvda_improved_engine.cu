@@ -111,7 +111,7 @@ namespace TUS
         unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
         // calculate the initialia acceleration
-        calculate_forces<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[src_index], d_A[src_index], block_size_);
+        calculate_forces_improved<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[src_index], d_A[src_index], block_size_);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
@@ -123,7 +123,7 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                calculate_forces<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[dest_index], //input
+                calculate_forces_improved<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[dest_index], //input
                                                                    d_A[dest_index], block_size_);            // output
 
                 cudaDeviceSynchronize();

@@ -42,7 +42,7 @@ __global__ inline void update_step_vel_f4(unsigned nbody, data_t step_size, floa
  */
 
 __device__ inline float3
-AccumulatebodyBodyInteraction(float4 bi, float4 bj, float3 ai)
+AccumulatebodyBodyInteraction_improved(float4 bi, float4 bj, float3 ai)
 {
     float3 r;
     // r_ij [3 FLOPS]
@@ -63,45 +63,26 @@ AccumulatebodyBodyInteraction(float4 bi, float4 bj, float3 ai)
     return ai;
 }
 
-// a version that exact matches with simple test bench
 __device__ inline float3
-AccumulatebodyBodyInteraction_exact_match(float4 bi, float4 bj, float3 ai)
-{
-    float3 r;
-    // r_ij [3 FLOPS]
-    r.x = bj.x - bi.x;
-    r.y = bj.y - bi.y;
-    r.z = bj.z - bi.z;
-    // distSqr = dot(r_ij, r_ij) + EPS^2 [6 FLOPS]
-    float distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z + CORE::UNIVERSE::epislon_square);
-    // invDistCube =1/distSqr^(3/2) [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
-    float distSixth = distSqr * distSqr * distSqr;
-    // s = m_j * invDistCube [1 FLOP]
-    float s = bj.w  / distSixth;
-    // a_i = a_i + s * r_ij [6 FLOPS]
-    ai.x += r.x * s;
-    ai.y += r.y * s;
-    ai.z += r.z * s;
-    return ai;
-}
-
-__device__ inline float3
-tile_calculation(float4 myPosition, float3 accel, int accum_length)
+tile_calculation_improved(float4 myPosition, float3 accel, int accum_length)
 {
     int i;
     extern __shared__ float4 shPosition[];
-    for (i = 0; i < accum_length; i++) {
+    for (i = 0; i < accum_length; i+=4) {
         // we don't need to check the object index.
         // because the vector subtration of oneself will just yields 0.
         // hence contributes no acceleration.
-        accel = AccumulatebodyBodyInteraction(myPosition, shPosition[i], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i+1], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i+2], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i+3], accel);
     }
     return accel;
 }
 
 // each calculate forces handles one body
 __global__ inline void
-calculate_forces(int N, void *devX, void *devA, int p)
+calculate_forces_improved(int N, void *devX, void *devA, int p)
 {
     extern __shared__ float4 shPosition[];
     float4 *globalX = (float4 *)devX;
@@ -144,7 +125,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // in length. but because we already load out of bound shared mem with 0s. we don't have to 
         // worry about out of bound anymore.
         __syncthreads();
-        acc = tile_calculation(myPosition, acc, blockDim.x);
+        acc = tile_calculation_improved(myPosition, acc, blockDim.x);
         __syncthreads();
     }
     // Save the result in global memory for the integration step.
