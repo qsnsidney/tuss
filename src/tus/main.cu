@@ -48,7 +48,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(::default_block_size)));
     option_group("len", "horizontal dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
     option_group("wid", "vertical dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
-    option_group("lur,loop_unroll", "loop unrolling factor", cxxopts::value<int>()->default_value("2"));
+    option_group("lur", "loop unrolling factor", cxxopts::value<int>()->default_value("2"));
     option_group("tpb", "thread per body", cxxopts::value<int>()->default_value("32"));
     option_group("V,version", "version of optimization (0 - basic, 1 - nvda reference): optional (default 0)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::BASIC))));
