@@ -120,7 +120,7 @@ namespace TUS
         dim3 grid( (nBody + block.x-1)/block.x, (nBody + block.y-1)/block.y ) ;
 
         // calculate the initialia acceleration
-        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], block_size_, unroll_factor_);
+        calculate_forces_2d<<<grid, block, block_size_ * sizeof(float4)>>>(nBody, d_X[src_index], d_A[src_index], block_size_, unroll_factor_);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
@@ -136,7 +136,7 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                update_step_vel_f4<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_A[dest_index], d_V_half, //input
+                update_step_vel_f4<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, (data_t)dt(), d_A[dest_index], d_V_half, //input
                                                             d_V[dest_index]);                                    // output
                 cudaDeviceSynchronize();
 
