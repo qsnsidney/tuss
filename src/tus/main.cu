@@ -46,6 +46,10 @@ auto parse_args(int argc, const char *argv[])
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(::default_block_size)));
+    option_group("len", "horizontal dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
+    option_group("wid", "vertical dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
+    option_group("lur,loop_unroll", "loop unrolling factor", cxxopts::value<int>()->default_value("2"));
+    option_group("tpb", "thread per body", cxxopts::value<int>()->default_value("32"));
     option_group("V,version", "version of optimization (0 - basic, 1 - nvda reference): optional (default 0)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::BASIC))));
     option_group("o,out", "system_state_log_dir: optional", cxxopts::value<std::string>());
@@ -91,6 +95,11 @@ int main(int argc, const char *argv[])
     const int verbosity = arg_result.count("verbose");
     CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
 
+    const int tb_len = arg_result.count("len");
+    const int tb_wid = arg_result.count("wid");
+    const int unroll_factor = arg_result.count("lur");
+    const int tpb = arg_result.count("tpb");
+
     std::cout << "Running.." << std::endl;
     std::cout << "ic_file: " << ic_file_path << std::endl;
     std::cout << "max_n_body: " << max_n_body << std::endl;
@@ -102,6 +111,10 @@ int main(int argc, const char *argv[])
     std::cout << "snapshot: " << snapshot << std::endl;
     std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
+    std::cout << "len: " << tb_len << std::endl;
+    std::cout << "wid: " << tb_wid << std::endl;
+    std::cout << "lur: " << unroll_factor << std::endl;
+    std::cout << "tpb: " << tpb << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
@@ -149,8 +162,23 @@ int main(int argc, const char *argv[])
     }
     else if (version == VERSION::SMALL_N) 
     {
+        int new_block_size = block_size;
+        int new_tb_len = tb_len;
+        int new_tb_wid = tb_wid;
+
+        if ((tb_len != 0) && (tb_wid != 0))
+        {
+            new_block_size = tb_len * tb_wid;
+        }
+        else
+        {
+            new_tb_len = block_size;
+            new_tb_wid = 1;
+        }
+        ASSERT(IsPowerOfTwo(new_block_size));
+
         engine.reset(new TUS::SMALL_N_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+            system_state_ic, dt, new_block_size, new_tb_len, new_tb_wid, unroll_factor, tpb, system_state_engine_log_dir_opt));
     }
     else 
     {

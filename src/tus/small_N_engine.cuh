@@ -12,6 +12,10 @@ namespace TUS
         SMALL_N_ENGINE(CORE::SYSTEM_STATE body_states_ic,
                               CORE::DT dt,
                               int block_size,
+                              int tb_len,
+                              int tb_wid,
+                              int unroll_factor,
+                              int tpb,
                               std::optional<std::string> system_state_log_dir_opt = {});
 
         virtual std::string name() override { return "SMALL_N_ENGINE"; }
@@ -19,5 +23,9 @@ namespace TUS
 
     private:
         int block_size_;
+        int tb_len_;
+        int tb_wid_;
+        int unroll_factor_;
+        int tpb_;
     };
 }

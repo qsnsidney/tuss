@@ -35,8 +35,13 @@ namespace TUS
     SMALL_N_ENGINE::SMALL_N_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                                        CORE::DT dt,
                                        int block_size,
+                                       int tb_len,
+                                       int tb_wid,
+                                       int unroll_factor,
+                                       int tpb,
                                        std::optional<std::string> system_state_log_dir_opt) : ENGINE(std::move(system_state_ic), dt, std::move(system_state_log_dir_opt)),
-                                                                                              block_size_(block_size)
+                                                                                              block_size_(block_size), tb_len_(tb_len), tb_wid_(tb_wid), 
+                                                                                              unroll_factor_(unroll_factor), tpb_(tpb)
     {
     }
 
@@ -111,8 +116,11 @@ namespace TUS
         std::cout << "Set thread_per_block to " << block_size_ << std::endl;
         unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
+        dim3 block( tb_len_, tb_wid_ );
+        dim3 grid( (N + block.x-1)/block.x, (N + block.y-1)/block.y ) ;
+
         // calculate the initialia acceleration
-        calculate_forces<<<nblocks, block_size_, block_size_ * sizeof(float4)>>>(nBody, d_X[src_index], d_A[src_index], block_size_);
+        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], block_size_, unroll_factor_);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {

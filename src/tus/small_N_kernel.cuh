@@ -126,11 +126,50 @@ tile_calculation(float4 myPosition, float3 accel, int accum_length)
     return accel;
 }
 
+__global__ inline void
+calculate_forces_2d(int N, void *devX, void *devA, int p, int luf)
+{
+    //extern __shared__ float4 shPosition[];
+    float4 *globalX = (float4 *)devX;
+    float4 *globalA = (float4 *)devA;
+    float4 myPosition;
+    float4 shPosition;
+    int i, j;
+    //const int unrollFactor = 4;
+    //float3 acc[unrollFactor];
+    float4 acc4;
+
+    int j = blockDim.x * blockIdx.x + threadIdx.x; // col
+    int i = blockDim.y * blockIdx.y + threadIdx.y; // row
+    //int gtid = unrollFactor * (blockIdx.x * blockDim.x + threadIdx.x);
+
+    myPosition = globalX[i];
+    float3 acc = {0.0f, 0.0f, 0.0f};
+
+    if ((i < N) && (j*luf < N))
+    {
+        for (int k = 0; j*luf + k < N; k++)
+        {
+            shPosition = globalX[j*luf + k];
+            acc = AccumulatebodyBodyInteraction(myPosition, shPosition, acc);
+        }
+    }
+    
+    // Save the result in global memory for the integration step.
+    __syncthreads();
+    for (i = 0; i < unrollFactor; i++)
+    {
+        acc4 = globalA[i];
+        globalA[i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
+    }
+    __syncthreads();  
+}
+
 // Each thread reads 1 bank from the shared memory, but we limit its size (i.e. limit the # of rows)
 // Data from this 1 bank can be shared between multiple bodies to perform accumulation in parallel
 // We want 32 threads per block, since there are 32 banks in the shared memory
 __global__ inline void
-calculate_forces(int N, void *devX, void *devA, int p)
+calculate_forces_1d(int N, void *devX, void *devA, int p)
 {
     //extern __shared__ float4 shPosition[];
     float4 *globalX = (float4 *)devX;
