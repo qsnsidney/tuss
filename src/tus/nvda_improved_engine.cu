@@ -1,4 +1,4 @@
-#include "nvda_reference_engine.cuh"
+#include "nvda_improved_engine.cuh"
 #include "core/timer.h"
 
 #include <stdlib.h>
@@ -6,13 +6,12 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <iostream>
-#include <fstream>
 
 #include "core/physics.hpp"
 #include "core/serde.h"
 #include "helper.cuh"
 #include "data_t.cuh"
-#include "nvda_reference_kernel.cuh"
+#include "nvda_improved_kernel.cuh"
 
 namespace
 {
@@ -32,7 +31,7 @@ namespace
 
 namespace TUS
 {
-    NVDA_REFERENCE_ENGINE::NVDA_REFERENCE_ENGINE(CORE::SYSTEM_STATE system_state_ic,
+    NVDA_IMPROVED_ENGINE::NVDA_IMPROVED_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                                        CORE::DT dt,
                                        int block_size,
                                        std::optional<std::string> system_state_log_dir_opt) : ENGINE(std::move(system_state_ic), dt, std::move(system_state_log_dir_opt)),
@@ -40,7 +39,7 @@ namespace TUS
     {
     }
 
-    CORE::SYSTEM_STATE NVDA_REFERENCE_ENGINE::execute(int n_iter, CORE::TIMER &timer)
+    CORE::SYSTEM_STATE NVDA_IMPROVED_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
         size_t nBody = system_state_snapshot().size();
 
@@ -50,7 +49,7 @@ namespace TUS
         // random initializer just for now
         size_t vector_size_3d = sizeof(data_t_3d) * nBody;
         size_t vector_size_4d = sizeof(float4) * nBody;
-
+        size_t vector_size_4dx = sizeof(float4) * ((nBody + (block_size_ - 1))/block_size_) * block_size_;
         /*
      *   host side memory allocation
      */
@@ -60,7 +59,7 @@ namespace TUS
         host_malloc_helper((void **)&h_V, vector_size_3d);
         host_malloc_helper((void **)&h_output_V, vector_size_3d);
 
-        host_malloc_helper((void **)&h_X, vector_size_4d);
+        host_malloc_helper((void **)&h_X, vector_size_4dx);
         host_malloc_helper((void **)&h_A, vector_size_4d);
         host_malloc_helper((void **)&h_output_X, vector_size_4d);
 
@@ -68,6 +67,10 @@ namespace TUS
         /*
      *   input randome initialize
      */
+
+        for(int i = 0; i < ((nBody + (block_size_ - 1))/block_size_) * block_size_; i++) {
+            h_X[i] = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
+        }
 
         parse_ic_f4(h_X, h_V, ic);
         timer.elapsed_previous("deserialize_body_state_vec_from_csv");
@@ -79,8 +82,8 @@ namespace TUS
         unsigned src_index = 0;
         unsigned dest_index = 1;
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
-        gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4d));
-        gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4d));
+        gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4dx));
+        gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4dx));
 
         d_A = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size_4d));
@@ -99,7 +102,7 @@ namespace TUS
          *   create double buffer on device side
          */
         // cudaMemcpy(d_A[0], h_A, vector_size, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_X[src_index], h_X, vector_size_4d, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_X[src_index], h_X, vector_size_4dx, cudaMemcpyHostToDevice);
         cudaMemcpy(d_V[src_index], h_V, vector_size_3d, cudaMemcpyHostToDevice);
         timer.elapsed_previous("copied input data from host to device");
 
@@ -162,26 +165,7 @@ namespace TUS
         // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
 
-        std::ofstream X_file;
-        std::ofstream V_file;
-        std::ofstream A_file;
-        X_file.open ("referenceX.output");
-        V_file.open ("referenceV.output");
-        A_file.open ("referenceA.output");
-        for(int i = 0; i < nBody; i++) {
-            X_file << h_output_X[i].x << "\n";
-            X_file << h_output_X[i].y << "\n";
-            X_file << h_output_X[i].z << "\n";
-            V_file << h_output_V[i].x << "\n";
-            V_file << h_output_V[i].y << "\n";
-            V_file << h_output_V[i].z << "\n";
-            A_file << h_A[i].x << "\n";
-            A_file << h_A[i].y << "\n";
-            A_file << h_A[i].z << "\n";
-        }
-        X_file.close();
-        V_file.close();
-        A_file.close();
+        write_debug_output(name(), h_output_X, h_output_V, h_A, nBody);
 
         timer.elapsed_previous("copied output back to host");
 

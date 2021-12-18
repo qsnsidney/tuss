@@ -34,33 +34,6 @@ __global__ inline void update_step_vel_f4(unsigned nbody, data_t step_size, floa
     }
 }
 
-__global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *location, float4 *acceleration)
-{
-    unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
-    if (tid < nbody)
-    {
-        data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
-        data_t_3d x_self = make_data_t_3d(location[tid].x,location[tid].y,location[tid].z);
-        for (unsigned j = 0; j < nbody; j++)
-        {
-            if (j == tid)
-            {
-                continue;
-            }
-            // source of gravitiy
-            data_t_3d x_source = make_float3(location[j].x, location[j].y, location[j].z);
-            data_t mass = location[j].w;
-
-            data_t_3d numerator = (x_source - x_self) * mass;
-            data_t denominator = power_norm(x_self, x_source);
-            data_t_3d new_term = (numerator / denominator);
-            accumulated_accer = accumulated_accer + new_term;
-            //printf("tid = %d, new_term %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z);
-        }
-        acceleration[tid] = make_float4(accumulated_accer.x, accumulated_accer.y, accumulated_accer.z, 0);
-    }
-}
-
 /*
  * Functions below are taken from https://www.researchgate.net/publication/291770155_Fast_N-body_simulation_with_CUDA with
  * only necessary modifications such as boundary condition check and parameter fixing.
@@ -140,11 +113,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
     
     // we don't skip the object even if it's gtid > N.
     // reasons explained later.
-    if(gtid < N){
-        myPosition = globalX[gtid];
-    } else {
-        myPosition = {0.0f, 0.0f, 0.0f, 0.0f};
-    }
+    myPosition = globalX[gtid];
     for (i = 0, tile = 0; i < N; i += blockDim.x, tile++) {
         
         // decide which piece of memory to read into the shared mem
@@ -156,12 +125,12 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // for example, when there are 48 bodies with block_size = 32. 
         // in the 2nd iteration, thread of body 24 will try to read sharemem
         // of body 56. but we should not skip body 24's accleration accumulatio
-        if(idx >= N) {
-            shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f, 0.0f};
-        }
-        else {
-            shPosition[threadIdx.x] = globalX[idx];
-        }
+        //if(idx >= N) {
+        //    shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f, 0.0f};
+        //}
+        //else {
+        shPosition[threadIdx.x] = globalX[idx];
+        //
 
         // we have to skip the thread that's greater than gtid here 
         // instead of earlier, because the thread could be reading some
@@ -169,9 +138,6 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // then the thread with gtid 9 will be reading the body1's location
         // in the first iteration. now the thread is done with loading the shared mem
         // so we can skip it.
-        if(gtid >= N) {
-            continue;
-        }
 
         // Ideally, we should take care of the case where the last tile contains less than 
         // num_block of data. only let the tiled function process min(blocksize, remaining elements) 

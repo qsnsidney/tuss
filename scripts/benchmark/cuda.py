@@ -4,28 +4,53 @@ import os
 import re
 import subprocess
 import argparse
+from enum import Enum
+
 
 def error_and_exit(err_msg):
     print(err_msg)
     exit(1)
 
+BASIC = 0
+NVDA_REFERENCE = 1
+COALESCED_BASIC = 2
+TILED_BASIC = 3
+MAT_MUL = 4
+NVDA_IMPROVED = 5
+
+TEST_ENGINES_NAME = { \
+    BASIC : "basic_engine", \
+    NVDA_REFERENCE : "nvda_reference_engine", \
+    COALESCED_BASIC : "coalesced_basic_engine", \
+    TILED_BASIC : "tiled_basic_engine", \
+    MAT_MUL : "matmul_engine", \
+    NVDA_IMPROVED : "improved_nvda_engine", \
+}
+
+DEFAULT_ITERATION = 1
 
 if __name__=='__main__':
-    THREAD_PER_BLOCK = [16,32,64,128,256]
-    NBODY = [10000,20000,50000,100000]
-    AVG_ITERATION = 1
-    VERSION = 2
-    CUDA_EXECUTABLE = "build/tus/tus_exe"
-    GPU_TIME_PATTERN = "Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)"
-    BENCHMARK_DATA = "data/ic/benchmark_500000.bin"
-    BENCHMARK_OUTPUT_FILE = f"gpu_benchmark_{VERSION}.csv"
-    STDOUT_OUTPUT = "benchmark.stdout"
 
     parser = argparse.ArgumentParser(description='Simple parser')
-    parser.add_argument('--iter', type=int, default=AVG_ITERATION,
-                        help='number of runs for each configuration (default: 1)')
+    parser.add_argument('--iter', type=int, default=DEFAULT_ITERATION,
+                        help=f'number of runs for each configuration (default: {DEFAULT_ITERATION})')
+
+    parser.add_argument('--version', type=int, default=NVDA_IMPROVED,
+                        help=f'version of enginer to test. default = {NVDA_IMPROVED}({TEST_ENGINES_NAME[NVDA_IMPROVED]})')
 
     args = parser.parse_args()
+
+    THREAD_PER_BLOCK = [16,64,256]
+    NBODY = [50000, 100000, 200000]
+    CUDA_EXECUTABLE = "build/tus/tus_exe"
+    GPU_TIME_PATTERN = "Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)"
+    BENCHMARK_DATA = "data/ic/s0_s112500_g100000_d100000.bin"
+    STDOUT_OUTPUT = "benchmark.stdout"
+    VERSION = args.version
+    AVG_ITERATION = args.iter
+    BENCHMARK_OUTPUT_FILE = f"gpu_benchmark_{TEST_ENGINES_NAME[VERSION]}.csv"
+    
+    print(f"running benchmark for {TEST_ENGINES_NAME[VERSION]}")
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
     project_home_dir = os.path.join(script_dir, "../../")
@@ -47,7 +72,7 @@ if __name__=='__main__':
         f_data.write(str(block_size) + ",")
         for num_body in NBODY:
             total_time = 0
-            for count in range(args.iter):
+            for count in range(AVG_ITERATION):
                 info_msg = "RUNNING NUMBLOCK : " + str(block_size) + ". NBODY : " + str(num_body) + ". ITER: " + str(count)
                 f_stdout.write(info_msg + "\n")
                 print(info_msg)

@@ -14,6 +14,7 @@
 #include "coalesced_simple_engine.cuh"
 #include "tiled_simple_engine.cuh"
 #include "mat_mul_engine.cuh"
+#include "nvda_improved_engine.cuh"
 #include "core/cxxopts.hpp"
 #include "cpusim/reference.h"
 
@@ -28,6 +29,7 @@ namespace
         COALESCED_BASIC,
         TILED_BASIC,
         MAT_MUL,
+        NVDA_IMPROVED,
     };
 }
 
@@ -150,6 +152,11 @@ int main(int argc, const char *argv[])
     else if (version == VERSION::MAT_MUL)
     {
         engine = std::make_unique<TUS::MAT_MUL_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
+    }
+    else if (version == VERSION::NVDA_IMPROVED)
+    {
+        engine = std::make_unique<TUS::NVDA_IMPROVED_ENGINE>(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
     else
