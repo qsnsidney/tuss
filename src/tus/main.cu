@@ -95,10 +95,10 @@ int main(int argc, const char *argv[])
     const int verbosity = arg_result.count("verbose");
     CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
 
-    const int tb_len = arg_result.count("len");
-    const int tb_wid = arg_result.count("wid");
-    const int unroll_factor = arg_result.count("lur");
-    const int tpb = arg_result.count("tpb");
+    const int tb_len = arg_result["len"].as<int>();
+    const int tb_wid = arg_result["wid"].as<int>();
+    const int unroll_factor = arg_result["lur"].as<int>();
+    const int tpb = arg_result["tpb"].as<int>();
 
     std::cout << "Running.." << std::endl;
     std::cout << "ic_file: " << ic_file_path << std::endl;
