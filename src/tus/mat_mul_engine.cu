@@ -78,8 +78,8 @@ namespace TUS
         /*
      *   create double buffer on device side
      */
-        constexpr size_t src_index = 0;
-        constexpr size_t dest_index = 1;
+        unsigned src_index = 0;
+        unsigned dest_index = 1;
 
         data_t_3d* d_X[2] = {nullptr, nullptr};
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size));
@@ -159,7 +159,7 @@ namespace TUS
                     timer.elapsed_previous(std::string("Transfer to CPU"), CORE::TIMER::TRIGGER_LEVEL::INFO);
                 }
 
-                swap(src_index, dest_index);
+                std::swap(src_index, dest_index);
             }
             cudaDeviceSynchronize();
         }
