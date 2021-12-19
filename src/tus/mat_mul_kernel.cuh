@@ -71,7 +71,7 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
             data_t_3d x_source = location[j];
             data_t_3d displacement = (x_source - x_self);
             data_t denominator = power_norm(displacement);
-            data_t_3d new_term = (mass[j] * displacement / denominator);
+            data_t_3d new_term = (displacement * mass[j] / denominator);
             accumulated_accer = accumulated_accer + new_term;
             //printf("tid = %d, new_term %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z);
         }
