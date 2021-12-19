@@ -164,6 +164,12 @@ make run_tus ARGS="-i ./data/ic/benchmark_100000.bin -d 0.001 -n10 -v -V1"
 make run_tus ARGS="-i ./data/ic/s0_s112500.bin -d 0.001 -n10 -v -V1 -t32"
 make run_tus ARGS="-i ./data/ic/s0_s112500.bin -d 0.001 -n10 -v -V1 -t64"
 ```
+```
+# Deprecated
+python3 scripts/benchmark/cuda.py
+# Preferred
+python3 -m scripts.benchmark cuda
+```
 
 ### Verification
 

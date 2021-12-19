@@ -34,33 +34,6 @@ __global__ inline void update_step_vel_f4(unsigned nbody, data_t step_size, floa
     }
 }
 
-__global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *location, float4 *acceleration)
-{
-    unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
-    if (tid < nbody)
-    {
-        data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
-        data_t_3d x_self = make_data_t_3d(location[tid].x,location[tid].y,location[tid].z);
-        for (unsigned j = 0; j < nbody; j++)
-        {
-            if (j == tid)
-            {
-                continue;
-            }
-            // source of gravitiy
-            data_t_3d x_source = make_float3(location[j].x, location[j].y, location[j].z);
-            data_t mass = location[j].w;
-
-            data_t_3d numerator = (x_source - x_self) * mass;
-            data_t denominator = power_norm(x_self, x_source);
-            data_t_3d new_term = (numerator / denominator);
-            accumulated_accer = accumulated_accer + new_term;
-            //printf("tid = %d, new_term %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z);
-        }
-        acceleration[tid] = make_float4(accumulated_accer.x, accumulated_accer.y, accumulated_accer.z, 0);
-    }
-}
-
 /*
  * Functions below are taken from https://www.researchgate.net/publication/291770155_Fast_N-body_simulation_with_CUDA with
  * only necessary modifications such as boundary condition check and parameter fixing.
@@ -69,7 +42,7 @@ __global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *locatio
  */
 
 __device__ inline float3
-AccumulatebodyBodyInteraction(float4 bi, float4 bj, float3 ai)
+AccumulatebodyBodyInteraction_improved(float4 bi, float4 bj, float3 ai)
 {
     float3 r;
     // r_ij [3 FLOPS]
@@ -90,45 +63,26 @@ AccumulatebodyBodyInteraction(float4 bi, float4 bj, float3 ai)
     return ai;
 }
 
-// a version that exact matches with simple test bench
 __device__ inline float3
-AccumulatebodyBodyInteraction_exact_match(float4 bi, float4 bj, float3 ai)
-{
-    float3 r;
-    // r_ij [3 FLOPS]
-    r.x = bj.x - bi.x;
-    r.y = bj.y - bi.y;
-    r.z = bj.z - bi.z;
-    // distSqr = dot(r_ij, r_ij) + EPS^2 [6 FLOPS]
-    float distSqr = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z + CORE::UNIVERSE::epislon_square);
-    // invDistCube =1/distSqr^(3/2) [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
-    float distSixth = distSqr * distSqr * distSqr;
-    // s = m_j * invDistCube [1 FLOP]
-    float s = bj.w  / distSixth;
-    // a_i = a_i + s * r_ij [6 FLOPS]
-    ai.x += r.x * s;
-    ai.y += r.y * s;
-    ai.z += r.z * s;
-    return ai;
-}
-
-__device__ inline float3
-tile_calculation(float4 myPosition, float3 accel, int accum_length)
+tile_calculation_improved(float4 myPosition, float3 accel, int accum_length)
 {
     int i;
     extern __shared__ float4 shPosition[];
-    for (i = 0; i < accum_length; i++) {
+    for (i = 0; i < accum_length; i+=4) {
         // we don't need to check the object index.
         // because the vector subtration of oneself will just yields 0.
         // hence contributes no acceleration.
-        accel = AccumulatebodyBodyInteraction(myPosition, shPosition[i], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i+1], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i+2], accel);
+        accel = AccumulatebodyBodyInteraction_improved(myPosition, shPosition[i+3], accel);
     }
     return accel;
 }
 
 // each calculate forces handles one body
 __global__ inline void
-calculate_forces(int N, void *devX, void *devA, int p)
+calculate_forces_improved(int N, void *devX, void *devA, int p)
 {
     extern __shared__ float4 shPosition[];
     float4 *globalX = (float4 *)devX;
@@ -140,11 +94,7 @@ calculate_forces(int N, void *devX, void *devA, int p)
     
     // we don't skip the object even if it's gtid > N.
     // reasons explained later.
-    if(gtid < N){
-        myPosition = globalX[gtid];
-    } else {
-        myPosition = {0.0f, 0.0f, 0.0f, 0.0f};
-    }
+    myPosition = globalX[gtid];
     for (i = 0, tile = 0; i < N; i += blockDim.x, tile++) {
         
         // decide which piece of memory to read into the shared mem
@@ -156,12 +106,12 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // for example, when there are 48 bodies with block_size = 32. 
         // in the 2nd iteration, thread of body 24 will try to read sharemem
         // of body 56. but we should not skip body 24's accleration accumulatio
-        if(idx >= N) {
-            shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f, 0.0f};
-        }
-        else {
-            shPosition[threadIdx.x] = globalX[idx];
-        }
+        //if(idx >= N) {
+        //    shPosition[threadIdx.x] = {0.0f, 0.0f, 0.0f, 0.0f};
+        //}
+        //else {
+        shPosition[threadIdx.x] = globalX[idx];
+        //
 
         // we have to skip the thread that's greater than gtid here 
         // instead of earlier, because the thread could be reading some
@@ -169,16 +119,13 @@ calculate_forces(int N, void *devX, void *devA, int p)
         // then the thread with gtid 9 will be reading the body1's location
         // in the first iteration. now the thread is done with loading the shared mem
         // so we can skip it.
-        if(gtid >= N) {
-            continue;
-        }
 
         // Ideally, we should take care of the case where the last tile contains less than 
         // num_block of data. only let the tiled function process min(blocksize, remaining elements) 
         // in length. but because we already load out of bound shared mem with 0s. we don't have to 
         // worry about out of bound anymore.
         __syncthreads();
-        acc = tile_calculation(myPosition, acc, blockDim.x);
+        acc = tile_calculation_improved(myPosition, acc, blockDim.x);
         __syncthreads();
     }
     // Save the result in global memory for the integration step.

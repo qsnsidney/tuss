@@ -14,6 +14,8 @@
 #include "small_N_engine.cuh"
 #include "coalesced_simple_engine.cuh"
 #include "tiled_simple_engine.cuh"
+#include "mat_mul_engine.cuh"
+#include "nvda_improved_engine.cuh"
 #include "core/cxxopts.hpp"
 #include "cpusim/reference.h"
 
@@ -28,6 +30,8 @@ namespace
         COALESCED_BASIC,
         TILED_BASIC,
         SMALL_N,
+        MAT_MUL,
+        NVDA_IMPROVED,
     };
 }
 
@@ -50,7 +54,7 @@ auto parse_args(int argc, const char *argv[])
     option_group("wid", "vertical dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
     option_group("lur", "loop unrolling factor", cxxopts::value<int>()->default_value("2"));
     option_group("tpb", "thread per body", cxxopts::value<int>()->default_value("32"));
-    option_group("V,version", "version of optimization (0 - basic, 1 - nvda reference): optional (default 0)",
+    option_group("V,version", "version of optimization (see src/tus/main.cu): optional (default 0)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::BASIC))));
     option_group("o,out", "system_state_log_dir: optional", cxxopts::value<std::string>());
     option_group("snapshot", "only dump out the final view, combined with --out: optional (default false)");
@@ -142,23 +146,34 @@ int main(int argc, const char *argv[])
     std::unique_ptr<CORE::ENGINE> engine;
     if (version == VERSION::NVDA_REFERENCE)
     {
-        engine.reset(new TUS::NVDA_REFERENCE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::NVDA_REFERENCE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
-    else if(version == VERSION::BASIC)
+    else if (version == VERSION::BASIC)
     {
-        engine.reset(new TUS::SIMPLE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
-    } 
-    else if (version == VERSION::COALESCED_BASIC) 
-    {
-        engine.reset(new TUS::COALESCED_SIMPLE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::SIMPLE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
-    else if (version == VERSION::TILED_BASIC) 
+    else if (version == VERSION::COALESCED_BASIC)
     {
-        engine.reset(new TUS::TILED_SIMPLE_ENGINE(
-            system_state_ic, dt, block_size, system_state_engine_log_dir_opt));
+        engine = std::make_unique<TUS::COALESCED_SIMPLE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
+    }
+    else if (version == VERSION::TILED_BASIC)
+    {
+        engine = std::make_unique<TUS::TILED_SIMPLE_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
+    }
+    else if (version == VERSION::MAT_MUL)
+    {
+        // POC, bad performance due to too many kernel calls
+        engine = std::make_unique<TUS::MAT_MUL_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
+    }
+    else if (version == VERSION::NVDA_IMPROVED)
+    {
+        engine = std::make_unique<TUS::NVDA_IMPROVED_ENGINE>(
+            system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
     else if (version == VERSION::SMALL_N) 
     {

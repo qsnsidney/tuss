@@ -4,6 +4,8 @@
 #include "core/physics.hpp"
 #include "core/serde.h"
 #include <iostream>
+#include <fstream>
+
 inline void swap(unsigned &a, unsigned &b)
 {
     unsigned temp = a;
@@ -70,4 +72,29 @@ inline __host__ void parse_ic_f4(float4 *input_x, data_t_3d *input_v, const CORE
         input_x[i] = make_float4(p.x, p.y, p.z, m);
         input_v[i] = make_data_t_3d((data_t)v.x, (data_t)v.y, (data_t)v.z);
     }
+}
+
+inline __host__ void write_debug_output(std::string engine_name, float4 * X_output, data_t_3d * V_output, float4 * A_output, size_t nBody) {
+#if 1
+    std::ofstream X_file;
+    std::ofstream V_file;
+    std::ofstream A_file;
+    X_file.open(engine_name + "X.output");
+    V_file.open(engine_name + "V.output");
+    A_file.open(engine_name + "A.output");
+    for(int i = 0; i < nBody; i++) {
+        X_file << X_output[i].x << "\n";
+        X_file << X_output[i].y << "\n";
+        X_file << X_output[i].z << "\n";
+        V_file << V_output[i].x << "\n";
+        V_file << V_output[i].y << "\n";
+        V_file << V_output[i].z << "\n";
+        A_file << A_output[i].x << "\n";
+        A_file << A_output[i].y << "\n";
+        A_file << A_output[i].z << "\n";
+    }
+    X_file.close();
+    V_file.close();
+    A_file.close();
+#endif
 }

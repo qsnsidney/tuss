@@ -1,6 +1,5 @@
 import argparse
 
-from numpy import number
 from . import translation
 
 # IC Data
@@ -22,7 +21,7 @@ def init(parser):
 def main(args):
     if args.target == 'translate':
         print('Info:')
-        print('Info:', 'args.tipsy', 'args.tipsy')
+        print('Info:', 'args.tipsy', args.tipsy)
         print('Info:', 'args.bin', args.bin)
         print('Info:', 'args.body_types', args.body_types)
         print('Info:')
