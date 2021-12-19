@@ -99,8 +99,8 @@ namespace TUS
         // d_Field[0..nBody] = field.x
         // d_Field[nBody..2*nBody] = field.y
         // d_Field[2*nBody..3*nBody] = field.z
-        data_t *d_Field = nullptr;
-        gpuErrchk(cudaMalloc((void**)&d_Field, sizeof(data_t) * nBody * 3));
+        // data_t *d_Field = nullptr;
+        // gpuErrchk(cudaMalloc((void**)&d_Field, sizeof(data_t) * nBody * 3));
 
         timer.elapsed_previous("allocated device memory");
         /*
@@ -129,16 +129,16 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                // calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
-                //                                                    d_A[dest_index]);            // output
-                // cudaDeviceSynchronize();
+                calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[dest_index], d_M, //input
+                                                                   d_A[dest_index]);            // output
+                cudaDeviceSynchronize();
 
-                for(size_t ibody = 0; ibody < nBody; ibody++) {
-                    // prepare for field
-                    calculate_field<<<nblocks, block_size_>>>(nBody, ibody, d_X[dest_index], // input
-                        d_Field); // output
-                    // cudaDeviceSynchronize();
-                }
+                // for(size_t ibody = 0; ibody < nBody; ibody++) {
+                //     // prepare for field
+                //     calculate_field<<<nblocks, block_size_>>>(nBody, ibody, d_X[dest_index], // input
+                //         d_Field); // output
+                //     // cudaDeviceSynchronize();
+                // }
 
                 update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
                                                             d_V[dest_index]);                                    // output
@@ -197,7 +197,7 @@ namespace TUS
         }
         cudaFree(d_V_half);
         cudaFree(d_M);
-        cudaFree(d_Field);
+        // cudaFree(d_Field);
         cudaDeviceReset();
 
         return system_state_result;

@@ -69,6 +69,11 @@ __device__ inline data_t power_norm(data_t_3d a, data_t_3d b)
     return res * res * res;
 }
 
+__device__ inline data_t power_norm(data_t_3d a)
+{
+    data_t res = sqrtf(a.x*a.x + a.y*a.y + a.z*a.z + CORE::UNIVERSE::epislon_square);
+    return res * res * res;
+}
 
 // WARNING: this function has hardcoded assumption on float vs double
 __device__ inline data_t power_norm_inverse(data_t_3d a, data_t_3d b)

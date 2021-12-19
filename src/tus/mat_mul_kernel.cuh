@@ -69,9 +69,9 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
             }
             // source of gravitiy
             data_t_3d x_source = location[j];
-            data_t_3d numerator = (x_source - x_self) * mass[j];
-            data_t denominator = power_norm(x_self, x_source);
-            data_t_3d new_term = (numerator / denominator);
+            data_t_3d displacement = (x_source - x_self);
+            data_t denominator = power_norm(displacement);
+            data_t_3d new_term = (mass[j] * displacement / denominator);
             accumulated_accer = accumulated_accer + new_term;
             //printf("tid = %d, new_term %f, %f, %f\n", tid, new_term.x, new_term.y, new_term.z);
         }
@@ -91,7 +91,7 @@ __global__ inline void calculate_field(unsigned nbody, unsigned target_ibody, da
         const data_t_3d source_field = numerator / denominator;
         
         field[source_ibody] = source_field.x;
-        // field[nbody + source_ibody] = source_field.y;
-        // field[nbody + nbody + source_ibody] = source_field.z;
+        field[nbody + source_ibody] = source_field.y;
+        field[nbody + nbody + source_ibody] = source_field.z;
     }
 }
