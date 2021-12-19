@@ -102,6 +102,10 @@ def main(args):
 
 
 if __name__ == '__main__':
+    print('WARNING:', 'Launching directly from this script is now deprecated!')
+    print('WARNING:', 'Please use:')
+    print('WARNING:', '  python3 -m scripts.benchmark cuda')
+    print(' ')
     parser = argparse.ArgumentParser(description='Simple parser')
     init(parser)
     main(args=parser.parse_args())
