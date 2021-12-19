@@ -7,7 +7,7 @@ def init(parser):
     subparsers = parser.add_subparsers(dest='target', required=True)
 
     parser_cuda = subparsers.add_parser('cuda')
-    cuda.init_argparser(parser_cuda)
+    cuda.init(parser_cuda)
 
 
 def main(args):
