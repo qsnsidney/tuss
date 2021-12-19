@@ -81,17 +81,17 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
 
 __global__ inline void calculate_field(unsigned nbody, unsigned target_ibody, data_t_3d *location, data_t *field)
 {
-    unsigned source_ibody = threadIdx.x + blockDim.x * blockIdx.x;
+    const unsigned source_ibody = threadIdx.x + blockDim.x * blockIdx.x;
     if (source_ibody < nbody)
     {
-        data_t_3d x_target = location[target_ibody];
-        data_t_3d x_source = location[source_ibody];
-        data_t_3d numerator = (x_source - x_target);
-        data_t denominator = power_norm(x_target, x_source);
-        data_t_3d field = numerator / denominator;
+        const data_t_3d x_target = location[target_ibody];
+        const data_t_3d x_source = location[source_ibody];
+        const data_t_3d numerator = (x_source - x_target);
+        const data_t denominator = power_norm(x_target, x_source);
+        const data_t_3d source_field = numerator / denominator;
         
-        field[source_ibody] = field.x;
-        field[nbody + source_ibody] = field.y;
-        field[nbody + nbody + source_ibody] = field.z;
+        field[source_ibody] = source_field.x;
+        field[nbody + source_ibody] = source_field.y;
+        field[nbody + nbody + source_ibody] = source_field.z;
     }
 }
