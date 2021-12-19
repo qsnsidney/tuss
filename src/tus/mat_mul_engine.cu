@@ -137,7 +137,7 @@ namespace TUS
                     // prepare for field
                     calculate_field<<<nblocks, block_size_>>>(nBody, ibody, d_X[dest_index], // input
                         d_Field); // output
-                    cudaDeviceSynchronize();
+                    // cudaDeviceSynchronize();
                 }
 
                 update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
