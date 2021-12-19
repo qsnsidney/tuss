@@ -63,12 +63,14 @@ __host__ __device__ inline data_t_3d operator/(const data_t_3d &a, const data_t 
 // }
 
 // WARNING: this function has hardcoded assumption on float vs double
+// norm(a-b) ^ 1.5
 __device__ inline data_t power_norm(data_t_3d a, data_t_3d b)
 {
     data_t res = sqrtf((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z) + CORE::UNIVERSE::epislon_square);
     return res * res * res;
 }
 
+// norm(a) ^ 1.5
 __device__ inline data_t power_norm(data_t_3d a)
 {
     data_t res = sqrtf(a.x*a.x + a.y*a.y + a.z*a.z + CORE::UNIVERSE::epislon_square);
