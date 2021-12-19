@@ -127,7 +127,7 @@ tile_calculation(float4 myPosition, float3 accel, int accum_length)
 }
 
 __global__ inline void
-calculate_forces_2d(int N, void *devX, void *devA, int p, int luf)
+calculate_forces_2d(int N, void *devX, void *devA, int luf)
 {
     //extern __shared__ float4 shPosition[];
     float4 *globalX = (float4 *)devX;

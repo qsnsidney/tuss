@@ -120,7 +120,7 @@ namespace TUS
         dim3 grid( (nBody + block.x-1)/block.x, (nBody + block.y-1)/block.y ) ;
 
         // calculate the initialia acceleration
-        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], block_size_, unroll_factor_);
+        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], unroll_factor_);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {

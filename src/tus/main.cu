@@ -162,23 +162,8 @@ int main(int argc, const char *argv[])
     }
     else if (version == VERSION::SMALL_N) 
     {
-        int new_block_size = block_size;
-        int new_tb_len = tb_len;
-        int new_tb_wid = tb_wid;
-
-        if ((tb_len != 0) && (tb_wid != 0))
-        {
-            new_block_size = tb_len * tb_wid;
-        }
-        else
-        {
-            new_tb_len = block_size;
-            new_tb_wid = 1;
-        }
-        ASSERT(IsPowerOfTwo(new_block_size));
-
-        engine.reset(new TUS::SMALL_N_ENGINE(
-            system_state_ic, dt, new_block_size, new_tb_len, new_tb_wid, unroll_factor, tpb, system_state_engine_log_dir_opt));
+            engine.reset(new TUS::SMALL_N_ENGINE(
+            system_state_ic, dt, block_size, tb_len,tb_wid, unroll_factor, tpb, system_state_engine_log_dir_opt));
     }
     else 
     {
