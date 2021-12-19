@@ -91,7 +91,7 @@ __global__ inline void calculate_field(unsigned nbody, unsigned target_ibody, da
         const data_t_3d source_field = numerator / denominator;
         
         field[source_ibody] = source_field.x;
-        field[nbody + source_ibody] = source_field.y;
-        field[nbody + nbody + source_ibody] = source_field.z;
+        // field[nbody + source_ibody] = source_field.y;
+        // field[nbody + nbody + source_ibody] = source_field.z;
     }
 }
