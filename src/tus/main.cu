@@ -151,6 +151,7 @@ int main(int argc, const char *argv[])
     }
     else if (version == VERSION::MAT_MUL)
     {
+        // POC, bad performance due to too many kernel calls
         engine = std::make_unique<TUS::MAT_MUL_ENGINE>(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
