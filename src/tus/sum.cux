@@ -65,7 +65,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
 
     sdata[tid] = (i < n) ? g_idata[i] : 0;
     __syncthreads();
-    printf("thread %d has data %f\n", i, sdata[0]);
+    printf("thread: (i - %d, tid - %d) has data %f\n", i, tid, sdata[tid]);
 
     // do reduction in shared mem
     for (int s=1; s < blockDim.x; s *= 2) 
@@ -75,7 +75,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
         if (tid % (2*s) == 0) {
             // only tids divisible by s*2 partake
             sdata[tid] += sdata[tid + s];
-            printf("sdata[%d] is %f", tid, sdata[tid]);
+            printf("sdata[%d] is %f\n", tid, sdata[tid]);
         }
         __syncthreads();
     }
