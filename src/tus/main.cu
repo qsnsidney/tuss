@@ -11,6 +11,7 @@
 #include "core/utility.hpp"
 #include "simple_engine.cuh"
 #include "nvda_reference_engine.cuh"
+#include "small_N_engine.cuh"
 #include "coalesced_simple_engine.cuh"
 #include "tiled_simple_engine.cuh"
 #include "mat_mul_engine.cuh"
@@ -28,6 +29,7 @@ namespace
         NVDA_REFERENCE,
         COALESCED_BASIC,
         TILED_BASIC,
+        SMALL_N,
         MAT_MUL,
         NVDA_IMPROVED,
     };
@@ -48,6 +50,10 @@ auto parse_args(int argc, const char *argv[])
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(::default_block_size)));
+    option_group("len", "horizontal dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
+    option_group("wid", "vertical dimension of a 2D thread block", cxxopts::value<int>()->default_value("0"));
+    option_group("lur", "loop unrolling factor", cxxopts::value<int>()->default_value("2"));
+    option_group("tpb", "thread per body", cxxopts::value<int>()->default_value("32"));
     option_group("V,version", "version of optimization (see src/tus/main.cu): optional (default 0)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::BASIC))));
     option_group("o,out", "system_state_log_dir: optional", cxxopts::value<std::string>());
@@ -93,6 +99,11 @@ int main(int argc, const char *argv[])
     const int verbosity = arg_result.count("verbose");
     CORE::TIMER::set_trigger_level(static_cast<CORE::TIMER::TRIGGER_LEVEL>(verbosity));
 
+    const int tb_len = arg_result["len"].as<int>();
+    const int tb_wid = arg_result["wid"].as<int>();
+    const int unroll_factor = arg_result["lur"].as<int>();
+    const int tpb = arg_result["tpb"].as<int>();
+
     std::cout << "Running.." << std::endl;
     std::cout << "ic_file: " << ic_file_path << std::endl;
     std::cout << "max_n_body: " << max_n_body << std::endl;
@@ -104,6 +115,10 @@ int main(int argc, const char *argv[])
     std::cout << "snapshot: " << snapshot << std::endl;
     std::cout << "verify: " << verify << std::endl;
     std::cout << "verbosity: " << verbosity << std::endl;
+    std::cout << "len: " << tb_len << std::endl;
+    std::cout << "wid: " << tb_wid << std::endl;
+    std::cout << "lur: " << unroll_factor << std::endl;
+    std::cout << "tpb: " << tpb << std::endl;
     std::cout << std::endl;
     timer.elapsed_previous("parsing_args");
 
@@ -160,7 +175,12 @@ int main(int argc, const char *argv[])
         engine = std::make_unique<TUS::NVDA_IMPROVED_ENGINE>(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
-    else
+    else if (version == VERSION::SMALL_N) 
+    {
+            engine.reset(new TUS::SMALL_N_ENGINE(
+            system_state_ic, dt, block_size, tb_len,tb_wid, unroll_factor, tpb, system_state_engine_log_dir_opt));
+    }
+    else 
     {
         std::cout << "INVALID ENGINE VALUE: " << static_cast<std::underlying_type<VERSION>::type>(version) << std::endl;
         exit(1);
