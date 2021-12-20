@@ -63,22 +63,16 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     int tid = threadIdx.x;
     int i = blockIdx.x*blockDim.x + threadIdx.x;
 
-    if (i < n)
-    {
-        printf("g_idata[%d]: %f\n", i, g_idata[i]);
-    }
     //sdata[tid] = (i < n) ? g_idata[i] : 0;
     if (i < n)
     {
         sdata[tid] = g_idata[i];
-        printf("thread: (i - %d, tid - %d) has data %f\n", i, tid, sdata[tid]);
     }
     __syncthreads();
 
     // do reduction in shared mem
     for (int s=1; s < blockDim.x; s *= 2) 
     { 
-        printf("i - %d, s - %d\n", i, s);
         // s: stride
         if ((tid % (2*s) == 0) && (tid + s < n) && (tid < n)) {
             // only tids divisible by s*2 partake
@@ -92,8 +86,6 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
         g_odata[blockIdx.x] = sdata[0];
         printf("block %d has data %f\n", blockIdx.x, sdata[0]);
     }
-
-    printf("thread: (i - %d, tid - %d) end\n", i, tid);
 }
 
 int main(int argc, char *argv[])
@@ -179,17 +171,18 @@ int main(int argc, char *argv[])
     //const int bs = 32;
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
     //assign<<<blockNum, block>>>( d_X, r );
+    printf("blockNum 1: %d\n", blockNum);
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z, r ) ;
     blockNum = (blockNum + block.x-1)/block.x;
-    printf("blockNum: %d\n", blockNum);
+    printf("blockNum 2: %d\n", blockNum);
 
     while (blockNum != 1)
     {
-        printf("lala blockNum: %d\n", blockNum);
-        int total = blockNum;
-        blockNum = (blockNum + block.x-1)/block.x;
+        //int total = blockNum;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
         reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_X, d_Z, blockNum) ;
+        blockNum = (blockNum + block.x-1)/block.x;
+        printf("lala blockNum: %d\n", blockNum);
     }
 
     cudaDeviceSynchronize();
