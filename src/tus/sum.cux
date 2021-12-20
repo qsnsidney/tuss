@@ -168,7 +168,8 @@ int main(int argc, char *argv[])
 
     //const int bs = 32;
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
-    reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
+    printMatrix(d_X, "d_X", r);
+    reduce<<<blockNum, block>>>( d_X, d_Z, r) ;
     printMatrix(d_Z, "first", r);
 
     while (blockNum != 1)
