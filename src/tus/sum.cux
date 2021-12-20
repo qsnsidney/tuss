@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
 
     //const int bs = 32;
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
-    assign<<<blockNum, block>>>( d_X, r );
+    //assign<<<blockNum, block>>>( d_X, r );
     reduce<<<blockNum, block>>>( d_X, d_Z, r ) ;
 
     while (blockNum != 1)
