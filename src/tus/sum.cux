@@ -98,6 +98,7 @@ __global__ void assign(float *g_idata, int n) {
     if (i < n)
     {
         g_idata[i] = 1;
+        printf("assign g_idata[%d]: %f\n", i, g_idata[i]);
     }
 }
 
