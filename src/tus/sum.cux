@@ -69,7 +69,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n, int uid) {
     if (i < n)
     {
         sdata[tid] = g_idata[i];
-        if (uid > 0) printf("%d - input: g_idata[%d] = %f\n", uid, i, g_idata[i]);
+        //if (uid > 0) printf("%d - input: g_idata[%d] = %f\n", uid, i, g_idata[i]);
     }
     __syncthreads();
 
@@ -87,7 +87,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n, int uid) {
     if (tid == 0) 
     {
         g_odata[blockIdx.x] = sdata[0];
-        printf("%d - output: block %d has data %f\n", uid, blockIdx.x, sdata[0]);
+        //printf("%d - output: block %d has data %f\n", uid, blockIdx.x, sdata[0]);
     }
 }
 
