@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
     // GPU to CPU transfer
     double gc_transfer_start = getTimeStamp();
-    err = cudaMemcpy( h_dZ, d_Z[0], sizeof(float), cudaMemcpyDeviceToHost );
+    err = cudaMemcpy( h_dZ, d_Z, sizeof(float), cudaMemcpyDeviceToHost );
     if( err != cudaSuccess )
     {
         printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
