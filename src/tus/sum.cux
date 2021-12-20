@@ -67,7 +67,12 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     {
         printf("g_idata[%d]: %f\n", i, g_idata[i]);
     }
-    sdata[tid] = (i < n) ? g_idata[i] : 0;
+    //sdata[tid] = (i < n) ? g_idata[i] : 0;
+    sdata[tid] = 0;
+    if (i < n)
+    {
+        sdata[tid] = g_idata[i];
+    }
     __syncthreads();
     printf("thread: (i - %d, tid - %d) has data %f\n", i, tid, sdata[tid]);
 
