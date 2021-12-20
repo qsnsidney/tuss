@@ -20,7 +20,7 @@ void printMatrix(float* M, char* name, int r)
 }
 
 template <unsigned int blockSize>
-__device__ void warpReduce(volatile int *sdata, unsigned int tid) {
+__device__ void warpReduce(volatile float *sdata, unsigned float tid) {
     if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
     if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
     if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
@@ -43,7 +43,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     if (blockSize >= 256) { if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); }
     if (blockSize >= 128) { if (tid < 64) { sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
 
-    if (tid < 32) warpReduce<blockSize>(sdata, tid);
+    if (tid < 32) warpReduce(sdata, tid);
     if (tid == 0) g_odata[blockIdx.x] = sdata[0];
 }
 
