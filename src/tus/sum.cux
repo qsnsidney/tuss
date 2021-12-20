@@ -181,10 +181,11 @@ int main(int argc, char *argv[])
     //assign<<<blockNum, block>>>( d_X, r );
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z, r ) ;
     blockNum = (blockNum + block.x-1)/block.x;
+    printf("blockNum: %d\n", blockNum);
 
     while (blockNum != 1)
     {
-        printf("lala\n");
+        printf("lala blockNum: %d\n", blockNum);
         int total = blockNum;
         blockNum = (blockNum + block.x-1)/block.x;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
