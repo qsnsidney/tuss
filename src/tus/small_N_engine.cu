@@ -87,6 +87,10 @@ namespace TUS
         float4 **d_X, **d_A;
         unsigned src_index = 0;
         unsigned dest_index = 1;
+
+        float4 * d_intermidiate_A;
+        gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float4) * nBody * nBody));
+
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4dx));
         gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4dx));
@@ -116,11 +120,18 @@ namespace TUS
         std::cout << "Set thread_per_block to " << block_size_ << std::endl;
         unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
+
+        std::cout << "number of body to " << nBody << std::endl;
         dim3 block( tb_len_, tb_wid_ );
-        dim3 grid( (nBody + block.x-1)/block.x, (nBody + block.y-1)/block.y ) ;
+        dim3 grid( (nBody + block.x-1)/block.x, (nBody + block.y-1)/block.y );
+        // Haiqi: hack temporarily force unroll_factor_ to be 1 because we set grid.ydim to be 
+        // nbody / block.y. as a result, the y index of a thread could reach nBody and having an
+        // unroll factor > 1 will simply let thread with yid > nBody / 2 to stay idle.
+        assert(unroll_factor_ == 1);
 
         // calculate the initialia acceleration
-        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], unroll_factor_);
+        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_);
+        simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index]);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
@@ -132,7 +143,8 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], unroll_factor_);
+                calculate_forces_2d<<<grid, block>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_);
+                simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index]);
 
                 cudaDeviceSynchronize();
 
@@ -176,9 +188,9 @@ namespace TUS
         std::ofstream X_file;
         std::ofstream V_file;
         std::ofstream A_file;
-        X_file.open ("referenceX.output");
-        V_file.open ("referenceV.output");
-        A_file.open ("referenceA.output");
+        X_file.open ("smallX.output");
+        V_file.open ("smallV.output");
+        A_file.open ("smallA.output");
         for(int i = 0; i < nBody; i++) {
             X_file << h_output_X[i].x << "\n";
             X_file << h_output_X[i].y << "\n";
