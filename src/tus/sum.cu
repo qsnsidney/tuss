@@ -156,11 +156,10 @@ int main(int argc, char *argv[])
     kernel_time = kernel_end - kernel_start;
     GPU_CPU_transfer_time = gc_transfer_end - gc_transfer_start;
     total_GPU_time = gc_transfer_end - cg_transfer_start;
-    if (r > 5 && c > 5) Z_value = h_dZ[5*c+5];
     printf("<%f> <%f> <%f> <%f> <%f>\n", total_GPU_time, CPU_GPU_transfer_time, kernel_time, GPU_CPU_transfer_time, Z_value);
 
     // GPU & CPU result comparison
-    if (h_hZ != h_dZ)
+    if (h_hZ != *h_dZ)
     {
         printf("Error: GPU result is different from CPU - kernel has errors!\n");
     }
