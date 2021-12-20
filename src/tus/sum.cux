@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
         h_X[i] = 1;
     }
 
-    //printMatrix(h_X, "h_X", r, c);
+    printMatrix(h_X, "h_X", r);
     //printMatrix(h_Y, "h_Y", r, c);
 
     // CPU reference
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         h_hZ += h_X[i];
     }
 
-    //printMatrix(h_hZ, "h_hZ", r, c);
+    printMatrix(h_hZ, "h_hZ", r);
 
     // CPU to GPU transfer
     float *d_X, *d_Z;
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
     printMatrix(d_X, "d_X", r);
     reduce<<<blockNum, block>>>( d_X, d_Z, r) ;
-    printMatrix(d_Z, "first", r);
+    printMatrix(d_Z, "first", blockNum);
 
     while (blockNum != 1)
     {
