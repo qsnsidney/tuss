@@ -20,7 +20,7 @@ void printMatrix(float* M, char* name, int r)
 }
 
 template <unsigned int blockSize>
-__device__ void warpReduce(volatile float *sdata, unsigned float tid) {
+__device__ void warpReduce(volatile float *sdata, unsigned int tid) {
     if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
     if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
     if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
