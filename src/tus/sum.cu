@@ -127,12 +127,13 @@ int main(int argc, char *argv[])
         exit( EXIT_FAILURE );
     }
 
-    reduce<block.x><<<blockNum, block>>>( d_X, d_Z, r) ;
+    const bs = block.x;
+    reduce<bs><<<blockNum, block>>>( d_X, d_Z, r) ;
     while (blockNum != 1)
     {
         int total = blockNum;
         blockNum = (blockNum + block.x-1)/block.x;
-        reduce<block.x><<<blockNum, block>>>( d_X, d_Z, total) ;
+        reduce<bs><<<blockNum, block>>>( d_X, d_Z, total) ;
     }
 
     cudaDeviceSynchronize();
