@@ -80,7 +80,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     for (int s=1; s < blockDim.x; s *= 2) 
     { 
         // s: stride
-        if ((tid % (2*s) == 0) && tid + s < n) {
+        if ((tid % (2*s) == 0) && tid + s < n && tid < n) {
             // only tids divisible by s*2 partake
             printf("i - %d, s - %d\n", i, s);
             sdata[tid] += sdata[tid + s];
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
         int total = blockNum;
         blockNum = (blockNum + block.x-1)/block.x;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
-        reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
+        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_X, d_Z, blockNum) ;
     }
 
     cudaDeviceSynchronize();
