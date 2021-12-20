@@ -10,7 +10,7 @@ double getTimeStamp()
 
 void printMatrix(float* M, char* name, int r)
 {
-    int i, j;
+    int i;
     printf("%s\n", name);
     for (i = 0; i < r; i++)
     {
@@ -30,8 +30,8 @@ __device__ void warpReduce(volatile int *sdata, unsigned int tid) {
 }
 
 template <unsigned int blockSize>
-__global__ void reduce(int *g_idata, int *g_odata, int n) {
-    extern __shared__ int sdata[];
+__global__ void reduce(float *g_idata, float *g_odata, int n) {
+    extern __shared__ float sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int i = blockIdx.x*(blockSize*2) + tid;
     unsigned int gridSize = blockSize*2*gridDim.x;
@@ -118,7 +118,8 @@ int main(int argc, char *argv[])
 
     // Invoke kernel
     double kernel_start = getTimeStamp();
-    int blockNum = (c + block.x-1)/block.x;
+    dim3 block = 32;
+    int blockNum = (r + block.x-1)/block.x;
     err = cudaMalloc( (void **) &d_Z, blockNum*sizeof(float) ) ;
     if( err != cudaSuccess )
     {
@@ -126,7 +127,7 @@ int main(int argc, char *argv[])
         exit( EXIT_FAILURE );
     }
 
-    reduce<<<blockNum, 32>>>( d_X, d_Z, r) ;
+    reduce<<<blockNum, block>>>( d_X, d_Z, r) ;
     while (blockNum != 1)
     {
         int total = blockNum;
