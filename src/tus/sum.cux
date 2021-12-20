@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         h_hZ += h_X[i];
     }
 
-    printMatrix(h_hZ, "h_hZ", r);
+    printf("h_hZ: %d\n", h_hZ);
 
     // CPU to GPU transfer
     float *d_X, *d_Z;
