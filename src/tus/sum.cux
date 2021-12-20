@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
     int count = 0, total = 0;
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count);
 
-    while (blockNum > 1)
+    while (blockNum >= 1)
     {
         count += 1;
         total = blockNum;
