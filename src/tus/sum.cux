@@ -80,7 +80,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     { 
         printf("i - %d, s - %d\n", i, s);
         // s: stride
-        if ((tid % (2*s) == 0) && tid + s < n && tid < n) {
+        if ((tid % (2*s) == 0) && (tid + s < n) && (tid < n)) {
             // only tids divisible by s*2 partake
             sdata[tid] += sdata[tid + s];
         }
@@ -180,7 +180,8 @@ int main(int argc, char *argv[])
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
     //assign<<<blockNum, block>>>( d_X, r );
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z, r ) ;
-    printf("first\n");
+    blockNum = (blockNum + block.x-1)/block.x;
+
     while (blockNum != 1)
     {
         printf("lala\n");
