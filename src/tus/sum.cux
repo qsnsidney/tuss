@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
         printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
         exit( EXIT_FAILURE );
     }
-    err = cudaHostAlloc( (void **) &h_dZ, sizeof(float), 0 ) ;
+    err = cudaHostAlloc( (void **) &h_dZ, num*sizeof(float), 0 ) ;
     if( err != cudaSuccess )
     {
         printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
     // GPU to CPU transfer
     double gc_transfer_start = getTimeStamp();
-    err = cudaMemcpy( h_dZ, d_Z, sizeof(float), cudaMemcpyDeviceToHost );
+    err = cudaMemcpy( h_dZ, d_Z, num*sizeof(float), cudaMemcpyDeviceToHost );
     if( err != cudaSuccess )
     {
         printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
