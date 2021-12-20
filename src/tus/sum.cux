@@ -67,6 +67,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n, int uid) {
     if (i < n)
     {
         sdata[tid] = g_idata[i];
+        printf("input: g_idata[%d] = %f\n", i, g_idata[i]);
     }
     __syncthreads();
 
@@ -178,16 +179,15 @@ int main(int argc, char *argv[])
     //assign<<<blockNum, block>>>( d_X, r );
     printf("first blockNum: %d\n", blockNum);
     int count = 0;
-    reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count ) ;
-    blockNum = (blockNum + block.x-1)/block.x;
+    reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count);
 
-    while (blockNum > 1)
+    while (blockNum != 1)
     {
         //int total = blockNum;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
         count += 1;
-        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, blockNum, count);
         blockNum = (blockNum + block.x-1)/block.x;
+        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, blockNum, count);
         float *tmp;
         tmp = d_Z1;
         d_Z1 = d_Z2;
