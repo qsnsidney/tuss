@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     // GPU to CPU transfer
     double gc_transfer_start = getTimeStamp();
 
-    err = cudaMemcpy( h_dZ, d_Z, blockNum*sizeof(float), cudaMemcpyDeviceToHost );
+    err = cudaMemcpy( h_dZ, d_Z1, blockNum*sizeof(float), cudaMemcpyDeviceToHost );
     if( err != cudaSuccess )
     {
         printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 
     // Free resources
     cudaFree(d_X);
-    cudaFree(d_Z);
+    cudaFree(d_Z1);
     cudaFreeHost(h_X);
     cudaFreeHost(h_dZ);
     cudaDeviceReset();
