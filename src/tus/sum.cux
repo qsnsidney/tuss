@@ -80,11 +80,11 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     for (int s=1; s < blockDim.x; s *= 2) 
     { 
         // s: stride
-        printf("s: %d\n", s);
         if (tid % (2*s) == 0) {
             // only tids divisible by s*2 partake
-            sdata[tid] += sdata[tid + s];
             printf("sdata[%d] is %f\n", tid, sdata[tid]);
+            printf("sdata[%d] is %f\n", tid+s, sdata[tid+s]);
+            sdata[tid] += sdata[tid + s];
         }
         __syncthreads();
     }
