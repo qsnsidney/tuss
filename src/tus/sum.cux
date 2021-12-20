@@ -57,7 +57,7 @@ __global__ void reduce6(float *g_idata, float *g_odata, int n) {
     }
 }
 
-__global__ void reduce(float *g_idata, float *g_odata, int n) {
+__global__ void reduce(float *g_idata, float *g_odata, int n, int uid) {
     extern __shared__ float sdata[];
     // each thread loads one element from global to shared mem
     int tid = threadIdx.x;
@@ -84,7 +84,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     if (tid == 0) 
     {
         g_odata[blockIdx.x] = sdata[0];
-        printf("block %d has data %f\n", blockIdx.x, sdata[0]);
+        printf("uid - %d: block %d has data %f\n", uid, blockIdx.x, sdata[0]);
     }
 }
 
@@ -128,7 +128,6 @@ int main(int argc, char *argv[])
         h_X[i] = 1;
     }
 
-    printMatrix(h_X, "h_X", r);
     //printMatrix(h_Y, "h_Y", r, c);
 
     // CPU reference
@@ -140,7 +139,7 @@ int main(int argc, char *argv[])
     printf("h_hZ: %f\n", h_hZ);
 
     // CPU to GPU transfer
-    float *d_X, *d_Z;
+    float *d_X, *d_Z1, *d_Z2;
     err = cudaMalloc( (void **) &d_X, num ) ;
     if( err != cudaSuccess )
     {
@@ -161,7 +160,13 @@ int main(int argc, char *argv[])
     double kernel_start = getTimeStamp();
     dim3 block = 32;
     int blockNum = (r + block.x-1)/block.x;
-    err = cudaMalloc( (void **) &d_Z, blockNum*sizeof(float) ) ;
+    err = cudaMalloc( (void **) &d_Z1, blockNum*sizeof(float) ) ;
+    if( err != cudaSuccess )
+    {
+        printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
+        exit( EXIT_FAILURE );
+    }
+    err = cudaMalloc( (void **) &d_Z2, blockNum*sizeof(float) ) ;
     if( err != cudaSuccess )
     {
         printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
@@ -172,14 +177,20 @@ int main(int argc, char *argv[])
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
     //assign<<<blockNum, block>>>( d_X, r );
     printf("first blockNum: %d\n", blockNum);
-    reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z, r ) ;
+    int count = 0;
+    reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count ) ;
 
     while (blockNum != 1)
     {
         //int total = blockNum;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
-        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z, d_Z, blockNum) ;
+        count += 1;
+        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, blockNum, count);
         blockNum = (blockNum + block.x-1)/block.x;
+        float *tmp;
+        tmp = d_Z1;
+        d_Z1 = d_Z2;
+        d_Z2 = tmp;
         printf("lala blockNum: %d\n", blockNum);
     }
 
@@ -219,3 +230,5 @@ int main(int argc, char *argv[])
     cudaFreeHost(h_dZ);
     cudaDeviceReset();
 }
+
+//1025
