@@ -180,7 +180,8 @@ int main(int argc, char *argv[])
     printf("first blockNum: %d\n", blockNum);
     int count = 0, total = 0;
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count);
-
+    // 33 block -> 2 block -> 1 block
+    // 32 block -> 1 block
     while (blockNum >= 1)
     {
         count += 1;
@@ -189,10 +190,13 @@ int main(int argc, char *argv[])
         blockNum = (blockNum + block.x-1)/block.x;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
         reduce<<<blockNum, block, total*sizeof(float)>>>( d_Z1, d_Z2, blockNum, count);
+
         float *tmp;
         tmp = d_Z1;
         d_Z1 = d_Z2;
         d_Z2 = tmp;
+
+        if (blockNum == 1) break;
     }
 
     cudaDeviceSynchronize();
