@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
     //assign<<<blockNum, block>>>( d_X, r );
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z, r ) ;
-
+    printf("first\n");
     while (blockNum != 1)
     {
         printf("lala\n");
