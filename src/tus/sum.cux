@@ -91,6 +91,16 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     }
 }
 
+__global__ void assign(float *g_idata, int n) {
+
+    int i = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (i < n)
+    {
+        g_idata[i] = 1;
+    }
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -174,6 +184,7 @@ int main(int argc, char *argv[])
 
     //const int bs = 32;
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
+    assign<<<blockNum, block>>>( d_X, r );
     reduce<<<blockNum, block>>>( d_X, d_Z, r ) ;
 
     while (blockNum != 1)
