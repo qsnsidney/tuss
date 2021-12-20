@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     {
         //int total = blockNum;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
-        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_X, d_Z, blockNum) ;
+        reduce<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z, d_Z, blockNum) ;
         blockNum = (blockNum + block.x-1)/block.x;
         printf("lala blockNum: %d\n", blockNum);
     }
