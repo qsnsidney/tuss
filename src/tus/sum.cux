@@ -16,7 +16,7 @@ void printMatrix(float* M, char* name, int r)
     {
         printf("%f ", M[i]);
     }
-    printf("=============================\n");
+    printf("\n=============================\n");
 }
 
 template <unsigned int blockSize>
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
         h_hZ += h_X[i];
     }
 
-    printf("h_hZ: %d\n", h_hZ);
+    printf("h_hZ: %f\n", h_hZ);
 
     // CPU to GPU transfer
     float *d_X, *d_Z;
@@ -168,17 +168,15 @@ int main(int argc, char *argv[])
 
     //const int bs = 32;
     //reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
-    printMatrix(d_X, "d_X", r);
-    reduce<<<blockNum, block>>>( d_X, d_Z, r) ;
-    printMatrix(d_Z, "first", blockNum);
+    reduce<<<blockNum, block>>>( d_X, d_Z, r ) ;
 
     while (blockNum != 1)
     {
+        printf("lala\n");
         int total = blockNum;
         blockNum = (blockNum + block.x-1)/block.x;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
         reduce<<<blockNum, block>>>( d_X, d_Z, blockNum) ;
-        printMatrix(d_Z, "lala", total);
     }
 
     cudaDeviceSynchronize();
