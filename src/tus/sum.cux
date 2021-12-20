@@ -44,7 +44,11 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     if (blockSize >= 128) { if (tid < 64) { sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
 
     if (tid < 32) warpReduce<blockSize>(sdata, tid);
-    if (tid == 0) g_odata[blockIdx.x] = sdata[0];
+    if (tid == 0) 
+    {
+        g_odata[blockIdx.x] = sdata[0];
+        printf("block %d has data %f\n", blockIdx.x, sdata[0]);
+    }
 }
 
 
@@ -129,14 +133,15 @@ int main(int argc, char *argv[])
     }
 
     const int bs = 32;
-    reduce<bs><<<blockNum, block>>>( d_X, d_Z, r) ;
+    reduce<bs><<<blockNum, block>>>( d_X, d_Z, blockNum) ;
     printMatrix(d_Z, "first", r);
+
     while (blockNum != 1)
     {
         int total = blockNum;
         blockNum = (blockNum + block.x-1)/block.x;
         reduce<bs><<<blockNum, block>>>( d_X, d_Z, total) ;
-        printMatrix(d_Z, "lala", r);
+        printMatrix(d_Z, "lala", total);
     }
 
     cudaDeviceSynchronize();
@@ -153,7 +158,7 @@ int main(int argc, char *argv[])
     }
     double gc_transfer_end = getTimeStamp();
 
-    printMatrix(h_dZ, "h_dZ", r);
+    printMatrix(h_dZ, "h_dZ", blockNum);
 
     //Report: <total_GPU_time> <CPU_GPU_transfer_time> <kernel_time> <GPU_CPU_transfer_time> <Z-value>
     CPU_GPU_transfer_time = cg_transfer_end - cg_transfer_start;
