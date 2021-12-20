@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
         exit( EXIT_FAILURE );
     }
 
-    const bs = block.x;
+    const int bs = block.x;
     reduce<bs><<<blockNum, block>>>( d_X, d_Z, r) ;
     while (blockNum != 1)
     {
