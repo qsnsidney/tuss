@@ -16,14 +16,16 @@ BASIC = 0
 NVDA_REFERENCE = 1
 COALESCED_BASIC = 2
 TILED_BASIC = 3
-MAT_MUL = 4
-NVDA_IMPROVED = 5
+SMALL_N = 4
+MAT_MUL = 5
+NVDA_IMPROVED = 6
 
 TEST_ENGINES_NAME = {
     BASIC: "basic_engine",
     NVDA_REFERENCE: "nvda_reference_engine",
     COALESCED_BASIC: "coalesced_basic_engine",
     TILED_BASIC: "tiled_basic_engine",
+    SMALL_N: "small_n",
     MAT_MUL: "matmul_engine",
     NVDA_IMPROVED: "improved_nvda_engine",
 }
@@ -40,7 +42,7 @@ def init(parser):
 
 def main(args):
     THREAD_PER_BLOCK = [16, 64, 256]
-    NBODY = [50000, 100000, 200000]
+    NBODY = [50000, 100000]
     CUDA_EXECUTABLE = "build/tus/tus_exe"
     GPU_TIME_PATTERN = "Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)"
     BENCHMARK_DATA = "data/ic/s0_s112500_g100000_d100000.bin"
