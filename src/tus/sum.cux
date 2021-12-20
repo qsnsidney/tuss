@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
     // GPU to CPU transfer
     double gc_transfer_start = getTimeStamp();
-    prinf("sum: %f\n", d_Z[0])
+    printf("sum: %f\n", d_Z[0]);
     err = cudaMemcpy( h_dZ, d_Z, blockNum*sizeof(float), cudaMemcpyDeviceToHost );
     if( err != cudaSuccess )
     {
