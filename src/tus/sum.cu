@@ -47,6 +47,7 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     if (tid == 0) g_odata[blockIdx.x] = sdata[0];
 }
 
+
 int main(int argc, char *argv[])
 {
     if (argc != 2 )
