@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
         printf("%d blockNum: %d\n", count, blockNum);
         blockNum = (blockNum + block.x-1)/block.x;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
-        reduce<<<blockNum, block, total*sizeof(float)>>>( d_Z1, d_Z2, blockNum, count);
+        reduce<<<blockNum, block, total*sizeof(float)>>>( d_Z1, d_Z2, total, count);
 
         float *tmp;
         tmp = d_Z1;
