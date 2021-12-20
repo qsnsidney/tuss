@@ -92,6 +92,8 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
         g_odata[blockIdx.x] = sdata[0];
         printf("block %d has data %f\n", blockIdx.x, sdata[0]);
     }
+
+    printf("thread: (i - %d, tid - %d) end\n", i, tid);
 }
 
 int main(int argc, char *argv[])
