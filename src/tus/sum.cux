@@ -51,7 +51,7 @@ __global__ void reduce2(float *g_idata, float *g_odata, int n) {
     if (tid == 0) 
     {
         g_odata[blockIdx.x] = sdata[0];
-        printf("block %d has data %f\n", blockIdx.x, sdata[0]);
+        //printf("block %d has data %f\n", blockIdx.x, sdata[0]);
     }
 }
 
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
     double kernel_start = getTimeStamp();
 
     const int bs = 32;
-    printf("first blockNum: %d\n", blockNum);
+    //printf("first blockNum: %d\n", blockNum);
     int count = 0, total = 0;
     if (op == 2)
     {
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     {
         count += 1;
         total = blockNum;
-        printf("%d blockNum: %d\n", count, blockNum);
+        //printf("%d blockNum: %d\n", count, blockNum);
         blockNum = (blockNum + block.x-1)/block.x;
         if (op == 2)
         {
