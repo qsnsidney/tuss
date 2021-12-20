@@ -87,6 +87,10 @@ namespace TUS
         float4 **d_X, **d_A;
         unsigned src_index = 0;
         unsigned dest_index = 1;
+
+        float4 * d_intermidiate_A;
+        gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float4) * nBody * nBody));
+
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4dx));
         gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4dx));
@@ -126,7 +130,8 @@ namespace TUS
         assert(unroll_factor_ == 1);
 
         // calculate the initialia acceleration
-        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_A[src_index], unroll_factor_);
+        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_);
+        simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index]);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
@@ -138,7 +143,8 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                calculate_forces_2d<<<grid, block>>>(nBody, d_X[dest_index], d_A[dest_index], unroll_factor_);
+                calculate_forces_2d<<<grid, block>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_);
+                simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index]);
 
                 cudaDeviceSynchronize();
 

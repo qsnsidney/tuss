@@ -126,6 +126,24 @@ tile_calculation(float4 myPosition, float3 accel, int accum_length)
     return accel;
 }
 
+
+__global__ inline void 
+simple_accumulate_intermidate_acceleration(int N, float4* intermidiate_A, float4* output_A)
+{
+    unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
+    if (tid < N) {
+        float4 accumulated_accer = {0.0f, 0.0f, 0.0f, 0.0f}; 
+        // Hack: for sure, this N will needs to be changed once unroll factor > 1
+        for (int i = 0; i < N; i++) {
+            accumulated_accer.x += intermidiate_A[tid * N + i].x;
+            accumulated_accer.y += intermidiate_A[tid * N + i].y;
+            accumulated_accer.z += intermidiate_A[tid * N + i].z;
+        }
+        output_A[tid] = accumulated_accer;
+    }
+    
+}
+
 __global__ inline void
 calculate_forces_2d(int N, void *devX, void *devA, int luf)
 {
@@ -145,7 +163,7 @@ calculate_forces_2d(int N, void *devX, void *devA, int luf)
     myPosition = globalX[i];
     float3 acc = {0.0f, 0.0f, 0.0f};
 
-    if ((i < N) && (j*luf < N))
+    if (i < N)
     {
         for (int k = 0; k < luf; k++)
         {
@@ -157,10 +175,8 @@ calculate_forces_2d(int N, void *devX, void *devA, int luf)
         }
 
         // Save the result in global memory for the integration step.
-        __syncthreads();
-        acc4 = globalA[i];
-        globalA[i] = {acc.x+acc4.x, acc.y+acc4.y, acc.z+acc4.z, 0.0f};
-        __syncthreads();  
+        // Hack: this index might not be correct anymore for luf > 1. think careful
+        globalA[i * N + j] = {acc.x, acc.y, acc.z, 0.0f};
     }
 }
 
