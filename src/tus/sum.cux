@@ -36,7 +36,12 @@ __global__ void reduce(float *g_idata, float *g_odata, int n) {
     unsigned int i = blockIdx.x*(blockSize*2) + tid;
     unsigned int gridSize = blockSize*2*gridDim.x;
     sdata[tid] = 0;
-    while (i < n) { sdata[tid] += g_idata[i] + g_idata[i+blockSize]; i += gridSize; }
+
+    while (i < n) { 
+        printf("thread %d with blocksize %d\n", i, blockSize);
+        sdata[tid] += g_idata[i] + g_idata[i+blockSize]; 
+        i += gridSize; 
+    }
     __syncthreads();
 
     if (blockSize >= 512) { if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads(); }
