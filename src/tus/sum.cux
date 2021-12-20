@@ -179,8 +179,9 @@ int main(int argc, char *argv[])
     printf("first blockNum: %d\n", blockNum);
     int count = 0;
     reduce<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count ) ;
+    blockNum = (blockNum + block.x-1)/block.x;
 
-    while (blockNum != 1)
+    while (blockNum > 1)
     {
         //int total = blockNum;
         //reduce<<<blockNum, block>>>( d_X, d_Z, total) ;
