@@ -128,12 +128,12 @@ int main(int argc, char *argv[])
     }
 
     const int bs = 32;
-    reduce<<<blockNum, block>>><bs>( d_X, d_Z, r) ;
+    reduce<bs><<<blockNum, block>>>( d_X, d_Z, r) ;
     while (blockNum != 1)
     {
         int total = blockNum;
         blockNum = (blockNum + block.x-1)/block.x;
-        reduce<<<blockNum, block>>><bs>( d_X, d_Z, total) ;
+        reduce<bs><<<blockNum, block>>>( d_X, d_Z, total) ;
     }
 
     cudaDeviceSynchronize();
