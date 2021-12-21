@@ -79,9 +79,9 @@ inline __host__ void write_debug_output(std::string engine_name, float4 * X_outp
     std::ofstream X_file;
     std::ofstream V_file;
     std::ofstream A_file;
-    X_file.open(engine_name + "X.output");
-    V_file.open(engine_name + "V.output");
-    A_file.open(engine_name + "A.output");
+    X_file.open(engine_name + "_X.output");
+    V_file.open(engine_name + "_V.output");
+    A_file.open(engine_name + "_A.output");
     for(int i = 0; i < nBody; i++) {
         X_file << X_output[i].x << "\n";
         X_file << X_output[i].y << "\n";
