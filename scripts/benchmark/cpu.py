@@ -32,7 +32,7 @@ def main(args):
         CpuEngine(args.version).name,
         path.join(script_path, 'build/cpusim/cpusim_exe'),
         {'--num_bodies': [5000, 10000],
-         '--num_threads': [-1, 1, 2, 4]},
+         '--num_threads': [1, 2, 4]},
         args.trials,
         project_home_dir,
         'Subprofile \[.*/all_iters\]: (([0-9]*[.])?[0-9]+)',
