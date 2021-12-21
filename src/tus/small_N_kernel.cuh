@@ -93,14 +93,14 @@ simple_accumulate_intermidate_acceleration(int N, float4* intermidiate_A, float4
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
     if (tid < N) {
-        float4 accumulated_accer = {0.0f, 0.0f, 0.0f, 0.0f}; 
+        float3 accumulated_accer = make_float3(output_A[tid].x, output_A[tid].y, output_A[tid].z);
         for (int i = 0; i < summation_res_per_body; i++) {
             accumulated_accer.x += intermidiate_A[tid * summation_res_per_body + i].x;
             accumulated_accer.y += intermidiate_A[tid * summation_res_per_body + i].y;
             accumulated_accer.z += intermidiate_A[tid * summation_res_per_body + i].z;
         }
         
-        output_A[tid] = accumulated_accer;
+        output_A[tid] = make_float4(accumulated_accer.x, accumulated_accer.y, accumulated_accer.z, 0.0f);
     }
     
 }

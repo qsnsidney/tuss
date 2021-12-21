@@ -47,45 +47,52 @@ namespace TUS
 
     CORE::SYSTEM_STATE SMALL_N_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
+        // number of body for the problem
         size_t nBody = system_state_snapshot().size();
 
+        // number of body to accumulate field for each kernel call.
+        // each kernel call accumluate AccumBody's acceleration for all Nbodies.
+        size_t AccumBody = nBody;
         /* BIN file of initial conditions */
         const auto &ic = system_state_snapshot();
-
 
         dim3 block( tb_len_, tb_wid_ );
         int column_per_block = (tb_len_ * unroll_factor_);
         assert(unroll_factor_ % tb_wid_ == 0);
-        dim3 grid( (nBody + column_per_block-1)/column_per_block, (nBody + block.y-1)/block.y );
+        int num_block_x_dim = (AccumBody + column_per_block-1)/column_per_block;
+        int num_block_y_dim = (nBody + block.y-1)/block.y;
+        dim3 grid(num_block_x_dim, num_block_y_dim);
 
-        std::cout << "2d block dimension: (" << tb_len_ << "," << tb_wid_ << ")" << std::endl;
+        std::cout << "2d block dimension: (" << block.x << "," << block.y << ")" << std::endl;
         std::cout << "column per block " << column_per_block << std::endl;
-        std::cout << "2d grid dimension: (" << (nBody + column_per_block-1)/column_per_block << "," << (nBody + block.y-1)/block.y << ")" << std::endl;
+        std::cout << "2d grid dimension: (" << grid.x << "," << grid.y << std::endl;
         
-        // random initializer just for now
+        // size
         size_t vector_size_3d = sizeof(data_t_3d) * nBody;
         size_t vector_size_4d = sizeof(float4) * nBody;
-        std::cout << "quantize to " << ((nBody + (column_per_block - 1))/column_per_block) * column_per_block << std::endl;
-        size_t vector_size_4dx = sizeof(float4) * ((nBody + (column_per_block - 1))/column_per_block) * column_per_block;
+
+        // to make boundary check not so painful, pre allocated extra memory so each thread doesn't need to worry about
+        // boundary checking
+        std::cout << "quantize to " << num_block_x_dim * column_per_block << std::endl;
+        size_t vector_size_4d_qtzed = sizeof(float4) * num_block_x_dim * column_per_block;
         /*
-     *   host side memory allocation
-     */
+         *   host side memory allocation
+         */
         data_t_3d *h_V, *h_output_V;
         float4 *h_X, *h_A, *h_output_X;
 
         host_malloc_helper((void **)&h_V, vector_size_3d);
         host_malloc_helper((void **)&h_output_V, vector_size_3d);
 
-        host_malloc_helper((void **)&h_X, vector_size_4dx);
+        host_malloc_helper((void **)&h_X, vector_size_4d_qtzed);
         host_malloc_helper((void **)&h_A, vector_size_4d);
         host_malloc_helper((void **)&h_output_X, vector_size_4d);
 
         timer.elapsed_previous("allocated host side memory");
         /*
-     *   input randome initialize
-     */
-
-        for(int i = 0; i < ((nBody + (column_per_block - 1))/column_per_block) * column_per_block; i++) {
+         *   input randome initialize
+         */
+        for(int i = 0; i < num_block_x_dim * column_per_block; i++) {
             h_X[i] = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
         }
 
@@ -99,14 +106,15 @@ namespace TUS
         unsigned src_index = 0;
         unsigned dest_index = 1;
 
-        float4 * d_intermidiate_A;
-        int summation_result_per_body = (nBody + unroll_factor_ - 1) / unroll_factor_;
+        // for each kernel call, how many intermidate sum should we cache in global memory
+        int summation_result_per_body = (AccumBody + unroll_factor_ - 1) / unroll_factor_;
         std::cout << "summation result per body is " << summation_result_per_body << std::endl;
+        float4 * d_intermidiate_A;
         gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float4) * nBody * summation_result_per_body));
 
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
-        gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4dx));
-        gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4dx));
+        gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4d_qtzed));
+        gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4d_qtzed));
 
         d_A = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size_4d));
@@ -124,8 +132,7 @@ namespace TUS
         /*
          *   create double buffer on device side
          */
-        // cudaMemcpy(d_A[0], h_A, vector_size, cudaMemcpyHostToDevice);
-        cudaMemcpy(d_X[src_index], h_X, vector_size_4dx, cudaMemcpyHostToDevice);
+        cudaMemcpy(d_X[src_index], h_X, vector_size_4d_qtzed, cudaMemcpyHostToDevice);
         cudaMemcpy(d_V[src_index], h_V, vector_size_3d, cudaMemcpyHostToDevice);
         timer.elapsed_previous("copied input data from host to device");
 
@@ -137,6 +144,7 @@ namespace TUS
         std::cout << "set number of body to " << nBody << std::endl;
         std::cout << "using " << column_per_block * sizeof(float4) << " bytes per block" << std::endl;
         // calculate the initialia acceleration
+        cudaMemset(d_A[src_index], 0, vector_size_4d);
         calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
         simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
         timer.elapsed_previous("Calculated initial acceleration");
@@ -149,7 +157,7 @@ namespace TUS
                                                             d_X[dest_index], d_V_half);                                               // output
 
                 cudaDeviceSynchronize();
-
+                cudaMemset(d_A[dest_index], 0, vector_size_4d);
                 calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
                 simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
 
