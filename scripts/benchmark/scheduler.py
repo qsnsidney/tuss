@@ -140,7 +140,7 @@ def permutate_exe_args(exe_args_sweep: dict, exe_arg_names: list = None):
 
 
 def schedule_run(args: SchedulerParams):
-    result = list()
+    suite_result = list()
     # BENCHMARK_OUTPUT_FILE = f'{args.suite_name.lower()}_benchmark_{args.engine_version}.csv'
     STDOUT_OUTPUT = 'benchmark.stdout'
 
@@ -186,4 +186,6 @@ def schedule_run(args: SchedulerParams):
                 total_time += float(time_elapsed)
             avg_time = total_time / args.num_trials_per_run
 
-            result.append((exe_arg_line, avg_time))
+            suite_result.append((exe_arg_line, avg_time))
+
+    return suite_result
