@@ -56,7 +56,7 @@ def main_new(args):
         args.iter,
         project_home_dir,
         'Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)',
-        path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin'))
+        path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin1'))
 
     result = scheduler.schedule_run(scheduler_args)
 
