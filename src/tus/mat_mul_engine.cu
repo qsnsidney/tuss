@@ -94,44 +94,11 @@ __global__ inline void calculate_acceleration(unsigned nbody, data_t_3d *locatio
 
 __global__ inline void calculate_individual_acceleration(unsigned nbody, unsigned target_ibody, data_t_3d *location, data_t *mass, data_t *field)
 {
-    unsigned source_ibody = threadIdx.x + blockDim.x * blockIdx.x;
-    if (source_ibody < nbody/4)
+    const unsigned source_ibody = threadIdx.x + blockDim.x * blockIdx.x;
+    if (source_ibody < nbody)
     {
         const data_t_3d x_target = location[target_ibody];
         {
-            const data_t_3d x_source = location[source_ibody];
-            const data_t_3d displacement = (x_source - x_target);
-            const data_t denominator = power_norm(displacement);
-            const data_t_3d source_field = (displacement * mass[source_ibody]) / denominator;
-
-            field[source_ibody] = source_field.x;
-            field[nbody + source_ibody] = source_field.y;
-            field[nbody + nbody + source_ibody] = source_field.z;
-        }
-        {
-            source_ibody += nbody/4;
-            const data_t_3d x_source = location[source_ibody];
-            const data_t_3d displacement = (x_source - x_target);
-            const data_t denominator = power_norm(displacement);
-            const data_t_3d source_field = (displacement * mass[source_ibody]) / denominator;
-
-            field[source_ibody] = source_field.x;
-            field[nbody + source_ibody] = source_field.y;
-            field[nbody + nbody + source_ibody] = source_field.z;
-        }
-        {
-            source_ibody += nbody/4;
-            const data_t_3d x_source = location[source_ibody];
-            const data_t_3d displacement = (x_source - x_target);
-            const data_t denominator = power_norm(displacement);
-            const data_t_3d source_field = (displacement * mass[source_ibody]) / denominator;
-
-            field[source_ibody] = source_field.x;
-            field[nbody + source_ibody] = source_field.y;
-            field[nbody + nbody + source_ibody] = source_field.z;
-        }
-        {
-            source_ibody += nbody/4;
             const data_t_3d x_source = location[source_ibody];
             const data_t_3d displacement = (x_source - x_target);
             const data_t denominator = power_norm(displacement);
@@ -230,7 +197,7 @@ namespace TUS
         // d_Field[nBody..2*nBody] = field.y
         // d_Field[2*nBody..3*nBody] = field.z
         data_t *d_Field = nullptr;
-        gpuErrchk(cudaMalloc((void**)&d_Field, sizeof(data_t) * nBody * 3));
+        gpuErrchk(cudaMalloc((void **)&d_Field, sizeof(data_t) * nBody * 3));
 
         timer.elapsed_previous("allocated device memory");
         /*
@@ -247,14 +214,14 @@ namespace TUS
         unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
         // calculate the initialia acceleration
-        calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
+        calculate_acceleration<<<nblocks, block_size_> > >(nBody, d_X[src_index], d_M, d_A[src_index]);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
             CORE::TIMER core_timer("all_iters");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
-                update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, //input
+                update_step_pos<<<nblocks, block_size_> > >(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, //input
                                                             d_X[dest_index], d_V_half);                                               // output
 
                 cudaDeviceSynchronize();
@@ -263,17 +230,18 @@ namespace TUS
                 //                                                    d_A[dest_index]);            // output
                 // cudaDeviceSynchronize();
 
-                for(size_t ibody = 0; ibody < nBody; ibody++) {
+                for (size_t ibody = 0; ibody < nBody; ibody++)
+                {
                     // prepare for field
                     // Since everytime, there is only one target body,
                     // can we directly pass the location of that into the kernel call?
-                    calculate_individual_acceleration<<<nblocks/4, block_size_>>>(nBody, ibody, d_X[dest_index], d_M, // input
-                        d_Field); // output
+                    calculate_individual_acceleration<<<nblocks, block_size_> > >(nBody, ibody, d_X[dest_index], d_M, // input
+                                                                                  d_Field);                           // output
                     // Does not matter
                     // cudaDeviceSynchronize();
                 }
 
-                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
+                update_step_vel<<<nblocks, block_size_> > >(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
                                                             d_V[dest_index]);                                    // output
                 cudaDeviceSynchronize();
 
