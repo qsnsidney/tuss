@@ -1,8 +1,12 @@
 #pragma once
 #include "data_t.cuh"
 
+// IMPORTANT
+// TODO: merge this file into small_N_engine.cu
+// IMPORTANT
+
 __global__ inline void update_step_pos_f4(unsigned nbody, data_t step_size, float4 *i_location, data_t_3d *i_velocity, float4 *i_accer, // new accer is accer at i+1 iteration
-                            float4 *o_location, data_t_3d *velocity_half)
+                                          float4 *o_location, data_t_3d *velocity_half)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
     if (tid < nbody)
@@ -21,8 +25,8 @@ __global__ inline void update_step_pos_f4(unsigned nbody, data_t step_size, floa
     }
 }
 
-__global__ inline void update_step_vel_f4(unsigned nbody, data_t step_size, float4 *new_accer, data_t_3d *velocity_half,// new accer is accer at i+1 iteration
-                            data_t_3d *o_velocity)
+__global__ inline void update_step_vel_f4(unsigned nbody, data_t step_size, float4 *new_accer, data_t_3d *velocity_half, // new accer is accer at i+1 iteration
+                                          data_t_3d *o_velocity)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
     if (tid < nbody)
@@ -40,7 +44,7 @@ __global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *locatio
     if (tid < nbody)
     {
         data_t_3d accumulated_accer = make_data_t_3d(0, 0, 0);
-        data_t_3d x_self = make_data_t_3d(location[tid].x,location[tid].y,location[tid].z);
+        data_t_3d x_self = make_data_t_3d(location[tid].x, location[tid].y, location[tid].z);
         for (unsigned j = 0; j < nbody; j++)
         {
             if (j == tid)
@@ -64,7 +68,7 @@ __global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *locatio
 /*
  * The Functions below are taken from https://www.researchgate.net/publication/291770155_Fast_N-body_simulation_with_CUDA
  * with only changing sqrt to rsqrt
- */ 
+ */
 
 __device__ inline float3
 AccumulateBodyInteraction(float4 bi, float4 bj, float3 ai)
@@ -87,22 +91,22 @@ AccumulateBodyInteraction(float4 bi, float4 bj, float3 ai)
     return ai;
 }
 
-
-__global__ inline void 
-simple_accumulate_intermidate_acceleration(int N, float4* intermidiate_A, float4* output_A, int summation_res_per_body)
+__global__ inline void
+simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4 *output_A, int summation_res_per_body)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
-    if (tid < N) {
+    if (tid < N)
+    {
         float3 accumulated_accer = make_float3(output_A[tid].x, output_A[tid].y, output_A[tid].z);
-        for (int i = 0; i < summation_res_per_body; i++) {
+        for (int i = 0; i < summation_res_per_body; i++)
+        {
             accumulated_accer.x += intermidiate_A[tid * summation_res_per_body + i].x;
             accumulated_accer.y += intermidiate_A[tid * summation_res_per_body + i].y;
             accumulated_accer.z += intermidiate_A[tid * summation_res_per_body + i].z;
         }
-        
+
         output_A[tid] = make_float4(accumulated_accer.x, accumulated_accer.y, accumulated_accer.z, 0.0f);
     }
-    
 }
 
 __global__ inline void
@@ -112,19 +116,19 @@ calculate_forces_2d(int N, float4 *globalX, float4 *globalA, int luf, int summat
     float4 myPosition;
 
     int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
-    int row_id = blockDim.y * blockIdx.y + threadIdx.y; // row
+    int row_id = blockDim.y * blockIdx.y + threadIdx.y;    // row
 
     myPosition = globalX[row_id];
     float3 acc = {0.0f, 0.0f, 0.0f};
 
-    // number of shared mem element populate to be done by each thread in a block. 
+    // number of shared mem element populate to be done by each thread in a block.
     // for example. for a 64 * 4 block with luf = 1024.
     // each thread reads 1024 * 4 / (64 * 4) = 16 shared mem loc
     int num_element_shared_mem_read = luf / blockDim.y;
 
     // the beginning location of global offset to read memory from
     // column_id * luf accounts for the fact that each past column id already handles luf memory location
-    // threadIdx.y * num_element_shared_mem_read is there because each luf is handled by 
+    // threadIdx.y * num_element_shared_mem_read is there because each luf is handled by
     // all thread on the same y dimension
     int global_offset = column_id * luf + threadIdx.y * num_element_shared_mem_read;
 
@@ -132,7 +136,8 @@ calculate_forces_2d(int N, float4 *globalX, float4 *globalA, int luf, int summat
     // for example, in a 64 * 4 configuration. the (0,0) block handles the first 16 read
     // the (63,3) handles the last 16 reads. where (63, 3) => 4080
     int shared_mem_offset = threadIdx.x * luf + threadIdx.y * num_element_shared_mem_read;
-    for(int i = 0; i < num_element_shared_mem_read; i++) {
+    for (int i = 0; i < num_element_shared_mem_read; i++)
+    {
         // now, we need to be careful that shared_mem can't go overbound
         // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
         shPosition[shared_mem_offset + i] = globalX[global_offset + i];
@@ -149,7 +154,7 @@ calculate_forces_2d(int N, float4 *globalX, float4 *globalA, int luf, int summat
     if (row_id < N && column_id < summation_res_per_body)
     {
         for (int k = 0; k < luf; k++)
-        {   
+        {
             //printf("shared mem location :%d, value: %f\n", shared_mem_read_offset + k, shPosition[shared_mem_read_offset + k]);
             acc = AccumulateBodyInteraction(myPosition, shPosition[shared_mem_read_offset + k], acc);
         }
@@ -177,20 +182,20 @@ calculate_forces_1d(int N, void *devX, void *devA, int p)
     float3 acc[unrollFactor];
     float4 acc4;
     int gtid = unrollFactor * (blockIdx.x * blockDim.x + threadIdx.x);
-    
-    if (gtid <= N-unrollFactor)
+
+    if (gtid <= N - unrollFactor)
     {
         // we don't skip the object even if it's gtid > N.
         // reasons explained later.
         for (i = 0; i < unrollFactor; i++)
         {
-            myPosition = globalX[gtid+i];
+            myPosition = globalX[gtid + i];
             acc[i] = {0.0f, 0.0f, 0.0f};
 
             // accumulate over 1 bank indicated by the theadIdx
             for (j = 0; j < N; j++) // j - shared mem row index
             {
-                shPosition = globalX[32*j + threadIdx.x];
+                shPosition = globalX[32 * j + threadIdx.x];
                 // calculate accumulation
                 acc[i] = AccumulateBodyInteraction(myPosition, shPosition, acc[i]);
             }
@@ -199,9 +204,9 @@ calculate_forces_1d(int N, void *devX, void *devA, int p)
         __syncthreads();
         for (i = 0; i < unrollFactor; i++)
         {
-            acc4 = globalA[gtid+i];
-            globalA[gtid+i] = {acc[i].x+acc4.x, acc[i].y+acc4.y, acc[i].z+acc4.z, 0.0f};
+            acc4 = globalA[gtid + i];
+            globalA[gtid + i] = {acc[i].x + acc4.x, acc[i].y + acc4.y, acc[i].z + acc4.z, 0.0f};
         }
         __syncthreads();
-    }  
+    }
 }
