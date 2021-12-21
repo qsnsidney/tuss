@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 
-from os import path
+import argparse
 import re
 import subprocess
-import argparse
 from enum import Enum
+from os import path
 
-from . import scheduler
 from .. import core
-
-
-def error_and_exit(err_msg):
-    print(err_msg)
-    exit(1)
+from . import scheduler
 
 
 class CudaEngine(Enum):
@@ -56,7 +51,7 @@ def main_new(args):
         args.iter,
         project_home_dir,
         'Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)',
-        path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin1'))
+        path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin'))
 
     result = scheduler.schedule_run(scheduler_args)
 
@@ -119,13 +114,13 @@ def main(args):
                         command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
                     print(command)
-                    error_and_exit(e.output.decode('utf-8'))
+                    raise(e.output.decode('utf-8'))
 
                 ret = result.decode('utf-8')
                 f_stdout.write(ret + '\n')
                 gpu_runtime_re = re.search(GPU_TIME_PATTERN, ret)
                 if not gpu_runtime_re:
-                    error_and_exit('failed to find gpu runtime')
+                    raise('failed to find gpu runtime')
                 gpu_runtime = gpu_runtime_re.group(1)
                 total_time += float(gpu_runtime)
             avg_time = total_time / AVG_ITERATION
