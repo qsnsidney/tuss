@@ -89,7 +89,9 @@ namespace TUS
         unsigned dest_index = 1;
 
         float4 * d_intermidiate_A;
-        gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float4) * nBody * nBody));
+        int summation_result_per_body = (nBody + unroll_factor_ - 1) / unroll_factor_;
+        std::cout << "summation result per body is " << summation_result_per_body << std::endl;
+        gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float4) * nBody * summation_result_per_body));
 
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4dx));
@@ -121,17 +123,18 @@ namespace TUS
         unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
 
-        std::cout << "number of body to " << nBody << std::endl;
+        std::cout << "set number of body to " << nBody << std::endl;
         dim3 block( tb_len_, tb_wid_ );
-        dim3 grid( (nBody + block.x-1)/block.x, (nBody + block.y-1)/block.y );
-        // Haiqi: hack temporarily force unroll_factor_ to be 1 because we set grid.ydim to be 
-        // nbody / block.y. as a result, the y index of a thread could reach nBody and having an
-        // unroll factor > 1 will simply let thread with yid > nBody / 2 to stay idle.
-        assert(unroll_factor_ == 1);
+        int column_per_block = (tb_len_ * unroll_factor_);
+        dim3 grid( (nBody + column_per_block-1)/column_per_block, (nBody + block.y-1)/block.y );
+
+        std::cout << "2d block dimension: (" << tb_len_ << "," << tb_wid_ << ")" << std::endl;
+        std::cout << "column per block " << column_per_block << std::endl;
+        std::cout << "2d block dimension: (" << (nBody + column_per_block-1)/column_per_block << "," << (nBody + block.y-1)/block.y << ")" << std::endl;
 
         // calculate the initialia acceleration
-        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_);
-        simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index]);
+        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+        simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
@@ -143,8 +146,8 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                calculate_forces_2d<<<grid, block>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_);
-                simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index]);
+                calculate_forces_2d<<<grid, block>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+                simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
 
                 cudaDeviceSynchronize();
 
