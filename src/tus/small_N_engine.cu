@@ -52,10 +52,21 @@ namespace TUS
         /* BIN file of initial conditions */
         const auto &ic = system_state_snapshot();
 
+
+        dim3 block( tb_len_, tb_wid_ );
+        int column_per_block = (tb_len_ * unroll_factor_);
+        assert(unroll_factor_ % tb_wid_ == 0);
+        dim3 grid( (nBody + column_per_block-1)/column_per_block, (nBody + block.y-1)/block.y );
+
+        std::cout << "2d block dimension: (" << tb_len_ << "," << tb_wid_ << ")" << std::endl;
+        std::cout << "column per block " << column_per_block << std::endl;
+        std::cout << "2d grid dimension: (" << (nBody + column_per_block-1)/column_per_block << "," << (nBody + block.y-1)/block.y << ")" << std::endl;
+        
         // random initializer just for now
         size_t vector_size_3d = sizeof(data_t_3d) * nBody;
         size_t vector_size_4d = sizeof(float4) * nBody;
-        size_t vector_size_4dx = sizeof(float4) * ((nBody + (block_size_ - 1))/block_size_) * block_size_;
+        std::cout << "quantize to " << ((nBody + (column_per_block - 1))/column_per_block) * column_per_block << std::endl;
+        size_t vector_size_4dx = sizeof(float4) * ((nBody + (column_per_block - 1))/column_per_block) * column_per_block;
         /*
      *   host side memory allocation
      */
@@ -74,7 +85,7 @@ namespace TUS
      *   input randome initialize
      */
 
-        for(int i = 0; i < ((nBody + (block_size_ - 1))/block_size_) * block_size_; i++) {
+        for(int i = 0; i < ((nBody + (column_per_block - 1))/column_per_block) * column_per_block; i++) {
             h_X[i] = make_float4(0.0f, 0.0f, 0.0f, 0.0f);
         }
 
@@ -124,16 +135,9 @@ namespace TUS
 
 
         std::cout << "set number of body to " << nBody << std::endl;
-        dim3 block( tb_len_, tb_wid_ );
-        int column_per_block = (tb_len_ * unroll_factor_);
-        dim3 grid( (nBody + column_per_block-1)/column_per_block, (nBody + block.y-1)/block.y );
-
-        std::cout << "2d block dimension: (" << tb_len_ << "," << tb_wid_ << ")" << std::endl;
-        std::cout << "column per block " << column_per_block << std::endl;
-        std::cout << "2d block dimension: (" << (nBody + column_per_block-1)/column_per_block << "," << (nBody + block.y-1)/block.y << ")" << std::endl;
-
+        std::cout << "using " << column_per_block * sizeof(float4) << " bytes per block" << std::endl;
         // calculate the initialia acceleration
-        calculate_forces_2d<<<grid, block>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+        calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
         simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
         timer.elapsed_previous("Calculated initial acceleration");
 
@@ -146,7 +150,7 @@ namespace TUS
 
                 cudaDeviceSynchronize();
 
-                calculate_forces_2d<<<grid, block>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+                calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
                 simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
 
                 cudaDeviceSynchronize();

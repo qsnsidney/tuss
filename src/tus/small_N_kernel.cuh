@@ -109,11 +109,10 @@ simple_accumulate_intermidate_acceleration(int N, float4* intermidiate_A, float4
 __global__ inline void
 calculate_forces_2d(int N, void *devX, void *devA, int luf, int summation_res_per_body)
 {
-    //extern __shared__ float4 shPosition[];
+    extern __shared__ float4 shPosition[];
     float4 *globalX = (float4 *)devX;
     float4 *globalA = (float4 *)devA;
     float4 myPosition;
-    float4 shPosition;
     //const int unrollFactor = 4;
     //float3 acc[unrollFactor];
     float4 acc4;
@@ -121,20 +120,46 @@ calculate_forces_2d(int N, void *devX, void *devA, int luf, int summation_res_pe
     int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
     int row_id = blockDim.y * blockIdx.y + threadIdx.y; // row
 
+    //printf("row id :%d, column id: %d\n", row_id, column_id);
+
     myPosition = globalX[row_id];
     float3 acc = {0.0f, 0.0f, 0.0f};
 
+    // number of shared mem element populate to be done by each thread in a block. 
+    // for example. for a 64 * 4 block with luf = 1024.
+    // each thread reads 1024 * 4 / (64 * 4) = 16 shared mem loc
+    int num_element_shared_mem_read = luf / blockDim.y;
+
+    // the beginning location of global offset to read memory from
+    // column_id * luf accounts for the fact that each past column id already handles luf memory location
+    // threadIdx.y * num_element_shared_mem_read is there because each luf is handled by 
+    // all thread on the same y dimension
+    int global_offset = column_id * luf + threadIdx.y * num_element_shared_mem_read;
+
+    // the offset of shared_mem to be populated by this exact thread in the block.
+    // for example, in a 64 * 4 configuration. the (0,0) block handles the first 16 read
+    // the (63,3) handles the last 16 reads. where (63, 3) => 4080
+    int shared_mem_offset = threadIdx.x * luf + threadIdx.y * num_element_shared_mem_read;
+    for(int i = 0; i < num_element_shared_mem_read; i++) {
+        // now, we need to be careful that shared_mem can't go overbound
+        // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
+        shPosition[shared_mem_offset + i] = globalX[global_offset + i];
+    }
+    __syncthreads();
+
+    // don't forget that each thread is only reading a portion of the shared memory
+    int shared_mem_read_offset = threadIdx.x * luf;
+
+    //printf("row id :%d, column id: %d\n", row_id, column_id);
+
     // if the body is in the range. and the summation result is also in range
+    // question: is it possible that some column_id are missing?
     if (row_id < N && column_id < summation_res_per_body)
     {
         for (int k = 0; k < luf; k++)
         {   
-            int actual_column_id = column_id * luf + k;
-            if (actual_column_id < N)
-            {
-                shPosition = globalX[actual_column_id];
-                acc = AccumulateBodyInteraction(myPosition, shPosition, acc);
-            }
+            //printf("shared mem location :%d, value: %f\n", shared_mem_read_offset + k, shPosition[shared_mem_read_offset + k]);
+            acc = AccumulateBodyInteraction(myPosition, shPosition[shared_mem_read_offset + k], acc);
         }
         globalA[row_id * summation_res_per_body + column_id] = {acc.x, acc.y, acc.z, 0.0f};
     }
