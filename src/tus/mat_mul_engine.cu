@@ -214,14 +214,14 @@ namespace TUS
         unsigned nblocks = (nBody + block_size_ - 1) / block_size_;
 
         // calculate the initialia acceleration
-        calculate_acceleration<<<nblocks, block_size_> > >(nBody, d_X[src_index], d_M, d_A[src_index]);
+        calculate_acceleration<<<nblocks, block_size_>>>(nBody, d_X[src_index], d_M, d_A[src_index]);
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
             CORE::TIMER core_timer("all_iters");
             for (int i_iter = 0; i_iter < n_iter; i_iter++)
             {
-                update_step_pos<<<nblocks, block_size_> > >(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, //input
+                update_step_pos<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_X[src_index], d_V[src_index], d_A[src_index], d_M, //input
                                                             d_X[dest_index], d_V_half);                                               // output
 
                 cudaDeviceSynchronize();
@@ -235,13 +235,13 @@ namespace TUS
                     // prepare for field
                     // Since everytime, there is only one target body,
                     // can we directly pass the location of that into the kernel call?
-                    calculate_individual_acceleration<<<nblocks, block_size_> > >(nBody, ibody, d_X[dest_index], d_M, // input
+                    calculate_individual_acceleration<<<nblocks, block_size_>>>(nBody, ibody, d_X[dest_index], d_M, // input
                                                                                   d_Field);                           // output
                     // Does not matter
                     // cudaDeviceSynchronize();
                 }
 
-                update_step_vel<<<nblocks, block_size_> > >(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
+                update_step_vel<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_M, d_A[dest_index], d_V_half, //input
                                                             d_V[dest_index]);                                    // output
                 cudaDeviceSynchronize();
 
