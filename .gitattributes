@@ -1,1 +1,1 @@
-*.bin filter=lfs diff=lfs merge=lfs -text
+s0_s1125000_d1000000.bin MED.bin filter=lfs diff=lfs merge=lfs -text
