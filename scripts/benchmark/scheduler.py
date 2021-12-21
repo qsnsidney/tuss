@@ -48,7 +48,8 @@ def main(args):
     data_output_file_path = path.join(project_home_dir, BENCHMARK_OUTPUT_FILE)
     with open(data_output_file_path, 'w') as f_data:
         for exe_arg_line, avg_time in result:
-            f_data.write(exe_arg_line + ':' + '{:.6f}'.format(avg_time) + '\n')
+            f_data.write(str(exe_arg_line) + ':' +
+                         '{:.6f}'.format(avg_time) + '\n')
 
 
 def validate_exe_args(original_exe_args_sweep: dict):
