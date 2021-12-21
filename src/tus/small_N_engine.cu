@@ -143,6 +143,8 @@ namespace TUS
 
         std::cout << "set number of body to " << nBody << std::endl;
         std::cout << "using " << column_per_block * sizeof(float4) << " bytes per block" << std::endl;
+        // I would highly recommend be careful about setting shared mem > 16384
+        assert(column_per_block * sizeof(float4) < 16384);
         // calculate the initialia acceleration
         cudaMemset(d_A[src_index], 0, vector_size_4d);
         calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
