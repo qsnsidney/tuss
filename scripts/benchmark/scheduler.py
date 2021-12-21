@@ -41,7 +41,8 @@ def main(args):
         path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin'))
 
     result = schedule_run(scheduler_args)
-    print(result)
+    for row in result:
+        print(row)
     # # THREAD_PER_BLOCK = [16, 64, 256]
     # # NBODY = [50000, 100000]
     # # CUDA_EXECUTABLE = 'build/tus/tus_exe'
@@ -178,14 +179,18 @@ def schedule_run(args: SchedulerParams):
                     error_and_exit(e.output.decode('utf-8'))
 
                 ret = result.decode('utf-8')
-                f_stdout.write(ret + '\n')
                 timer_match = re.search(args.timer_pattern, ret)
                 if not timer_match:
                     error_and_exit('failed to find gpu runtime')
-                time_elapsed = timer_match.group(1)
-                total_time += float(time_elapsed)
-            avg_time = total_time / args.num_trials_per_run
+                time_elapsed = float(timer_match.group(1))
 
+                info_msg = '    {time_elapsed}'
+                f_stdout.write(info_msg + '\n')
+                print(info_msg)
+                f_stdout.write(ret + '\n')
+
+                total_time += time_elapsed
+            avg_time = total_time / args.num_trials_per_run
             suite_result.append((exe_arg_line, avg_time))
 
     return suite_result
