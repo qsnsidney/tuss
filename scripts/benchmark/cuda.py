@@ -32,7 +32,7 @@ def init(parser):
                         help=f'version of enginer to test. default = {CudaEngine.NVDA_IMPROVED.value}({CudaEngine.NVDA_IMPROVED.name})')
 
 
-def main_new(args):
+def main(args):
     script_path = path.join(path.dirname(path.realpath(__file__)),
                             '../../')
     project_home_dir = path.join(
@@ -57,6 +57,8 @@ def main_new(args):
 
     BENCHMARK_OUTPUT_FILE = f'{scheduler_args.suite_name.lower()}_benchmark_{scheduler_args.engine_version}.csv'
     data_output_file_path = path.join(project_home_dir, BENCHMARK_OUTPUT_FILE)
+    print(' ')
+    print('RESULT')
     with open(data_output_file_path, 'w') as f_data:
         for exe_arg_line, avg_time in result:
             line = str(exe_arg_line) + ':' + '{:.6f}'.format(avg_time)
@@ -64,7 +66,7 @@ def main_new(args):
             print(line)
 
 
-def main(args):
+def main_deprecated(args):
     '''
     @Deprecated
     '''
@@ -140,4 +142,4 @@ if __name__ == '__main__':
     print(' ')
     parser = argparse.ArgumentParser(description='Simple parser')
     init(parser)
-    main(args=parser.parse_args())
+    main_deprecated(args=parser.parse_args())

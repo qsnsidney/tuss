@@ -12,7 +12,7 @@ def init(parser):
 
 def main(args):
     if args.target == 'cuda':
-        cuda.main_new(args=args)
+        cuda.main(args=args)
 
 
 parser = argparse.ArgumentParser()
