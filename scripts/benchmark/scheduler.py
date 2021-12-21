@@ -71,32 +71,52 @@ def schedule_run(args: SchedulerParams):
                 f_stdout.write(info_msg + '\n')
                 print(info_msg)
 
+                # hardcode now, fixit
+                dt = 1
+                num_iterations = 10
+                # end fixit
+
                 command = [args.executable] + exe_arg_line + [
                     '--ic_file', args.benchmark_data_path,
-                    '--dt', str(1),
-                    '--num_iterations', str(10),
+                    '--dt', str(dt),
+                    '--num_iterations', str(num_iterations),
                     '--version', str(args.engine_version)]
 
+                result = None
                 try:
                     result = subprocess.check_output(
                         command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
-                    print(command)
-                    raise(e)
-
-                ret = result.decode('utf-8')
-                timer_match = re.search(args.timer_pattern, ret)
-                if not timer_match:
-                    raise(Exception('failed to find timer dump'))
-                time_elapsed = float(timer_match.group(1))
+                    ret = e.output.decode('utf-8')
+                    print('---------------------------------------------------------')
+                    print('[Error Running]')
+                    print(' '.join(command))
+                    print(' ')
+                    print('[Error]')
+                    print(ret)
+                    print('---------------------------------------------------------')
+                    time_elapsed = None
+                else:
+                    ret = result.decode('utf-8')
+                    timer_match = re.search(args.timer_pattern, ret)
+                    if not timer_match:
+                        raise(Exception('failed to find timer dump'))
+                    time_elapsed = float(timer_match.group(1))
 
                 info_msg = f'    {time_elapsed}'
                 f_stdout.write(info_msg + '\n')
                 print(info_msg)
                 f_stdout.write(ret + '\n')
 
-                total_time += time_elapsed
-            avg_time = total_time / args.num_trials_per_run
+                if time_elapsed is not None and total_time is not None:
+                    total_time += time_elapsed
+                else:
+                    total_time = None
+
+            if total_time is not None:
+                avg_time = total_time / args.num_trials_per_run
+            else:
+                avg_time = None
             suite_result.append((exe_arg_line, avg_time))
 
     return suite_result
