@@ -2,7 +2,7 @@ from enum import Enum
 from os import path
 
 from .. import core
-from . import scheduler
+from . import general, scheduler
 
 
 class CpuEngine(Enum):
@@ -14,14 +14,7 @@ DEFAULT_TRIALS = 1
 
 
 def init(parser):
-    parser.add_argument('-i', '--input', type=str, default=path.join(
-        path.dirname(path.realpath(__file__)), '../../data/ic/s0_s112500_g100000_d100000.bin'))
-    parser.add_argument('-o', '--output', type=str, default=path.join(
-        path.dirname(path.realpath(__file__)), '../../tmp'))
-    parser.add_argument('--trials', type=int, default=DEFAULT_TRIALS,
-                        help=f'number of runs for each configuration (default: {DEFAULT_TRIALS})')
-    parser.add_argument('--version', type=int, default=CpuEngine.SHARED_ACC.value,
-                        help=f'version of enginer to test. default = {CpuEngine.SHARED_ACC.value}({CpuEngine.SHARED_ACC.name})')
+    general.init_parser_parent(parser, CpuEngine.SHARED_ACC)
 
 
 def main(args):
