@@ -106,7 +106,7 @@ def main(args):
 
 def validate_exe_args(original_exe_args_sweep: dict):
     exe_arg_names_to_del = [
-        k for k, v in original_exe_args_sweep if len(v) == 0]
+        k for k, v in original_exe_args_sweep.items() if len(v) == 0]
     new_exe_args_sweep = dict(original_exe_args_sweep)
     for arg_name in exe_arg_names_to_del:
         new_exe_args_sweep.pop(arg_name)
@@ -156,9 +156,9 @@ def schedule_run(args: SchedulerParams):
     stdout_file_path = os.path.join(project_home_dir, STDOUT_OUTPUT)
 
     # with open(data_output_file_path, 'w') as f_data:
+    exe_args_sweep = permutate_exe_args(
+        validate_exe_args(args.exe_args_sweep))
     with open(stdout_file_path, 'w') as f_stdout:
-        exe_args_sweep = permutate_exe_args(
-            validate_exe_args(args.exe_args_sweep))
         for exe_arg_line in exe_args_sweep:
             total_time = 0
             assert args.num_trials_per_run > 0
