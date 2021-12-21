@@ -21,13 +21,13 @@ MAT_MUL = 5
 NVDA_IMPROVED = 6
 
 TEST_ENGINES_NAME = {
-    BASIC: "basic_engine",
-    NVDA_REFERENCE: "nvda_reference_engine",
-    COALESCED_BASIC: "coalesced_basic_engine",
-    TILED_BASIC: "tiled_basic_engine",
-    SMALL_N: "small_n",
-    MAT_MUL: "matmul_engine",
-    NVDA_IMPROVED: "improved_nvda_engine",
+    BASIC: 'basic_engine',
+    NVDA_REFERENCE: 'nvda_reference_engine',
+    COALESCED_BASIC: 'coalesced_basic_engine',
+    TILED_BASIC: 'tiled_basic_engine',
+    SMALL_N: 'small_n',
+    MAT_MUL: 'matmul_engine',
+    NVDA_IMPROVED: 'improved_nvda_engine',
 }
 
 DEFAULT_ITERATION = 1
@@ -43,18 +43,18 @@ def init(parser):
 def main(args):
     THREAD_PER_BLOCK = [16, 64, 256]
     NBODY = [50000, 100000]
-    CUDA_EXECUTABLE = "build/tus/tus_exe"
-    GPU_TIME_PATTERN = "Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)"
-    BENCHMARK_DATA = "data/ic/s0_s112500_g100000_d100000.bin"
-    STDOUT_OUTPUT = "benchmark.stdout"
+    CUDA_EXECUTABLE = 'build/tus/tus_exe'
+    GPU_TIME_PATTERN = 'Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)'
+    BENCHMARK_DATA = 'data/ic/s0_s112500_g100000_d100000.bin'
+    STDOUT_OUTPUT = 'benchmark.stdout'
     VERSION = args.version
     AVG_ITERATION = args.iter
-    BENCHMARK_OUTPUT_FILE = f"gpu_benchmark_{TEST_ENGINES_NAME[VERSION]}.csv"
+    BENCHMARK_OUTPUT_FILE = f'gpu_benchmark_{TEST_ENGINES_NAME[VERSION]}.csv'
 
-    print(f"running benchmark for {TEST_ENGINES_NAME[VERSION]}")
+    print(f'running benchmark for {TEST_ENGINES_NAME[VERSION]}')
 
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    project_home_dir = os.path.join(script_dir, "../../")
+    project_home_dir = os.path.join(script_dir, '../../')
 
     data_output_file_path = os.path.join(
         project_home_dir, BENCHMARK_OUTPUT_FILE)
@@ -62,23 +62,23 @@ def main(args):
     benchmark_path = os.path.join(project_home_dir, BENCHMARK_DATA)
     cuda_executable = os.path.join(project_home_dir, CUDA_EXECUTABLE)
 
-    f_data = open(data_output_file_path, "w")
-    f_stdout = open(stdout_file_path, "w")
+    f_data = open(data_output_file_path, 'w')
+    f_stdout = open(stdout_file_path, 'w')
 
-    f_data.write("nbody/block")
+    f_data.write('nbody/block')
     for i in NBODY:
-        f_data.write("," + str(i))
+        f_data.write(',' + str(i))
 
     for block_size in THREAD_PER_BLOCK:
-        f_data.write("\n")
-        f_data.write(str(block_size) + ",")
+        f_data.write('\n')
+        f_data.write(str(block_size) + ',')
         for num_body in NBODY:
             total_time = 0
             for count in range(AVG_ITERATION):
-                info_msg = "RUNNING NUMBLOCK : " + \
-                    str(block_size) + ". NBODY : " + \
-                    str(num_body) + ". ITER: " + str(count)
-                f_stdout.write(info_msg + "\n")
+                info_msg = 'RUNNING NUMBLOCK : ' + \
+                    str(block_size) + '. NBODY : ' + \
+                    str(num_body) + '. ITER: ' + str(count)
+                f_stdout.write(info_msg + '\n')
                 print(info_msg)
                 command = [cuda_executable, '-b', str(num_body), '-i', benchmark_path, '-t', str(
                     block_size), '-d', '1', '-n', '10', '--version', str(VERSION)]
@@ -90,14 +90,14 @@ def main(args):
                     error_and_exit(e.output.decode('utf-8'))
 
                 ret = result.decode('utf-8')
-                f_stdout.write(ret + "\n")
+                f_stdout.write(ret + '\n')
                 gpu_runtime_re = re.search(GPU_TIME_PATTERN, ret)
                 if not gpu_runtime_re:
-                    error_and_exit("failed to find gpu runtime")
+                    error_and_exit('failed to find gpu runtime')
                 gpu_runtime = gpu_runtime_re.group(1)
                 total_time += float(gpu_runtime)
             avg_time = total_time / AVG_ITERATION
-            f_data.write("{:.6f}".format(avg_time) + ",")
+            f_data.write('{:.6f}'.format(avg_time) + ',')
 
     f_data.close()
     f_stdout.close()
