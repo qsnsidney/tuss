@@ -163,7 +163,7 @@ def schedule_run(args: SchedulerParams):
             total_time = 0
             assert args.num_trials_per_run > 0
             for itrial in range(args.num_trials_per_run):
-                info_msg = f'Running [{exe_arg_line}, trial {itrial}'
+                info_msg = f'Running {exe_arg_line}, trial {itrial}'
                 f_stdout.write(info_msg + '\n')
                 print(info_msg)
 

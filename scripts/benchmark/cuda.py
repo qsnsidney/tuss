@@ -34,7 +34,8 @@ DEFAULT_ITERATION = 1
 
 
 def init(parser):
-    parser.add_argument('-o', '--output', type=str, default=os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../'))
+    parser.add_argument('-o', '--output', type=str, default=os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '../../tmp'))
     parser.add_argument('--iter', type=int, default=DEFAULT_ITERATION,
                         help=f'number of runs for each configuration (default: {DEFAULT_ITERATION})')
     parser.add_argument('--version', type=int, default=NVDA_IMPROVED,
