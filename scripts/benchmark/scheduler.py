@@ -56,7 +56,7 @@ def schedule_run(args: SchedulerParams):
     STDOUT_OUTPUT = 'benchmark.stdout'
 
     print(
-        f'Running {args.suite_name} benchmark for {args.engine_name} [{args.engine_version}]')
+        f'Running {args.suite_name} benchmark for {args.engine_name} ({args.engine_version})')
 
     exe_args_sweep = permutate_exe_args(
         validate_exe_args(args.exe_args_sweep))
