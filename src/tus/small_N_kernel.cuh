@@ -69,22 +69,21 @@ __global__ inline void calculate_acceleration_f4(unsigned nbody, float4 *locatio
 __device__ inline float3
 AccumulateBodyInteraction(float4 bi, float4 bj, float3 ai)
 {
-    float3 r;
     // r_ij [3 FLOPS]
-    r.x = bj.x - bi.x;
-    r.y = bj.y - bi.y;
-    r.z = bj.z - bi.z;
+    float x_diff = bj.x - bi.x;
+    float y_diff = bj.y - bi.y;
+    float z_diff = bj.z - bi.z;
     // distSqr = dot(r_ij, r_ij) + EPS^2 [6 FLOPS]
-    float distSqr = r.x * r.x + r.y * r.y + r.z * r.z + CORE::UNIVERSE::epislon_square;
+    float distSqr = x_diff * x_diff + y_diff * y_diff + z_diff * z_diff + CORE::UNIVERSE::epislon_square;
     // invDistCube =1/distSqr^(3/2) [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
     float distSixth = distSqr * distSqr * distSqr;
     float invDistCube = rsqrtf(distSixth);
     // s = m_j * invDistCube [1 FLOP]
     float s = bj.w * invDistCube;
     // a_i = a_i + s * r_ij [6 FLOPS]
-    ai.x += r.x * s;
-    ai.y += r.y * s;
-    ai.z += r.z * s;
+    ai.x += x_diff * s;
+    ai.y += y_diff * s;
+    ai.z += z_diff * s;
     return ai;
 }
 
@@ -107,20 +106,13 @@ simple_accumulate_intermidate_acceleration(int N, float4* intermidiate_A, float4
 }
 
 __global__ inline void
-calculate_forces_2d(int N, void *devX, void *devA, int luf, int summation_res_per_body)
+calculate_forces_2d(int N, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
 {
     extern __shared__ float4 shPosition[];
-    float4 *globalX = (float4 *)devX;
-    float4 *globalA = (float4 *)devA;
     float4 myPosition;
-    //const int unrollFactor = 4;
-    //float3 acc[unrollFactor];
-    float4 acc4;
 
     int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
     int row_id = blockDim.y * blockIdx.y + threadIdx.y; // row
-
-    //printf("row id :%d, column id: %d\n", row_id, column_id);
 
     myPosition = globalX[row_id];
     float3 acc = {0.0f, 0.0f, 0.0f};
@@ -145,15 +137,15 @@ calculate_forces_2d(int N, void *devX, void *devA, int luf, int summation_res_pe
         // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
         shPosition[shared_mem_offset + i] = globalX[global_offset + i];
     }
+
+    // wait for all shared mem to be written
     __syncthreads();
 
     // don't forget that each thread is only reading a portion of the shared memory
     int shared_mem_read_offset = threadIdx.x * luf;
 
-    //printf("row id :%d, column id: %d\n", row_id, column_id);
-
     // if the body is in the range. and the summation result is also in range
-    // question: is it possible that some column_id are missing?
+    // note that the block will end execution after the loop, so no syncthread is needed.
     if (row_id < N && column_id < summation_res_per_body)
     {
         for (int k = 0; k < luf; k++)
