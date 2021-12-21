@@ -184,7 +184,7 @@ def schedule_run(args: SchedulerParams):
                     error_and_exit('failed to find gpu runtime')
                 time_elapsed = float(timer_match.group(1))
 
-                info_msg = '    {time_elapsed}'
+                info_msg = f'    {time_elapsed}'
                 f_stdout.write(info_msg + '\n')
                 print(info_msg)
                 f_stdout.write(ret + '\n')
