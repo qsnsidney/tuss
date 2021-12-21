@@ -61,7 +61,7 @@ def main(args):
     print('RESULT')
     with open(data_output_file_path, 'w') as f_data:
         for exe_arg_line, avg_time in result:
-            line = str(exe_arg_line) + ':' + '{:.6f}'.format(avg_time)
+            line = str(exe_arg_line) + ': ' + '{:.6f}'.format(avg_time)
             f_data.write(line + '\n')
             print(line)
 
