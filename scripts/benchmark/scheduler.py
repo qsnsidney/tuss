@@ -3,53 +3,17 @@ import subprocess
 from os import path
 from typing import NamedTuple
 
-from .. import core
-
-
-def error_and_exit(err_msg):
-    print(err_msg)
-    exit(1)
-
 
 class SchedulerParams(NamedTuple):
     suite_name: str
     engine_version: int
+    engine_name: str
     executable: str
     exe_args_sweep: dict  # {arg_name: [arg]}
     num_trials_per_run: int
     wdir: str
     timer_pattern: str
     benchmark_data_path: str
-
-
-def main(args):
-    script_path = path.join(path.dirname(path.realpath(__file__)),
-                            '../../')
-    project_home_dir = path.join(
-        args.output, core.utils.get_pf_timestamp_str())
-    core.fileio.create_dir_if_necessary(project_home_dir)
-
-    print(f'Using {project_home_dir} as working directory')
-
-    scheduler_args = SchedulerParams(
-        'GPU',
-        args.version,
-        path.join(script_path, 'build/tus/tus_exe'),
-        {'--num_bodies': [
-            50000, 100000], '--block_size': [16, 64, 256]},
-        args.iter,
-        project_home_dir,
-        'Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)',
-        path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin'))
-
-    result = schedule_run(scheduler_args)
-
-    BENCHMARK_OUTPUT_FILE = f'{scheduler_args.suite_name.lower()}_benchmark_{scheduler_args.engine_version}.csv'
-    data_output_file_path = path.join(project_home_dir, BENCHMARK_OUTPUT_FILE)
-    with open(data_output_file_path, 'w') as f_data:
-        for exe_arg_line, avg_time in result:
-            f_data.write(str(exe_arg_line) + ':' +
-                         '{:.6f}'.format(avg_time) + '\n')
 
 
 def validate_exe_args(original_exe_args_sweep: dict):
@@ -91,7 +55,8 @@ def schedule_run(args: SchedulerParams):
     suite_result = list()
     STDOUT_OUTPUT = 'benchmark.stdout'
 
-    print(f'Running {args.suite_name} benchmark for {args.engine_version}')
+    print(
+        f'Running {args.suite_name} benchmark for {args.engine_name} [{args.engine_version}]')
 
     exe_args_sweep = permutate_exe_args(
         validate_exe_args(args.exe_args_sweep))
@@ -114,12 +79,12 @@ def schedule_run(args: SchedulerParams):
                         command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
                     print(command)
-                    error_and_exit(e.output.decode('utf-8'))
+                    raise(e)
 
                 ret = result.decode('utf-8')
                 timer_match = re.search(args.timer_pattern, ret)
                 if not timer_match:
-                    error_and_exit('failed to find gpu runtime')
+                    raise('failed to find timer dump')
                 time_elapsed = float(timer_match.group(1))
 
                 info_msg = f'    {time_elapsed}'

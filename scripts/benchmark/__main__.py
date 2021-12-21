@@ -1,6 +1,6 @@
 import argparse
 
-from . import cuda, scheduler
+from . import cuda
 
 
 def init(parser):
@@ -12,7 +12,7 @@ def init(parser):
 
 def main(args):
     if args.target == 'cuda':
-        scheduler.main(args=args)
+        cuda.main_new(args=args)
 
 
 parser = argparse.ArgumentParser()
