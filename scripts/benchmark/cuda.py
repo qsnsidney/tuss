@@ -80,6 +80,9 @@ def main_new(args):
 
 
 def main(args):
+    '''
+    @Deprecated
+    '''
     THREAD_PER_BLOCK = [16, 64, 256]
     NBODY = [50000, 100000]
     CUDA_EXECUTABLE = 'build/tus/tus_exe'
@@ -143,6 +146,9 @@ def main(args):
 
 
 if __name__ == '__main__':
+    '''
+    @Deprecated
+    '''
     print('WARNING:', 'Launching directly from this script is now deprecated!')
     print('WARNING:', 'Please use:')
     print('WARNING:', '  python3 -m scripts.benchmark cuda')
