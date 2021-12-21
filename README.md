@@ -153,6 +153,9 @@ make run_cpusim ARGS="-i ./data/ic/benchmark_100000.bin -d 0.001 -n10 -v -t1 -V0
 # Latest version
 make run_cpusim ARGS="-i ./data/ic/benchmark_100000.bin -d 0.001 -n10 -v -t4 -V1"
 ```
+```
+python3 -m scripts.benchmark cpu
+```
 
 #### tus
 ```
