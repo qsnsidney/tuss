@@ -71,8 +71,11 @@ def schedule_run(args: SchedulerParams):
                 f_stdout.write(info_msg + '\n')
                 print(info_msg)
 
-                command = [args.executable] + exe_arg_line + ['--ic_file', args.benchmark_data_path, '--dt', str(
-                    1), '--num_iterations', str(10), '--version', str(args.engine_version)]
+                command = [args.executable] + exe_arg_line + [
+                    '--ic_file', args.benchmark_data_path,
+                    '--dt', str(1),
+                    '--num_iterations', str(10),
+                    '--version', str(args.engine_version)]
 
                 try:
                     result = subprocess.check_output(
@@ -84,7 +87,7 @@ def schedule_run(args: SchedulerParams):
                 ret = result.decode('utf-8')
                 timer_match = re.search(args.timer_pattern, ret)
                 if not timer_match:
-                    raise('failed to find timer dump')
+                    raise(Exception('failed to find timer dump'))
                 time_elapsed = float(timer_match.group(1))
 
                 info_msg = f'    {time_elapsed}'

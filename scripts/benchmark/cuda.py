@@ -20,14 +20,16 @@ class CudaEngine(Enum):
     NVDA_IMPROVED = 6
 
 
-DEFAULT_ITERATION = 1
+DEFAULT_TRIALS = 1
 
 
 def init(parser):
+    parser.add_argument('-i', '--input', type=str, default=path.join(
+        path.dirname(path.realpath(__file__)), '../../data/ic/s0_s112500_g100000_d100000.bin'))
     parser.add_argument('-o', '--output', type=str, default=path.join(
         path.dirname(path.realpath(__file__)), '../../tmp'))
-    parser.add_argument('--iter', type=int, default=DEFAULT_ITERATION,
-                        help=f'number of runs for each configuration (default: {DEFAULT_ITERATION})')
+    parser.add_argument('--trials', type=int, default=DEFAULT_TRIALS,
+                        help=f'number of runs for each configuration (default: {DEFAULT_TRIALS})')
     parser.add_argument('--version', type=int, default=CudaEngine.NVDA_IMPROVED.value,
                         help=f'version of enginer to test. default = {CudaEngine.NVDA_IMPROVED.value}({CudaEngine.NVDA_IMPROVED.name})')
 
@@ -48,14 +50,14 @@ def main(args):
         path.join(script_path, 'build/tus/tus_exe'),
         {'--num_bodies': [
             50000, 100000], '--block_size': [16, 64, 256]},
-        args.iter,
+        args.trials,
         project_home_dir,
         'Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)',
-        path.join(script_path, 'data/ic/s0_s112500_g100000_d100000.bin'))
+        args.input)
 
     result = scheduler.schedule_run(scheduler_args)
 
-    BENCHMARK_OUTPUT_FILE = f'{scheduler_args.suite_name.lower()}_benchmark_{scheduler_args.engine_version}.csv'
+    BENCHMARK_OUTPUT_FILE = f'{scheduler_args.suite_name.lower()}_benchmark_{CudaEngine(scheduler_args.engine_version).name}.csv'
     data_output_file_path = path.join(project_home_dir, BENCHMARK_OUTPUT_FILE)
     print(' ')
     print('RESULT')
@@ -77,7 +79,7 @@ def main_deprecated(args):
     BENCHMARK_DATA = 'data/ic/s0_s112500_g100000_d100000.bin'
     STDOUT_OUTPUT = 'benchmark.stdout'
     VERSION = args.version
-    AVG_ITERATION = args.iter
+    AVG_ITERATION = args.trials
     BENCHMARK_OUTPUT_FILE = f'gpu_benchmark_{CudaEngine(VERSION).name}.csv'
 
     print(f'running benchmark for {CudaEngine(VERSION).name}')
@@ -116,13 +118,13 @@ def main_deprecated(args):
                         command, stderr=subprocess.STDOUT)
                 except subprocess.CalledProcessError as e:
                     print(command)
-                    raise(e.output.decode('utf-8'))
+                    raise(Exception(e.output.decode('utf-8')))
 
                 ret = result.decode('utf-8')
                 f_stdout.write(ret + '\n')
                 gpu_runtime_re = re.search(GPU_TIME_PATTERN, ret)
                 if not gpu_runtime_re:
-                    raise('failed to find gpu runtime')
+                    raise(Exception('failed to find gpu runtime'))
                 gpu_runtime = gpu_runtime_re.group(1)
                 total_time += float(gpu_runtime)
             avg_time = total_time / AVG_ITERATION
