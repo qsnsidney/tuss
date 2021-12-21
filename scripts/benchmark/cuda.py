@@ -15,7 +15,7 @@ def error_and_exit(err_msg):
     exit(1)
 
 
-class __Engine(Enum):
+class CudaEngine(Enum):
     BASIC = 0
     NVDA_REFERENCE = 1
     COALESCED_BASIC = 2
@@ -25,16 +25,6 @@ class __Engine(Enum):
     NVDA_IMPROVED = 6
 
 
-# TEST_ENGINES_NAME = {
-#     BASIC: 'basic_engine',
-#     NVDA_REFERENCE: 'nvda_reference_engine',
-#     COALESCED_BASIC: 'coalesced_basic_engine',
-#     TILED_BASIC: 'tiled_basic_engine',
-#     SMALL_N: 'small_n',
-#     MAT_MUL: 'matmul_engine',
-#     NVDA_IMPROVED: 'improved_nvda_engine',
-# }
-
 DEFAULT_ITERATION = 1
 
 
@@ -43,8 +33,8 @@ def init(parser):
         path.dirname(path.realpath(__file__)), '../../tmp'))
     parser.add_argument('--iter', type=int, default=DEFAULT_ITERATION,
                         help=f'number of runs for each configuration (default: {DEFAULT_ITERATION})')
-    parser.add_argument('--version', type=int, default=__Engine.NVDA_IMPROVED.value,
-                        help=f'version of enginer to test. default = {__Engine.NVDA_IMPROVED.value}({__Engine.NVDA_IMPROVED})')
+    parser.add_argument('--version', type=int, default=CudaEngine.NVDA_IMPROVED.value,
+                        help=f'version of enginer to test. default = {CudaEngine.NVDA_IMPROVED.value}({CudaEngine.NVDA_IMPROVED.name})')
 
 
 def main_new(args):
@@ -59,7 +49,7 @@ def main_new(args):
     scheduler_args = scheduler.SchedulerParams(
         'GPU',
         args.version,
-        str(__Engine(args.version)),
+        CudaEngine(args.version).name,
         path.join(script_path, 'build/tus/tus_exe'),
         {'--num_bodies': [
             50000, 100000], '--block_size': [16, 64, 256]},
@@ -91,9 +81,9 @@ def main(args):
     STDOUT_OUTPUT = 'benchmark.stdout'
     VERSION = args.version
     AVG_ITERATION = args.iter
-    BENCHMARK_OUTPUT_FILE = f'gpu_benchmark_{__Engine(VERSION)}.csv'
+    BENCHMARK_OUTPUT_FILE = f'gpu_benchmark_{CudaEngine(VERSION).name}.csv'
 
-    print(f'running benchmark for {__Engine(VERSION)}')
+    print(f'running benchmark for {CudaEngine(VERSION).name}')
 
     script_dir = path.dirname(path.realpath(__file__))
     project_home_dir = path.join(script_dir, '../../')
