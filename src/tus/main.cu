@@ -50,9 +50,9 @@ auto parse_args(int argc, const char *argv[])
     option_group("d,dt", "dt", cxxopts::value<CORE::UNIVERSE::floating_value_type>());
     option_group("n,num_iterations", "num_iterations", cxxopts::value<int>());
     option_group("t,block_size", "num_threads_per_block for CUDA", cxxopts::value<int>()->default_value(std::to_string(::default_block_size)));
-    option_group("len", "horizontal dimension of a 2D thread block", cxxopts::value<int>()->default_value("1"));
+    option_group("len", "horizontal dimension of a 2D thread block", cxxopts::value<int>()->default_value("4"));
     option_group("wid", "vertical dimension of a 2D thread block", cxxopts::value<int>()->default_value("64"));
-    option_group("lur", "loop unrolling factor", cxxopts::value<int>()->default_value("512"));
+    option_group("lur", "loop unrolling factor", cxxopts::value<int>()->default_value("128"));
     option_group("tpb", "thread per body", cxxopts::value<int>()->default_value("32"));
     option_group("V,version", "version of optimization (see src/tus/main.cu): optional (default 0)",
                  cxxopts::value<int>()->default_value(std::to_string(static_cast<int>(VERSION::BASIC))));

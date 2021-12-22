@@ -159,7 +159,11 @@ namespace TUS
 
         for(int i = 0; i < num_loop; i++) {
             size_t offset = i * AccumBody;
-            calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+            if(block.x == 1){
+                calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+            } else {
+                calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+            }
             simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
         }
         timer.elapsed_previous("Calculated initial acceleration");
@@ -175,7 +179,11 @@ namespace TUS
                 cudaMemset(d_A[dest_index], 0, vector_size_4d);
                 for(int i = 0; i < num_loop; i++) {
                     size_t offset = i * AccumBody;
-                    calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+                    if(block.x == 1){
+                        calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+                    } else {
+                        calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+                    }
                     simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
                 }
                 cudaDeviceSynchronize();

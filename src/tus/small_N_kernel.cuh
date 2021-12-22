@@ -165,6 +165,64 @@ calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int 
     // }
 }
 
+__global__ inline void
+calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
+{
+    extern __shared__ float4 shPosition[];
+    float4 myPosition;
+
+    int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
+    int row_id = blockDim.y * blockIdx.y + threadIdx.y; // row
+
+    myPosition = globalX[row_id];
+    float3 acc = {0.0f, 0.0f, 0.0f};
+
+    // number of shared mem element populate to be done by each thread in a block.
+    // for example. for a 64 * 4 block with luf = 1024.
+    // each thread reads 1024 * 4 / (64 * 4) = 16 shared mem loc
+    int num_element_shared_mem_read = luf / blockDim.y;
+
+    // the beginning location of global offset to read memory from
+    // column_id * luf accounts for the fact that each past column id already handles luf memory location
+    // threadIdx.y * num_element_shared_mem_read is there because each luf is handled by
+    // all thread on the same y dimension
+    int global_offset = column_id * luf + threadIdx.y * num_element_shared_mem_read;
+
+    // some very hacky calculation
+    int actual_thread_id = threadIdx.x + threadIdx.y * blockDim.x;
+    int warp_id = actual_thread_id % 32;
+    int num_wrap = blockDim.x * blockDim.y / 32; //8 warp. total read = 1024 bytes
+    int thread_group = actual_thread_id / 32; 
+    int shared_mem_offset = thread_group * (luf * blockDim.x / num_wrap); // each warp handles 128 bytes
+    int each_t_offset = shared_mem_offset / 32; // num_element_shared_mem_read = 4 bytes here
+    for(volatile int i = 0; i < num_element_shared_mem_read; i++) {
+        // now, we need to be careful that shared_mem can't go overbound
+        // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
+        shPosition[shared_mem_offset + i * 32 + warp_id] = globalX[offset + global_offset + i];
+        // an version if bank conflict read is used in later loop
+        //shPosition[shared_mem_offset + i * 32 + warp_id] = globalX[offset + global_offset + shared_mem_offset + i * 32 + warp_id];
+    }
+
+    // wait for all shared mem to be written
+    __syncthreads();
+
+    // don't forget that each thread is only reading a portion of the shared memory
+    int shared_mem_read_offset = threadIdx.x * luf;
+
+    // if the body is in the range. and the summation result is also in range
+    // note that the block will end execution after the loop, so no syncthread is needed.
+    if (row_id < N && column_id < summation_res_per_body)
+    {
+        for (int k = 0; k < luf; k++)
+        {
+            //printf("shared mem location :%d, value: %f\n", shared_mem_read_offset + k, shPosition[shared_mem_read_offset + k]);
+            //acc = AccumulateBodyInteraction(myPosition, shPosition[shared_mem_read_offset + k], acc);
+            acc = AccumulateBodyInteraction(myPosition, shPosition[k * blockDim.x + threadIdx.x], acc);
+        }
+        globalA[row_id * summation_res_per_body + column_id] = {acc.x, acc.y, acc.z, 0.0f};
+    }
+}
+
 // Each thread reads 1 bank from the shared memory, but we limit its size (i.e. limit the # of rows)
 // Data from this 1 bank can be shared between multiple bodies to perform accumulation in parallel
 // We want 32 threads per block, since there are 32 banks in the shared memory
