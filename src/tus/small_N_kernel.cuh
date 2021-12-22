@@ -136,7 +136,7 @@ calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int 
     // for example, in a 64 * 4 configuration. the (0,0) block handles the first 16 read
     // the (63,3) handles the last 16 reads. where (63, 3) => 4080
     int shared_mem_offset = threadIdx.x * luf + threadIdx.y * num_element_shared_mem_read;
-    for(int i = 0; i < num_element_shared_mem_read; i++) {
+    for(volatile int i = 0; i < num_element_shared_mem_read; i++) {
         // now, we need to be careful that shared_mem can't go overbound
         // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
         shPosition[shared_mem_offset + i] = globalX[offset + global_offset + i];
