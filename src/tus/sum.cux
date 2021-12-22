@@ -255,11 +255,12 @@ int main(int argc, char *argv[])
     */
 
     //Report: <total_GPU_time> <CPU_GPU_transfer_time> <kernel_time> <GPU_CPU_transfer_time> <Z-value>
-    CPU_GPU_transfer_time = cg_transfer_end - cg_transfer_start;
+    //CPU_GPU_transfer_time = cg_transfer_end - cg_transfer_start;
     kernel_time = kernel_end - kernel_start;
-    GPU_CPU_transfer_time = gc_transfer_end - gc_transfer_start;
-    total_GPU_time = gc_transfer_end - cg_transfer_start;
-    printf("<%f> <%f> <%f> <%f> <%f>\n", total_GPU_time, CPU_GPU_transfer_time, kernel_time, GPU_CPU_transfer_time, Z_value);
+    //GPU_CPU_transfer_time = gc_transfer_end - gc_transfer_start;
+    //total_GPU_time = gc_transfer_end - cg_transfer_start;
+    //printf("<%f> <%f> <%f> <%f> <%f>\n", total_GPU_time, CPU_GPU_transfer_time, kernel_time, GPU_CPU_transfer_time, Z_value);
+    printf("kernel time: %f\n", kernel_time);
 
     // Free resources
     cublasDestroy(handle);
@@ -270,3 +271,4 @@ int main(int argc, char *argv[])
     cudaFreeHost(h_dZ);
     cudaDeviceReset();
 }
+
