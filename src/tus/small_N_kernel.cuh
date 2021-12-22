@@ -189,25 +189,22 @@ calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, float4 *g
     int global_offset = column_id * luf + threadIdx.y * num_element_shared_mem_read;
 
     // some very hacky calculation
+    const int warp_size = 32;
     int actual_thread_id = threadIdx.x + threadIdx.y * blockDim.x;
-    int warp_id = actual_thread_id % 32;
-    int num_wrap = blockDim.x * blockDim.y / 32; //8 warp. total read = 1024 bytes
-    int thread_group = actual_thread_id / 32; 
-    int shared_mem_offset = thread_group * (luf * blockDim.x / num_wrap); // each warp handles 128 bytes
-    int each_t_offset = shared_mem_offset / 32; // num_element_shared_mem_read = 4 bytes here
+    int warp_id = actual_thread_id % warp_size; // the id of thread in its warp belong to
+    int num_wrap = blockDim.x * blockDim.y / warp_size; 
+    int thread_group = actual_thread_id / warp_size; // which warp does the thread belong to belong to
+    int shared_mem_offset = thread_group * (luf * blockDim.x / num_wrap); // how many bytes are handled by 1 thread
     for(volatile int i = 0; i < num_element_shared_mem_read; i++) {
         // now, we need to be careful that shared_mem can't go overbound
         // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
-        shPosition[shared_mem_offset + i * 32 + warp_id] = globalX[offset + global_offset + i];
+        shPosition[shared_mem_offset + i * warp_size + warp_id] = globalX[offset + global_offset + i];
         // an version if bank conflict read is used in later loop
-        //shPosition[shared_mem_offset + i * 32 + warp_id] = globalX[offset + global_offset + shared_mem_offset + i * 32 + warp_id];
+        //shPosition[shared_mem_offset + i * warp_size + warp_id] = globalX[offset + global_offset + shared_mem_offset + i * warp_size + warp_id];
     }
 
     // wait for all shared mem to be written
     __syncthreads();
-
-    // don't forget that each thread is only reading a portion of the shared memory
-    int shared_mem_read_offset = threadIdx.x * luf;
 
     // if the body is in the range. and the summation result is also in range
     // note that the block will end execution after the loop, so no syncthread is needed.
@@ -215,8 +212,9 @@ calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, float4 *g
     {
         for (int k = 0; k < luf; k++)
         {
-            //printf("shared mem location :%d, value: %f\n", shared_mem_read_offset + k, shPosition[shared_mem_read_offset + k]);
-            //acc = AccumulateBodyInteraction(myPosition, shPosition[shared_mem_read_offset + k], acc);
+            // for a continuous memory region. do it as 
+            // | Pos1 | Pos2 | Pos3 | Pos4 |
+            //   t1      t2     t3     t4
             acc = AccumulateBodyInteraction(myPosition, shPosition[k * blockDim.x + threadIdx.x], acc);
         }
         globalA[row_id * summation_res_per_body + column_id] = {acc.x, acc.y, acc.z, 0.0f};

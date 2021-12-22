@@ -168,6 +168,8 @@ make run_tus ARGS="-i ./data/ic/s0_s112500.bin -d 0.001 -n10 -v -V1 -t32"
 make run_tus ARGS="-i ./data/ic/s0_s112500.bin -d 0.001 -n10 -v -V1 -t64"
 # Best performance
 make run_tus ARGS="-i ./data/ic/s0_s112500.bin -d 0.001 -n10 -b 100000 -v -V4 -t32 --len 1 --wid 256 --lur 1024"
+# Simple profilier
+nvprof ./build/tus/tus_exe -i ./data/ic/s0_s112500.bin -d 0.001 -n10 -b 100000 -v -V4 -t32 --len 1 --wid 256 --lur 1024
 ```
 ```
 # Deprecated
