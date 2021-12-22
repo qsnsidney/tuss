@@ -110,13 +110,13 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
 }
 
 __global__ inline void
-calculate_forces_2d(int N, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
+calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
 {
     extern __shared__ float4 shPosition[];
     float4 myPosition;
 
     int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
-    int row_id = blockDim.y * blockIdx.y + threadIdx.y;    // row
+    int row_id = blockDim.y * blockIdx.y + threadIdx.y; // row
 
     myPosition = globalX[row_id];
     float3 acc = {0.0f, 0.0f, 0.0f};
@@ -136,11 +136,10 @@ calculate_forces_2d(int N, float4 *globalX, float4 *globalA, int luf, int summat
     // for example, in a 64 * 4 configuration. the (0,0) block handles the first 16 read
     // the (63,3) handles the last 16 reads. where (63, 3) => 4080
     int shared_mem_offset = threadIdx.x * luf + threadIdx.y * num_element_shared_mem_read;
-    for (int i = 0; i < num_element_shared_mem_read; i++)
-    {
+    for(int i = 0; i < num_element_shared_mem_read; i++) {
         // now, we need to be careful that shared_mem can't go overbound
         // in the caller, I pre allocate enough space in globalX (can some one help me to verify?)
-        shPosition[shared_mem_offset + i] = globalX[global_offset + i];
+        shPosition[shared_mem_offset + i] = globalX[offset + global_offset + i];
     }
 
     // wait for all shared mem to be written

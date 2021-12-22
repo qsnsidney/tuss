@@ -47,12 +47,16 @@ namespace TUS
 
     CORE::SYSTEM_STATE SMALL_N_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
+
         // number of body for the problem
         size_t nBody = system_state_snapshot().size();
 
         // number of body to accumulate field for each kernel call.
         // each kernel call accumluate AccumBody's acceleration for all Nbodies.
         size_t AccumBody = nBody;
+        if(AccumBody > 100000){
+            AccumBody = 100000;
+        }
         /* BIN file of initial conditions */
         const auto &ic = system_state_snapshot();
 
@@ -65,7 +69,7 @@ namespace TUS
 
         std::cout << "2d block dimension: (" << block.x << "," << block.y << ")" << std::endl;
         std::cout << "column per block " << column_per_block << std::endl;
-        std::cout << "2d grid dimension: (" << grid.x << "," << grid.y << std::endl;
+        std::cout << "2d grid dimension: (" << grid.x << "," << grid.y << ")" << std::endl;
         
         // size
         size_t vector_size_3d = sizeof(data_t_3d) * nBody;
@@ -73,8 +77,13 @@ namespace TUS
 
         // to make boundary check not so painful, pre allocated extra memory so each thread doesn't need to worry about
         // boundary checking
-        std::cout << "quantize to " << num_block_x_dim * column_per_block << std::endl;
-        size_t vector_size_4d_qtzed = sizeof(float4) * num_block_x_dim * column_per_block;
+        size_t position_quantized_element = (nBody + column_per_block-1)/column_per_block * column_per_block;
+        size_t quantized_accum_body = (nBody + (AccumBody - 1)) / AccumBody * AccumBody;
+        size_t gter = get_max(position_quantized_element, quantized_accum_body);
+        size_t vector_size_4d_qtzed = sizeof(float4) * gter;
+        size_t num_loop = quantized_accum_body / AccumBody;
+        std::cout << "quantize to " << gter << std::endl;
+        printf("summation expects to take %d / %d = %d iteration\n", quantized_accum_body, AccumBody, num_loop);
         /*
          *   host side memory allocation
          */
@@ -144,11 +153,15 @@ namespace TUS
         std::cout << "set number of body to " << nBody << std::endl;
         std::cout << "using " << column_per_block * sizeof(float4) << " bytes per block" << std::endl;
         // I would highly recommend be careful about setting shared mem > 16384
-        assert(column_per_block * sizeof(float4) < 16384);
+        assert(column_per_block * sizeof(float4) <= 16384);
         // calculate the initialia acceleration
         cudaMemset(d_A[src_index], 0, vector_size_4d);
-        calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
-        simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
+
+        for(int i = 0; i < num_loop; i++) {
+            size_t offset = i * AccumBody;
+            calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+            simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
+        }
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
@@ -160,9 +173,11 @@ namespace TUS
 
                 cudaDeviceSynchronize();
                 cudaMemset(d_A[dest_index], 0, vector_size_4d);
-                calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
-                simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
-
+                for(int i = 0; i < num_loop; i++) {
+                    size_t offset = i * AccumBody;
+                    calculate_forces_2d<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
+                    simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
+                }
                 cudaDeviceSynchronize();
 
                 update_step_vel_f4<<<nblocks, block_size_>>>(nBody, (data_t)dt(), d_A[dest_index], d_V_half, //input

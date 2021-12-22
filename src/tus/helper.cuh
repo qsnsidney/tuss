@@ -6,6 +6,14 @@
 #include <iostream>
 #include <fstream>
 
+inline size_t get_max(size_t a, size_t b)
+{
+    if(a > b) {
+        return a;
+    }
+    return b;
+}
+
 inline void swap(unsigned &a, unsigned &b)
 {
     unsigned temp = a;
