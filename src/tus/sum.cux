@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <cublas_v2.h>
 
 double getTimeStamp() 
 {
@@ -174,8 +175,21 @@ int main(int argc, char *argv[])
         exit( EXIT_FAILURE );
     }
 
+    cublasStatus_t stat;
+    cublasHandle_t handle;
+    float* h_dz = (float*)malloc(sizeof(float));
+    
+    stat = cublasCreate(&handle);
+    if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf ("CUBLAS initialization failed\n");
+        return EXIT_FAILURE;
+    }
+
     // Invoke kernel
     double kernel_start = getTimeStamp();
+    stat = cublasSasum(handle, r, d_X, 1, h_dz);
+    
+    /*
 
     const int bs = 32;
     //printf("first blockNum: %d\n", blockNum);
@@ -213,10 +227,13 @@ int main(int argc, char *argv[])
 
         if (blockNum == 1) break;
     }
+    */
 
     cudaDeviceSynchronize();
     double kernel_end = getTimeStamp();
+    printf("cublas result: %f\n", *h_dz);
 
+    /*
     // GPU to CPU transfer
     double gc_transfer_start = getTimeStamp();
 
@@ -242,8 +259,11 @@ int main(int argc, char *argv[])
     {
         printf("Error: GPU result is different from CPU - kernel has errors!\n");
     }
+    */
 
     // Free resources
+    cublasDestory(handle);
+    free(h_dz);
     cudaFree(d_X);
     cudaFree(d_Z1);
     cudaFreeHost(h_X);
