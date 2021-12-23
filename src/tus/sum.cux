@@ -185,74 +185,83 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    // Invoke kernel
-    double kernel_start = getTimeStamp();
-    stat = cublasSasum(handle, r, d_X, 1, h_dz);
-    
-    /*
-
     const int bs = 32;
     //printf("first blockNum: %d\n", blockNum);
     int count = 0, total = 0;
-    if (op == 2)
+
+    // Invoke kernel
+    double kernel_start = getTimeStamp();
+
+    if (op == 0)
     {
-        reduce2<bs><<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r ) ;
+        cublasSasum(handle, r, d_X, 1, h_dz);
     }
     else 
     {
-        reduce1<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count );
-    }
-
-    // 33 block -> 2 block -> 1 block
-    // 32 block -> 1 block
-    while (blockNum >= 1)
-    {
-        count += 1;
-        total = blockNum;
-        //printf("%d blockNum: %d\n", count, blockNum);
-        blockNum = (blockNum + block.x-1)/block.x;
         if (op == 2)
         {
-            reduce2<bs><<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, total );
+            reduce2<bs><<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r ) ;
         }
         else 
         {
-            reduce1<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, total, count );
+            reduce1<<<blockNum, block, r*sizeof(float)>>>( d_X, d_Z1, r, count );
         }
 
-        float *tmp;
-        tmp = d_Z1;
-        d_Z1 = d_Z2;
-        d_Z2 = tmp;
+        // 33 block -> 2 block -> 1 block
+        // 32 block -> 1 block
+        while (blockNum >= 1)
+        {
+            count += 1;
+            total = blockNum;
+            //printf("%d blockNum: %d\n", count, blockNum);
+            blockNum = (blockNum + block.x-1)/block.x;
+            if (op == 2)
+            {
+                reduce2<bs><<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, total );
+            }
+            else 
+            {
+                reduce1<<<blockNum, block, blockNum*sizeof(float)>>>( d_Z1, d_Z2, total, count );
+            }
 
-        if (blockNum == 1) break;
+            float *tmp;
+            tmp = d_Z1;
+            d_Z1 = d_Z2;
+            d_Z2 = tmp;
+
+            if (blockNum == 1) break;
+        }
     }
-    */
 
     cudaDeviceSynchronize();
     double kernel_end = getTimeStamp();
-    printf("cublas result: %f\n", *h_dz);
 
-    /*
-    // GPU to CPU transfer
-    double gc_transfer_start = getTimeStamp();
-
-    err = cudaMemcpy( h_dZ, d_Z1, blockNum*sizeof(float), cudaMemcpyDeviceToHost );
-    if( err != cudaSuccess )
+    if (op == 0)
     {
-        printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
-        exit( EXIT_FAILURE );
+        printf("cublas result: %f\n", *h_dz);
     }
-    double gc_transfer_end = getTimeStamp();
-
-    printMatrix(h_dZ, "h_dZ", blockNum);
-
-    // GPU & CPU result comparison
-    if (h_hZ != *h_dZ)
+    else
     {
-        printf("Error: GPU result is different from CPU - kernel has errors!\n");
+        // GPU to CPU transfer
+        double gc_transfer_start = getTimeStamp();
+
+        err = cudaMemcpy( h_dZ, d_Z1, blockNum*sizeof(float), cudaMemcpyDeviceToHost );
+        if( err != cudaSuccess )
+        {
+            printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
+            exit( EXIT_FAILURE );
+        }
+        double gc_transfer_end = getTimeStamp();
+
+        printMatrix(h_dZ, "h_dZ", blockNum);
+
+        // GPU & CPU result comparison
+        if (h_hZ != *h_dZ)
+        {
+            printf("Error: GPU result is different from CPU - kernel has errors!\n");
+        }
     }
-    */
+
 
     //Report: <total_GPU_time> <CPU_GPU_transfer_time> <kernel_time> <GPU_CPU_transfer_time> <Z-value>
     //CPU_GPU_transfer_time = cg_transfer_end - cg_transfer_start;
