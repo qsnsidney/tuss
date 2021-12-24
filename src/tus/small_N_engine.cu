@@ -526,7 +526,7 @@ namespace TUS
         int h_blockNum = (summation_result_per_body + bs-1)/bs;
         int v_blockNum = (nBody + body_per_block-1)/body_per_block;
         //int blockNum = h_blockNum * v_blockNum;
-        dim3 rgrid = (h_blockNum, v_blockNum);
+        dim3 rgrid(h_blockNum, v_blockNum);
 
         float4 *d_Z1, *d_Z2, *tmp;
         int ii, z1s, z2s, s1, s2, st;
@@ -535,18 +535,8 @@ namespace TUS
         s1 = z1s;
         s2 = z2s;
 
-        err = cudaMalloc( (void **) &d_Z1, nBody*z1s*sizeof(float4) ) ;
-        if( err != cudaSuccess )
-        {
-            printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
-            exit( EXIT_FAILURE );
-        }
-        err = cudaMalloc( (void **) &d_Z2, nBody*z2s*sizeof(float4) ) ;
-        if( err != cudaSuccess )
-        {
-            printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
-            exit( EXIT_FAILURE );
-        }
+        cudaMalloc( (void **) &d_Z1, nBody*z1s*sizeof(float4) ) ;
+        cudaMalloc( (void **) &d_Z2, nBody*z2s*sizeof(float4) ) ;
 
         for (int i = 0; i < num_loop; i++)
         {
@@ -568,7 +558,7 @@ namespace TUS
                 //printf("%d blockNum: %d\n", count, blockNum);
                 h_blockNum = (h_blockNum + bs-1)/bs;
 
-                rgrid = (h_blockNum, v_blockNum);
+                rgrid = {h_blockNum, v_blockNum};
 
                 reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
 
@@ -612,7 +602,7 @@ namespace TUS
                     //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
                     
                     h_blockNum = (summation_result_per_body + bs-1)/bs;
-                    rgrid = (h_blockNum, v_blockNum);
+                    rgrid = {h_blockNum, v_blockNum};
                     z1s = h_blockNum;
                     z2s = (h_blockNum+bs-1)/bs;
                     s1 = z1s;
@@ -625,7 +615,7 @@ namespace TUS
                         total = h_blockNum;
                         //printf("%d blockNum: %d\n", count, blockNum);
                         h_blockNum = (h_blockNum + bs-1)/bs;
-                        rgrid = (h_blockNum, v_blockNum);
+                        rgrid = {h_blockNum, v_blockNum};
 
                         reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
 
