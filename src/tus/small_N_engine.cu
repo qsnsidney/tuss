@@ -166,7 +166,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
     for (int j = 0; j < bn; j++)
     {
-        i = ii;
+        int i = ii;
         sdata[tid] = {0.0f, 0.0f, 0.0f};
 
         while (i < n) 
@@ -529,7 +529,7 @@ namespace TUS
         dim3 rgrid(h_blockNum, v_blockNum);
 
         float4 *d_Z1, *d_Z2, *tmp;
-        int ii, z1s, z2s, s1, s2, st;
+        int ii, z1s, z2s, s1, s2, st, total;
         z1s = h_blockNum;
         z2s = (h_blockNum+bs-1)/bs;
         s1 = z1s;
@@ -574,7 +574,7 @@ namespace TUS
 
             for (ii = 0; ii < nBody; ii++)
             {
-                d_A[src_index+ii] = d_Z2[ii*z2s];
+                *d_A[src_index+ii] = d_Z2[ii*z2s];
             }
         }
         timer.elapsed_previous("Calculated initial acceleration");
@@ -631,7 +631,7 @@ namespace TUS
 
                     for (ii = 0; ii < nBody; ii++)
                     {
-                        d_A[dest_index+ii] = d_Z2[ii*z2s];
+                        *d_A[dest_index+ii] = d_Z2[ii*z2s];
                     }
                 }
                 cudaDeviceSynchronize();
