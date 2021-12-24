@@ -117,6 +117,107 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
     }
 }
 
+template <unsigned int blockSize>
+__device__ void warpReduce(volatile float4 *sdata, unsigned int tid, int n) {
+    if ((blockSize >= 64) && (tid + 32 < n)) 
+    {
+        sdata[tid].x += sdata[tid + 32].x;
+        sdata[tid].y += sdata[tid + 32].y;
+        sdata[tid].z += sdata[tid + 32].z;
+    }
+    if ((blockSize >= 32) && (tid + 16 < n)) 
+    {
+        sdata[tid].x += sdata[tid + 16].x;
+        sdata[tid].y += sdata[tid + 16].y;
+        sdata[tid].z += sdata[tid + 16].z;
+    }
+    if ((blockSize >= 16) && (tid + 8 < n)) 
+    {
+        sdata[tid].x += sdata[tid + 8].x;
+        sdata[tid].y += sdata[tid + 8].y;
+        sdata[tid].z += sdata[tid + 8].z;
+    }
+    if ((blockSize >= 8) && (tid + 4 < n)) 
+    {
+        sdata[tid].x += sdata[tid + 4].x;
+        sdata[tid].y += sdata[tid + 4].y;
+        sdata[tid].z += sdata[tid + 4].z;
+    }
+    if ((blockSize >= 4) && (tid + 2 < n))
+    {
+        sdata[tid].x += sdata[tid + 2].x;
+        sdata[tid].y += sdata[tid + 2].y;
+        sdata[tid].z += sdata[tid + 2].z;
+    }
+    if ((blockSize >= 2) && (tid + 1 < n)) 
+    {
+        sdata[tid].x += sdata[tid + 1].x;
+        sdata[tid].y += sdata[tid + 1].y;
+        sdata[tid].z += sdata[tid + 1].z;
+    }
+}
+
+template <unsigned int blockSize>
+__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bn) {
+    extern __shared__ float4 sdata[];
+    unsigned int tid = threadIdx.x;
+    unsigned int ii = blockIdx.x*(blockSize*2) + threadIdx.x;
+    unsigned int gridSize = blockSize*2*gridDim.x;
+
+    for (int j = 0; j < bn; j++)
+    {
+        i = ii;
+        sdata[tid] = {0.0f, 0.0f, 0.0f};
+
+        while (i < n) 
+        { 
+            sdata[tid].x += g_idata[ilen*j + i].x + g_idata[ilen*j + i+blockSize].x; 
+            sdata[tid].y += g_idata[ilen*j + i].y + g_idata[ilen*j + i+blockSize].y; 
+            sdata[tid].z += g_idata[ilen*j + i].z + g_idata[ilen*j + i+blockSize].z; 
+            i += gridSize; 
+        }
+        __syncthreads();
+
+        if (blockSize >= 512) 
+        { 
+            if ((tid < 256) && (tid + 256 < n)) 
+            { 
+                sdata[tid].x += sdata[tid + 256].x; 
+                sdata[tid].y += sdata[tid + 256].y; 
+                sdata[tid].z += sdata[tid + 256].z; 
+            } 
+            __syncthreads(); 
+        }
+        if (blockSize >= 256) 
+        { 
+            if ((tid < 128) && (tid + 128 < n)) 
+            { 
+                sdata[tid].x += sdata[tid + 128].x; 
+                sdata[tid].y += sdata[tid + 128].y; 
+                sdata[tid].z += sdata[tid + 128].z; 
+            } 
+            __syncthreads();
+        }
+        if (blockSize >= 128) 
+        { 
+            if ((tid < 64) && (tid + 64 < n)) 
+            { 
+                sdata[tid].x += sdata[tid + 64].x; 
+                sdata[tid].y += sdata[tid + 64].y; 
+                sdata[tid].z += sdata[tid + 64].z; 
+            } 
+            __syncthreads(); 
+        }
+
+        if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
+        if (tid == 0) 
+        {
+            g_odata[olen*j + blockIdx.x] = sdata[0];
+            //printf("block %d has data %f\n", blockIdx.x, sdata[0]);
+        }
+    }
+}
+
 __global__ inline void
 calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
 {
@@ -419,6 +520,33 @@ namespace TUS
         assert(column_per_block * sizeof(float4) <= 16384);
         // calculate the initialia acceleration
         cudaMemset(d_A[src_index], 0, vector_size_4d);
+        
+        const int bs = 32; //block_size_;
+        int body_per_block = 100;
+        int h_blockNum = (summation_result_per_body + bs-1)/bs;
+        int v_blockNum = (nBody + body_per_block-1)/body_per_block;
+        //int blockNum = h_blockNum * v_blockNum;
+        dim3 rgrid = (h_blockNum, v_blockNum);
+
+        float4 *d_Z1, *d_Z2, *tmp;
+        int ii, z1s, z2s, s1, s2, st;
+        z1s = h_blockNum;
+        z2s = (h_blockNum+bs-1)/bs;
+        s1 = z1s;
+        s2 = z2s;
+
+        err = cudaMalloc( (void **) &d_Z1, nBody*z1s*sizeof(float4) ) ;
+        if( err != cudaSuccess )
+        {
+            printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
+            exit( EXIT_FAILURE );
+        }
+        err = cudaMalloc( (void **) &d_Z2, nBody*z2s*sizeof(float4) ) ;
+        if( err != cudaSuccess )
+        {
+            printf( "Error: %s in %s at line %d\n", cudaGetErrorString( err ), __FILE__, __LINE__ );
+            exit( EXIT_FAILURE );
+        }
 
         for (int i = 0; i < num_loop; i++)
         {
@@ -431,7 +559,33 @@ namespace TUS
             {
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
-            simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
+            //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
+            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, v_blockNum ) ;
+
+            while (h_blockNum >= 1)
+            {
+                total = h_blockNum;
+                //printf("%d blockNum: %d\n", count, blockNum);
+                h_blockNum = (h_blockNum + bs-1)/bs;
+
+                rgrid = (h_blockNum, v_blockNum);
+
+                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
+
+                tmp = d_Z1;
+                d_Z1 = d_Z2;
+                d_Z2 = tmp;
+                st = s1;
+                s1 = s2;
+                s2 = st;
+
+                if (h_blockNum == 1) break;
+            }
+
+            for (ii = 0; ii < nBody; ii++)
+            {
+                d_A[src_index+ii] = d_Z2[ii*z2s];
+            }
         }
         timer.elapsed_previous("Calculated initial acceleration");
 
@@ -455,7 +609,40 @@ namespace TUS
                     {
                         calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
                     }
-                    simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
+                    //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
+                    
+                    h_blockNum = (summation_result_per_body + bs-1)/bs;
+                    rgrid = (h_blockNum, v_blockNum);
+                    z1s = h_blockNum;
+                    z2s = (h_blockNum+bs-1)/bs;
+                    s1 = z1s;
+                    s2 = z2s;
+
+                    reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, v_blockNum ) ;
+            
+                    while (h_blockNum >= 1)
+                    {
+                        total = h_blockNum;
+                        //printf("%d blockNum: %d\n", count, blockNum);
+                        h_blockNum = (h_blockNum + bs-1)/bs;
+                        rgrid = (h_blockNum, v_blockNum);
+
+                        reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
+
+                        tmp = d_Z1;
+                        d_Z1 = d_Z2;
+                        d_Z2 = tmp;
+                        st = s1;
+                        s1 = s2;
+                        s2 = st;
+
+                        if (h_blockNum == 1) break;
+                    }
+
+                    for (ii = 0; ii < nBody; ii++)
+                    {
+                        d_A[dest_index+ii] = d_Z2[ii*z2s];
+                    }
                 }
                 cudaDeviceSynchronize();
 
