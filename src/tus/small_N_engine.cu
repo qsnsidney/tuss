@@ -627,11 +627,11 @@ namespace TUS
                     s1 = z1s;
                     s2 = z2s;
 
-                    printf("lala 1");
+                    printf("lala 1\n");
 
                     reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, v_blockNum, h_blockNum, d_A[dest_index] ) ;
             
-                    printf("lala 2");
+                    printf("lala 2\n");
 
                     while (h_blockNum >= 1)
                     {
