@@ -224,6 +224,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 //o[blockIdx.y*bn+j] = sdata[0];
             }
         }
+        __syncthreads(); 
     }
 }
 
