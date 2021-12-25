@@ -565,7 +565,7 @@ namespace TUS
             int count = 0;
             while (h_blockNum >= 1)
             {
-                printf("debug 6-1: %d\n", count);
+                printf("%d debug 6-1\n", count);
                 total = h_blockNum;
                 printf("%d total: %d\n", count, h_blockNum);
                 h_blockNum = (h_blockNum + bs-1)/bs;
@@ -574,7 +574,7 @@ namespace TUS
                 rgrid = {h_blockNum, v_blockNum};
 
                 reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
-                printf("debug 6-2: %d\n", count);
+                printf("%d debug 6-2\n", count);
 
                 tmp = d_Z1;
                 d_Z1 = d_Z2;
@@ -590,6 +590,7 @@ namespace TUS
             printf("debug 7\n");
             for (ii = 0; ii < nBody; ii++)
             {
+                printf("%d body sum: %f\n", ii, d_Z1[ii*z1s]);
                 *d_A[src_index+ii] = d_Z1[ii*z1s];
             }
         }
