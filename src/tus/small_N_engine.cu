@@ -520,6 +520,8 @@ namespace TUS
         assert(column_per_block * sizeof(float4) <= 16384);
         // calculate the initialia acceleration
         cudaMemset(d_A[src_index], 0, vector_size_4d);
+
+        printf("debug 1\n");
         
         const int bs = 32; //block_size_;
         int body_per_block = 100;
@@ -535,8 +537,12 @@ namespace TUS
         s1 = z1s;
         s2 = z2s;
 
+        printf("debug 2\n");
+
         cudaMalloc( (void **) &d_Z1, nBody*z1s*sizeof(float4) ) ;
         cudaMalloc( (void **) &d_Z2, nBody*z2s*sizeof(float4) ) ;
+
+        printf("debug 3\n");
 
         for (int i = 0; i < num_loop; i++)
         {
@@ -550,10 +556,14 @@ namespace TUS
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
+            printf("debug 4\n");
             reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, v_blockNum ) ;
+            printf("debug 5\n");
 
+            int count = 0;
             while (h_blockNum >= 1)
             {
+                printf("debug 6: %d\n", count);
                 total = h_blockNum;
                 //printf("%d blockNum: %d\n", count, blockNum);
                 h_blockNum = (h_blockNum + bs-1)/bs;
@@ -570,6 +580,7 @@ namespace TUS
                 s2 = st;
 
                 if (h_blockNum == 1) break;
+                count += 1;
             }
 
             for (ii = 0; ii < nBody; ii++)
