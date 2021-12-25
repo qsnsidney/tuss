@@ -166,7 +166,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn;
     unsigned int gridSize = blockSize*2*gridDim.x;
-    if (n == 4) printf("tid: %d, i: %d, n: %d\n", tid, ii, n);
+    //printf("tid: %d, i: %d, n: %d\n", tid, ii, n);
 
     for (int j = 0; j < bn; j++)
     {
@@ -175,7 +175,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
         while (i < n) 
         { 
-            printf("idata i x: %f, y: %f, z: %f\n", g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
+            printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
             sdata[tid].x += g_idata[vi + ilen*j + i].x + g_idata[vi + ilen*j + i+blockSize].x; 
             sdata[tid].y += g_idata[vi + ilen*j + i].y + g_idata[vi + ilen*j + i+blockSize].y; 
             sdata[tid].z += g_idata[vi + ilen*j + i].z + g_idata[vi + ilen*j + i+blockSize].z; 
