@@ -215,7 +215,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         if (tid == 0) 
         {
             g_odata[vo + olen*j] = sdata[0];
-            //printf("block %d has data %f\n", blockIdx.x, sdata[0]);
+            printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
         }
     }
 }
