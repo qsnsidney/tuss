@@ -217,11 +217,11 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
         if (tid == 0) 
         {
-            g_odata[vo + olen*j] = sdata[0];
+            //g_odata[vo + olen*j] = sdata[0];
             printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
             if (blkn == 1)
             {
-                o[blockIdx.y*bn+j] = sdata[0];
+                //o[blockIdx.y*bn+j] = sdata[0];
             }
         }
     }
