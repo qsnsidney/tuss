@@ -590,7 +590,6 @@ namespace TUS
             printf("debug 7\n");
             for (ii = 0; ii < nBody; ii++)
             {
-                printf("%d body sum: %f\n", ii, *d_Z1[ii*s1]);
                 printf("%d body sum: %f\n", ii, d_Z1[ii*s1]);
                 *d_A[src_index+ii] = d_Z1[ii*s1];
             }
