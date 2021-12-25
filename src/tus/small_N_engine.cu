@@ -168,7 +168,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int gridSize = blockSize*2*gridDim.x;
     //printf("tid: %d, i: %d, n: %d\n", tid, ii, n);
 
-    for (int j = 0; j < bn; j++)
+    for (int j = 0; j < bn && j < n; j++)
     {
         int i = ii;
         sdata[tid] = {0.0f, 0.0f, 0.0f};
@@ -176,9 +176,9 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         while (i < n) 
         { 
             printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
-            //sdata[tid].x += g_idata[vi + ilen*j + i].x + g_idata[vi + ilen*j + i+blockSize].x; 
-            //sdata[tid].y += g_idata[vi + ilen*j + i].y + g_idata[vi + ilen*j + i+blockSize].y; 
-            //sdata[tid].z += g_idata[vi + ilen*j + i].z + g_idata[vi + ilen*j + i+blockSize].z; 
+            sdata[tid].x += g_idata[vi + ilen*j + i].x + g_idata[vi + ilen*j + i+blockSize].x; 
+            sdata[tid].y += g_idata[vi + ilen*j + i].y + g_idata[vi + ilen*j + i+blockSize].y; 
+            sdata[tid].z += g_idata[vi + ilen*j + i].z + g_idata[vi + ilen*j + i+blockSize].z; 
             i += gridSize; 
         }
         __syncthreads();
@@ -217,11 +217,11 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
         if (tid == 0) 
         {
-           // g_odata[vo + olen*j] = sdata[0];
-            //printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
+            g_odata[vo + olen*j] = sdata[0];
+            printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
             if (blkn == 1)
             {
-                //o[blockIdx.y*bn+j] = sdata[0];
+                o[blockIdx.y*bn+j] = sdata[0];
             }
         }
     }
