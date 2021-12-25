@@ -158,7 +158,7 @@ __device__ void warpReduce(volatile float4 *sdata, unsigned int tid, int n) {
 }
 
 template <unsigned int blockSize>
-__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bn) {
+__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bn, int blkn, float4 *o) {
     extern __shared__ float4 sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int ii = blockIdx.x*(blockSize*2) + threadIdx.x;
@@ -216,6 +216,10 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         {
             g_odata[vo + olen*j] = sdata[0];
             printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
+            if (blkn == 1)
+            {
+                o[blockIdx.y*bn+j] = sdata[0];
+            }
         }
     }
 }
@@ -559,7 +563,7 @@ namespace TUS
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
             printf("debug 4\n");
-            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, v_blockNum ) ;
+            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, v_blockNum, h_blockNum, d_A[sc_index] ) ;
             printf("debug 5\n");
 
             int count = 0;
@@ -573,7 +577,7 @@ namespace TUS
 
                 rgrid = {h_blockNum, v_blockNum};
 
-                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
+                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum, h_blockNum, d_A[sc_index] ) ;
                 printf("%d debug 6-2\n", count);
 
                 tmp = d_Z1;
@@ -626,7 +630,7 @@ namespace TUS
                     s1 = z1s;
                     s2 = z2s;
 
-                    reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, v_blockNum ) ;
+                    reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, v_blockNum, h_blockNum, d_A[dest_index] ) ;
             
                     while (h_blockNum >= 1)
                     {
@@ -635,7 +639,7 @@ namespace TUS
                         h_blockNum = (h_blockNum + bs-1)/bs;
                         rgrid = {h_blockNum, v_blockNum};
 
-                        reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum ) ;
+                        reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum, h_blockNum, d_A[dest_index] ) ;
 
                         tmp = d_Z1;
                         d_Z1 = d_Z2;
@@ -647,10 +651,6 @@ namespace TUS
                         if (h_blockNum == 1) break;
                     }
 
-                    for (ii = 0; ii < nBody; ii++)
-                    {
-                        *d_A[dest_index+ii] = d_Z2[ii*z2s];
-                    }
                 }
                 cudaDeviceSynchronize();
 
