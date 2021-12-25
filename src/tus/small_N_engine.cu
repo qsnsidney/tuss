@@ -161,7 +161,7 @@ template <unsigned int blockSize>
 __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bn, int blkn, float4 *o) {
     extern __shared__ float4 sdata[];
     unsigned int tid = threadIdx.x;
-    unsigned int ii = blockIdx.x*(blockSize*2) + threadIdx.x;
+    int ii = blockIdx.x*(blockSize*2) + threadIdx.x;
     // i = blockIdx.x*(blockSize*2) + threadIdx.x;
     unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn;
