@@ -166,6 +166,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn;
     unsigned int gridSize = blockSize*2*gridDim.x;
+    printf("tid: %d, i: %d, n: %d\n", tid, ii, n);
 
     for (int j = 0; j < bn; j++)
     {
