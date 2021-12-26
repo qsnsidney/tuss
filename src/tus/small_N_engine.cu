@@ -254,7 +254,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 if (tid == 0) 
                 {
                     g_odata[vo + olen*j] = sdata[sidx];
-                    //printf("%d block (%d, %d) has data x: %f, y: %f, z: %f\n", j, blockIdx.x, blockIdx.y, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                    printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
                     if (blkn == 1)
                     {
                         o[blockIdx.y*bn+j] = sdata[sidx];
@@ -611,7 +611,7 @@ namespace TUS
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
-            printf("debug 4\n");
+            printf("debug 4 shared memory size: %d\n", body_per_block*summation_result_per_body);
             reduce<bs><<<rgrid, bs, body_per_block*summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
             printf("debug 5\n");
 
