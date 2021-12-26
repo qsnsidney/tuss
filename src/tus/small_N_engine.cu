@@ -151,7 +151,7 @@ __device__ void warpReduce(volatile float4 *sdata, int sidx, unsigned int ii, in
     }
     if ((blockSize >= 2) && (ii + 1 < n) && (ii + 1 < min_i)) 
     {
-        printf("ii: %d, n: %d, sidx: %d, sdata[sidx + 1] x: %f, y: %f, z: %f\n", ii, n, sidx, sdata[sidx + 1].x, sdata[sidx + 1].y, sdata[sidx + 1].z);
+        //printf("ii: %d, n: %d, sidx: %d, sdata[sidx + 1] x: %f, y: %f, z: %f\n", ii, n, sidx, sdata[sidx + 1].x, sdata[sidx + 1].y, sdata[sidx + 1].z);
         sdata[sidx].x += sdata[sidx + 1].x;
         sdata[sidx].y += sdata[sidx + 1].y;
         sdata[sidx].z += sdata[sidx + 1].z;
@@ -202,14 +202,14 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if (i + blockSize < n && i + blockSize < max_i)
                     {
-                        printf("if writing into (%d, %d) sidx: %d, g_offset: %d, i: %d, i+blockSize: %d\n x: %f, y: %f, z: %f\n x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, i+blockSize, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z, g_idata[g_offset + blockSize].x, g_idata[g_offset + blockSize].y, g_idata[g_offset + blockSize].z);
+                        //printf("if writing into (%d, %d) sidx: %d, g_offset: %d, i: %d, i+blockSize: %d\n x: %f, y: %f, z: %f\n x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, i+blockSize, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z, g_idata[g_offset + blockSize].x, g_idata[g_offset + blockSize].y, g_idata[g_offset + blockSize].z);
                         sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
                         sdata[sidx].y += g_idata[g_offset].y + g_idata[g_offset + blockSize].y; 
                         sdata[sidx].z += g_idata[g_offset].z + g_idata[g_offset + blockSize].z; 
                     }
                     else
                     {
-                        printf("else writing into (%d, %d) sidx: %d, g_offset: %d, i: %d\n x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
+                        //printf("else writing into (%d, %d) sidx: %d, g_offset: %d, i: %d\n x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                         sdata[sidx].x += g_idata[g_offset].x;
                         sdata[sidx].y += g_idata[g_offset].y; 
                         sdata[sidx].z += g_idata[g_offset].z;
@@ -220,11 +220,11 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads();
 
-                printf("1 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("1 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (blockSize >= 512) 
                 { 
-                    if ((tid < 256) && (tid + 256 < n)) 
+                    if ((tid < 256) && (ii + 256 < n) && (ii + 256 < min_i)) 
                     { 
                         sdata[sidx].x += sdata[sidx + 256].x; 
                         sdata[sidx].y += sdata[sidx + 256].y; 
@@ -234,7 +234,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 }
                 if (blockSize >= 256) 
                 { 
-                    if ((tid < 128) && (tid + 128 < n)) 
+                    if ((tid < 128) && (ii + 128 < n) && (ii + 128 < min_i)) 
                     { 
                         sdata[sidx].x += sdata[sidx + 128].x; 
                         sdata[sidx].y += sdata[sidx + 128].y; 
@@ -244,7 +244,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 }
                 if (blockSize >= 128) 
                 { 
-                    if ((tid < 64) && (tid + 64 < n)) 
+                    if ((tid < 64) && (ii + 64 < n) && (ii + 64 < min_i)) 
                     { 
                         sdata[sidx].x += sdata[sidx + 64].x; 
                         sdata[sidx].y += sdata[sidx + 64].y; 
@@ -253,19 +253,19 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     __syncthreads(); 
                 }
 
-                printf("2 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("2 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (tid < 32) warpReduce<blockSize>(sdata, sidx, ii, n, min_i);
 
                 __syncthreads(); 
 
-                printf("3 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("3 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 
                 if (tid == 0) 
                 {
                     g_odata[vo + olen*j] = sdata[sidx];
-                    printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                    //printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
                     if (blkn == 1)
                     {
                         o[blockIdx.y*bn+j] = sdata[sidx];
