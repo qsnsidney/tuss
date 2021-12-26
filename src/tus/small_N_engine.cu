@@ -189,7 +189,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             {
                 sdata[sidx] = {0.0f, 0.0f, 0.0f};
 
-                //printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
+                printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
                 
                 while (i < n) 
                 { 
