@@ -175,8 +175,11 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int gridSize = blockSize*2*gridDim.x;
     int i, brow, vs, sidx;
 
+    printf("lala1\n");
+
     if (col < n)
     {
+        printf("lala2\n");
         for (int j = 0; j < bn; j++)
         {
             // determine which row to look at
