@@ -580,7 +580,7 @@ namespace TUS
 
         printf("debug 1\n");
         
-        const int bs = 32; //block_size_;
+        const int bs = 2; //block_size_;
         int body_per_block = 1;
         int h_blockNum = (summation_result_per_body + bs-1)/bs;
         int v_blockNum = (nBody + body_per_block-1)/body_per_block;
