@@ -171,7 +171,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
     if (col < n)
     {
-        for (int j = 0; j < bn && j < n; j++)
+        for (int j = 0; j < bn; j++)
         {
             int i = ii;
             sdata[tid] = {0.0f, 0.0f, 0.0f};
