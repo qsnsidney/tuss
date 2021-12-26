@@ -180,7 +180,8 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         for (int j = 0; j < bn; j++)
         {
             // determine which row to look at
-            i = blockIdx.x*(blockSize*2) + threadIdx.x;
+            //i = blockIdx.x*(blockSize*2) + threadIdx.x;
+            i = blockIdx.x*(blockSize) + threadIdx.x;
             g_offset = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
             s_offset = blockSize*j;
             sidx = s_offset + threadIdx.x;
@@ -193,7 +194,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 
                 while (i < n) 
                 { 
-                    if (i + blockSize < n)
+                    if (false)//(i + blockSize < n)
                     {
                         printf("if writing into sidx: %d, g_offset: %d 0 - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
                         sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
