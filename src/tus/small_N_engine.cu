@@ -176,7 +176,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             int i = ii;
             sdata[tid] = {0.0f, 0.0f, 0.0f};
 
-            printf("i: %d, j: %d, ilen: %d, vi: %d, index: %d\n", i, j, ilen, vi, vi + ilen*j + i);
+            printf("i: %d, j: %d, bn: %d, ilen: %d, vi: %d, index: %d\n", i, j, bn, ilen, vi, vi + ilen*j + i);
             printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
             
             /*
