@@ -119,37 +119,37 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
 
 template <unsigned int blockSize>
 __device__ void warpReduce(volatile float4 *sdata, unsigned int sidx, unsigned int tid, int n) {
-    if ((blockSize >= 64) && (tid + 32 < n)) 
+    if ((blockSize >= 64) && (sidx + 32 < n)) 
     {
         sdata[sidx].x += sdata[sidx + 32].x;
         sdata[sidx].y += sdata[sidx + 32].y;
         sdata[sidx].z += sdata[sidx + 32].z;
     }
-    if ((blockSize >= 32) && (tid + 16 < n)) 
+    if ((blockSize >= 32) && (sidx + 16 < n)) 
     {
         sdata[sidx].x += sdata[sidx + 16].x;
         sdata[sidx].y += sdata[sidx + 16].y;
         sdata[sidx].z += sdata[sidx + 16].z;
     }
-    if ((blockSize >= 16) && (tid + 8 < n)) 
+    if ((blockSize >= 16) && (sidx + 8 < n)) 
     {
         sdata[sidx].x += sdata[sidx + 8].x;
         sdata[sidx].y += sdata[sidx + 8].y;
         sdata[sidx].z += sdata[sidx + 8].z;
     }
-    if ((blockSize >= 8) && (tid + 4 < n)) 
+    if ((blockSize >= 8) && (sidx + 4 < n)) 
     {
         sdata[sidx].x += sdata[sidx + 4].x;
         sdata[sidx].y += sdata[sidx + 4].y;
         sdata[sidx].z += sdata[sidx + 4].z;
     }
-    if ((blockSize >= 4) && (tid + 2 < n))
+    if ((blockSize >= 4) && (sidx + 2 < n))
     {
         sdata[sidx].x += sdata[sidx + 2].x;
         sdata[sidx].y += sdata[sidx + 2].y;
         sdata[sidx].z += sdata[sidx + 2].z;
     }
-    if ((blockSize >= 2) && (tid + 1 < n)) 
+    if ((blockSize >= 2) && (sidx + 1 < n)) 
     {
         sdata[sidx].x += sdata[sidx + 1].x;
         sdata[sidx].y += sdata[sidx + 1].y;
