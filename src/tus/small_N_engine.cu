@@ -158,13 +158,14 @@ __device__ void warpReduce(volatile float4 *sdata, unsigned int sidx, unsigned i
 }
 
 template <unsigned int blockSize>
-__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bnt, int bn, int blkn, float4 *o) {
+__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bnt, int bn, int bnh, int blkn, float4 *o) {
     // 32 theads per block; 1 sum per block -> 
     // ilen - how many elements per row in g_idata
     // olen - how many elements per row in g_odata
     // n - how many elements to sum in total
     // bnt - how many bodies in total
     // bn - how many rows to take care of
+    // bnh - how many columns to take care of
     // blkn - number of blocks per row
     extern __shared__ float4 sdata[];
     unsigned int tid = threadIdx.x;
@@ -172,19 +173,19 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     // i = blockIdx.x*(blockSize*2) + threadIdx.x;
     //unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn + blockIdx.x;
-    //unsigned int gridSize = blockSize*2*gridDim.x;
-    unsigned int gridSize = blockSize*gridDim.x;
-    int i, g_offset, s_offset, sidx;
+    unsigned int gridSize = blockSize*2*gridDim.x;
+    int i, max_i, g_offset, s_offset, sidx;
 
     if (col < n)
     {
         for (int j = 0; j < bn; j++)
         {
             // determine which row to look at
-            //i = blockIdx.x*(blockSize*2) + threadIdx.x;
-            i = blockIdx.x*(blockSize) + threadIdx.x;
+            i = blockIdx.x*(blockSize*2) + threadIdx.x;
+            max_i = i + bnh;
+            
             g_offset = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
-            s_offset = blockSize*j;
+            s_offset = bnh*j;
             sidx = s_offset + threadIdx.x;
 
             if (g_offset < bnt*ilen)
@@ -193,9 +194,9 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 //printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, g_offset: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                 
-                while (i < n) 
+                while (i < n && i < max_i) 
                 { 
-                    if (false)//(i + blockSize < n)
+                    if (i + blockSize < n && i + blockSize < max_i)
                     {
                         printf("if writing into sidx: %d, g_offset: %d - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
                         sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
@@ -582,9 +583,10 @@ namespace TUS
 
         printf("debug 1\n");
         
-        const int bs = 2; //block_size_;
+        const int bs = 2;
         int body_per_block = 1;
-        int h_blockNum = (summation_result_per_body + bs-1)/bs;
+        int h_body_per_block = 4;
+        int h_blockNum = (summation_result_per_body + h_body_per_block-1)/h_body_per_block;
         int v_blockNum = (nBody + body_per_block-1)/body_per_block;
         //int blockNum = h_blockNum * v_blockNum;
         dim3 rgrid(h_blockNum, v_blockNum);
@@ -592,7 +594,7 @@ namespace TUS
         float4 *d_Z1, *d_Z2, *tmp;
         int ii, z1s, z2s, s1, s2, st, total;
         z1s = h_blockNum;
-        z2s = (h_blockNum+bs-1)/bs;
+        z2s = (h_blockNum+h_body_per_block-1)/h_body_per_block;
         s1 = z1s;
         s2 = z2s;
 
@@ -616,7 +618,7 @@ namespace TUS
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
             printf("debug 4 shared memory size: %d\n", body_per_block*summation_result_per_body);
-            reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
+            reduce<bs><<<rgrid, h_body_per_block, body_per_block*h_body_per_block*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_body_per_block, h_blockNum, d_A[src_index] ) ;
             
             cudaDeviceSynchronize();
             printf("debug 5\n");
@@ -628,12 +630,12 @@ namespace TUS
                 printf("%d debug 6-1\n", count);
                 total = h_blockNum;
                 printf("%d total: %d\n", count, h_blockNum);
-                h_blockNum = (h_blockNum + bs-1)/bs;
+                h_blockNum = (h_blockNum + h_body_per_block-1)/h_body_per_block;
                 printf("%d blockNum: %d\n", count, h_blockNum);
 
                 rgrid = {h_blockNum, v_blockNum};
 
-                reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
+                reduce<bs><<<rgrid, h_body_per_block, body_per_block*h_body_per_block*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_body_per_block, h_blockNum, d_A[src_index] ) ;
                 
                 cudaDeviceSynchronize();
                 printf("%d debug 6-2\n", count);
@@ -676,7 +678,7 @@ namespace TUS
                     }
                     //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[dest_index], summation_result_per_body);
                     
-                    h_blockNum = (summation_result_per_body + bs-1)/bs;
+                    h_blockNum = (summation_result_per_body + h_body_per_block-1)/h_body_per_block;
                     rgrid = {h_blockNum, v_blockNum};
 
                     if (s1 < s2)
@@ -691,16 +693,16 @@ namespace TUS
                     s1 = z1s;
                     s2 = z2s;
 
-                    reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
+                    reduce<bs><<<rgrid, h_body_per_block, body_per_block*h_body_per_block*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, nBody, body_per_block, h_body_per_block, h_blockNum, d_A[dest_index] ) ;
 
                     while (h_blockNum >= 1)
                     {
                         total = h_blockNum;
                         //printf("%d blockNum: %d\n", count, blockNum);
-                        h_blockNum = (h_blockNum + bs-1)/bs;
+                        h_blockNum = (h_blockNum + h_body_per_block-1)/h_body_per_block;
                         rgrid = {h_blockNum, v_blockNum};
 
-                        reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
+                        reduce<bs><<<rgrid, h_body_per_block, body_per_block*h_body_per_block*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_body_per_block, h_blockNum, d_A[dest_index] ) ;
 
                         tmp = d_Z1;
                         d_Z1 = d_Z2;
