@@ -172,7 +172,8 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     // i = blockIdx.x*(blockSize*2) + threadIdx.x;
     //unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn + blockIdx.x;
-    unsigned int gridSize = blockSize*2*gridDim.x;
+    //unsigned int gridSize = blockSize*2*gridDim.x;
+    unsigned int gridSize = blockSize*gridDim.x;
     int i, g_offset, s_offset, sidx;
 
     if (col < n)
@@ -208,8 +209,8 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                         sdata[sidx].y += g_idata[g_offset].y; 
                         sdata[sidx].z += g_idata[g_offset].z;
                     }
-                    i += gridSize.x; 
-                    g_offset += gridSize.x; 
+                    i += gridSize; 
+                    g_offset += gridSize; 
                 }
 
                 __syncthreads();
