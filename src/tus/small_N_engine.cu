@@ -118,7 +118,7 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
 }
 
 template <unsigned int blockSize>
-__device__ void warpReduce(volatile float4 *sdata, unsigned int sidx, unsigned int tid, int n) {
+__device__ void warpReduce(volatile float4 *sdata, int sidx, unsigned int tid, int n) {
     if ((blockSize >= 64) && (sidx + 32 < n)) 
     {
         sdata[sidx].x += sdata[sidx + 32].x;
