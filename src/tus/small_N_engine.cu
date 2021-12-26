@@ -211,7 +211,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads();
 
-                printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (blockSize >= 512) 
                 { 
@@ -248,7 +248,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads(); 
 
-                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 
                 if (tid == 0) 
