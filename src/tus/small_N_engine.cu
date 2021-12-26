@@ -158,26 +158,33 @@ __device__ void warpReduce(volatile float4 *sdata, unsigned int tid, int n) {
 }
 
 template <unsigned int blockSize>
-__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bn, int blkn, float4 *o) {
+__global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bnt, int bn, int blkn, float4 *o) {
+    // 32 theads per block; 1 sum per block -> 
+    // ilen - how many elements per row in g_idata
+    // olen - how many elements per row in g_odata
+    // n - how many elements to sum in total
+    // bnt - how many bodies in total
+    // bn - how many rows to take care of
+    // blkn - number of blocks per row
     extern __shared__ float4 sdata[];
     unsigned int tid = threadIdx.x;
     unsigned int col = blockDim.x*blockIdx.x + threadIdx.x;
-    int ii = blockIdx.x*(blockSize*2) + threadIdx.x;
     // i = blockIdx.x*(blockSize*2) + threadIdx.x;
     unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn;
     unsigned int gridSize = blockSize*2*gridDim.x;
-    //printf("tid: %d, i: %d, n: %d\n", tid, ii, n);
+    int i;
 
     if (col < n)
     {
-        for (int j = 0; j < bn; j++)
+        for (int j = 0; j < bn && j< bnt; j++)
         {
-            int i = ii;
+            i = blockIdx.x*(blockSize*2) + threadIdx.x;
             sdata[tid] = {0.0f, 0.0f, 0.0f};
 
-            printf("i: %d, j: %d, bn: %d, ilen: %d, vi: %d, index: %d\n", i, j, bn, ilen, vi, vi + ilen*j + i);
-            printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
+            printf("tid: %d, bx: %d, by: %d\n", tid, blockIdx.x, blockIdx.y);
+            printf("tid: %d, j: %d, bn: %d, ilen: %d, vi: %d, index: %d, olen: %d\n", tid, j, bn, ilen, vi, vi + ilen*j + i, olen);
+            printf("tid: %d, idata i x: %f, y: %f, z: %f\n", tid, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
             
             /*
             while (i < n) 
@@ -542,7 +549,7 @@ namespace TUS
         printf("debug 1\n");
         
         const int bs = 32; //block_size_;
-        int body_per_block = 100;
+        int body_per_block = 2;
         int h_blockNum = (summation_result_per_body + bs-1)/bs;
         int v_blockNum = (nBody + body_per_block-1)/body_per_block;
         //int blockNum = h_blockNum * v_blockNum;
@@ -575,7 +582,7 @@ namespace TUS
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
             printf("debug 4\n");
-            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, body_per_block, h_blockNum, d_A[src_index] ) ;
+            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
             printf("debug 5\n");
 
             int count = 0;
@@ -589,7 +596,7 @@ namespace TUS
 
                 rgrid = {h_blockNum, v_blockNum};
 
-                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, body_per_block, h_blockNum, d_A[src_index] ) ;
+                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
                 printf("%d debug 6-2\n", count);
 
                 tmp = d_Z1;
@@ -636,7 +643,7 @@ namespace TUS
                     s1 = z1s;
                     s2 = z2s;
 
-                    reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, v_blockNum, h_blockNum, d_A[dest_index] ) ;
+                    reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
 
                     while (h_blockNum >= 1)
                     {
@@ -645,7 +652,7 @@ namespace TUS
                         h_blockNum = (h_blockNum + bs-1)/bs;
                         rgrid = {h_blockNum, v_blockNum};
 
-                        reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum, h_blockNum, d_A[dest_index] ) ;
+                        reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
 
                         tmp = d_Z1;
                         d_Z1 = d_Z2;
