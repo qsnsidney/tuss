@@ -575,7 +575,7 @@ namespace TUS
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
             printf("debug 4\n");
-            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, v_blockNum, h_blockNum, d_A[src_index] ) ;
+            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, body_per_block, h_blockNum, d_A[src_index] ) ;
             printf("debug 5\n");
 
             int count = 0;
@@ -589,7 +589,7 @@ namespace TUS
 
                 rgrid = {h_blockNum, v_blockNum};
 
-                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, v_blockNum, h_blockNum, d_A[src_index] ) ;
+                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, body_per_block, h_blockNum, d_A[src_index] ) ;
                 printf("%d debug 6-2\n", count);
 
                 tmp = d_Z1;
