@@ -173,7 +173,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     //unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn + blockIdx.x;
     unsigned int gridSize = blockSize*2*gridDim.x;
-    int i, brow, vs, sidx;
+    int i, brow, s_offset, sidx;
 
     if (col < n)
     {
@@ -182,8 +182,8 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             // determine which row to look at
             i = blockIdx.x*(blockSize*2) + threadIdx.x;
             brow = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
-            vs = blockIdx.y*blockSize*bn + blockSize*j;
-            sidx = vs + threadIdx.x;
+            s_offset = blockSize*j;
+            sidx = s_offset + threadIdx.x;
 
             if (brow < bnt)
             {
