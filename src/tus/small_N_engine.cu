@@ -230,6 +230,8 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 }
 
                 if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
+
+                __syncthreads(); 
                 if (tid == 0) 
                 {
                     //g_odata[vo + olen*j] = sdata[0];
@@ -240,7 +242,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     }
                 }
                 __syncthreads(); 
-                
+
             }
         }
     }
