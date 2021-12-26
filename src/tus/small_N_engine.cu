@@ -173,7 +173,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     //unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn + blockIdx.x;
     unsigned int gridSize = blockSize*2*gridDim.x;
-    int i, brow, s_offset, sidx;
+    int i, g_offset, s_offset, sidx;
 
     if (col < n)
     {
@@ -181,34 +181,34 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         {
             // determine which row to look at
             i = blockIdx.x*(blockSize*2) + threadIdx.x;
-            brow = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
+            g_offset = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
             s_offset = blockSize*j;
             sidx = s_offset + threadIdx.x;
 
-            if (brow < bnt)
+            if (g_offset < bnt)
             {
                 sdata[sidx] = {0.0f, 0.0f, 0.0f};
 
-                printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
+                printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, g_offset: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                 
                 while (i < n) 
                 { 
                     if (i + blockSize < n)
                     {
-                        printf("if writing into sidx: %d, brow: %d 0 - x: %f, y: %f, z: %f\n", sidx, brow, g_idata[brow].x + g_idata[brow + blockSize].x, g_idata[brow].y + g_idata[brow + blockSize].y, g_idata[brow].z + g_idata[brow + blockSize].z);
-                        sdata[sidx].x += g_idata[brow].x + g_idata[brow + blockSize].x; 
-                        sdata[sidx].y += g_idata[brow].y + g_idata[brow + blockSize].y; 
-                        sdata[sidx].z += g_idata[brow].z + g_idata[brow + blockSize].z; 
+                        printf("if writing into sidx: %d, g_offset: %d 0 - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
+                        sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
+                        sdata[sidx].y += g_idata[g_offset].y + g_idata[g_offset + blockSize].y; 
+                        sdata[sidx].z += g_idata[g_offset].z + g_idata[g_offset + blockSize].z; 
                     }
                     else
                     {
-                        printf("else writing into sidx: %d, brow: %d 0 - x: %f, y: %f, z: %f\n", sidx, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
-                        sdata[sidx].x += g_idata[brow].x;
-                        sdata[sidx].y += g_idata[brow].y; 
-                        sdata[sidx].z += g_idata[brow].z;
+                        printf("else writing into sidx: %d, g_offset: %d 0 - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
+                        sdata[sidx].x += g_idata[g_offset].x;
+                        sdata[sidx].y += g_idata[g_offset].y; 
+                        sdata[sidx].z += g_idata[g_offset].z;
                     }
                     i += gridSize; 
-                    brow += gridSize; 
+                    g_offset += gridSize; 
                 }
 
                 __syncthreads();
@@ -616,6 +616,7 @@ namespace TUS
             printf("debug 4 shared memory size: %d\n", body_per_block*summation_result_per_body);
             reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
             printf("debug 5\n");
+            printf("rgrid 1 - x: %d, y: %d\n", rgrid.x, rgrid.y);
 
             int count = 0;
             while (h_blockNum >= 1)
@@ -630,6 +631,7 @@ namespace TUS
 
                 reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
                 printf("%d debug 6-2\n", count);
+                printf("rgrid 2 - x: %d, y: %d\n", rgrid.x, rgrid.y);
 
                 tmp = d_Z1;
                 d_Z1 = d_Z2;
