@@ -151,7 +151,7 @@ __device__ void warpReduce(volatile float4 *sdata, int sidx, unsigned int ii, in
     }
     if ((blockSize >= 2) && (ii + 1 < n)) 
     {
-        printf("sidx: %d, sdata[sidx + 1] x: %f, y: %f, z: %f\n", sidx, sdata[sidx + 1].x, sdata[sidx + 1].y, sdata[sidx + 1].z);
+        printf("ii: %d, n: %d, sidx: %d, sdata[sidx + 1] x: %f, y: %f, z: %f\n", ii, n, sidx, sdata[sidx + 1].x, sdata[sidx + 1].y, sdata[sidx + 1].z);
         sdata[sidx].x += sdata[sidx + 1].x;
         sdata[sidx].y += sdata[sidx + 1].y;
         sdata[sidx].z += sdata[sidx + 1].z;
