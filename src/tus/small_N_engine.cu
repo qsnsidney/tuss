@@ -203,13 +203,13 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     }
                     else
                     {
-                        printf("else writing into sidx: %d, g_offset: %d - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
+                        printf("else writing into (%d, %d)\n sidx: %d, g_offset: %d - x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                         sdata[sidx].x += g_idata[g_offset].x;
                         sdata[sidx].y += g_idata[g_offset].y; 
                         sdata[sidx].z += g_idata[g_offset].z;
                     }
-                    i += gridSize; 
-                    g_offset += gridSize; 
+                    i += gridSize.x; 
+                    g_offset += gridSize.x; 
                 }
 
                 __syncthreads();
