@@ -251,11 +251,13 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     __syncthreads(); 
                 }
 
+                printf("2 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+
                 if (tid < 32) warpReduce<blockSize>(sdata, sidx, tid, min_i);
 
                 __syncthreads(); 
 
-                printf("2 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                printf("3 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 
                 if (tid == 0) 
