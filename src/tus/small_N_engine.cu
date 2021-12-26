@@ -254,14 +254,18 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 if (tid == 0) 
                 {
                     g_odata[vo + olen*j] = sdata[sidx];
-                    printf("%d block (%d, %d) has data x: %f, y: %f, z: %f\n", j, blockIdx.x, blockIdx.x, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                    printf("%d block (%d, %d) has data x: %f, y: %f, z: %f\n", j, blockIdx.x, blockIdx.y, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
                     if (blkn == 1)
                     {
                         o[blockIdx.y*bn+j] = sdata[sidx];
                     }
                 }
                 __syncthreads(); 
-                
+
+                if (tid == 0 && blkn == 1) 
+                {
+                    printf("%d block (%d, %d)output x: %f, y: %f, z: %f\n", j, blockIdx.x, blockIdx.y, o[blockIdx.y*bn+j].x, o[blockIdx.y*bn+j].y, o[blockIdx.y*bn+j].z);
+                }
 
             }
         }
@@ -663,8 +667,16 @@ namespace TUS
                     
                     h_blockNum = (summation_result_per_body + bs-1)/bs;
                     rgrid = {h_blockNum, v_blockNum};
-                    z1s = h_blockNum;
-                    z2s = (h_blockNum+bs-1)/bs;
+
+                    if (s1 < s2)
+                    {
+                        tmp = d_Z1;
+                        d_Z1 = d_Z2;
+                        d_Z2 = tmp;
+                        st = s1;
+                        s1 = s2;
+                        s2 = st;
+                    }
                     s1 = z1s;
                     s2 = z2s;
 
