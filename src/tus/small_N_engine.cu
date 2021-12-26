@@ -125,31 +125,31 @@ __device__ void warpReduce(volatile float4 *sdata, int sidx, unsigned int ii, in
         sdata[sidx].y += sdata[sidx + 32].y;
         sdata[sidx].z += sdata[sidx + 32].z;
     }
-    if ((blockSize >= 32) && (ii + 16 < n) && (ii + 32 < min_i)) 
+    if ((blockSize >= 32) && (ii + 16 < n) && (ii + 16 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 16].x;
         sdata[sidx].y += sdata[sidx + 16].y;
         sdata[sidx].z += sdata[sidx + 16].z;
     }
-    if ((blockSize >= 16) && (ii + 8 < n) && (ii + 32 < min_i)) 
+    if ((blockSize >= 16) && (ii + 8 < n) && (ii + 8 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 8].x;
         sdata[sidx].y += sdata[sidx + 8].y;
         sdata[sidx].z += sdata[sidx + 8].z;
     }
-    if ((blockSize >= 8) && (ii + 4 < n) && (ii + 32 < min_i)) 
+    if ((blockSize >= 8) && (ii + 4 < n) && (ii + 4 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 4].x;
         sdata[sidx].y += sdata[sidx + 4].y;
         sdata[sidx].z += sdata[sidx + 4].z;
     }
-    if ((blockSize >= 4) && (ii + 2 < n) && (ii + 32 < min_i))
+    if ((blockSize >= 4) && (ii + 2 < n) && (ii + 2 < min_i))
     {
         sdata[sidx].x += sdata[sidx + 2].x;
         sdata[sidx].y += sdata[sidx + 2].y;
         sdata[sidx].z += sdata[sidx + 2].z;
     }
-    if ((blockSize >= 2) && (ii + 1 < n) && (ii + 32 < min_i)) 
+    if ((blockSize >= 2) && (ii + 1 < n) && (ii + 1 < min_i)) 
     {
         printf("ii: %d, n: %d, sidx: %d, sdata[sidx + 1] x: %f, y: %f, z: %f\n", ii, n, sidx, sdata[sidx + 1].x, sdata[sidx + 1].y, sdata[sidx + 1].z);
         sdata[sidx].x += sdata[sidx + 1].x;
