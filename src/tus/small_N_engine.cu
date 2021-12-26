@@ -248,13 +248,13 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads(); 
 
-                //printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 
                 if (tid == 0) 
                 {
                     g_odata[vo + olen*j] = sdata[sidx];
-                    //printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                    printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
                     if (blkn == 1)
                     {
                         o[blockIdx.y*bn+j] = sdata[sidx];
