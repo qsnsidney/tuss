@@ -180,13 +180,13 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         for (int j = 0; j < bn; j++)
         {
             // determine which row to look at
+            i = blockIdx.x*(blockSize*2) + threadIdx.x;
             brow = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
             vs = blockIdx.y*n*bn + n*j;
             sidx = vs + threadIdx.x;
 
             if (brow < bnt)
             {
-                i = blockIdx.x*(blockSize*2) + threadIdx.x;
                 sdata[sidx] = {0.0f, 0.0f, 0.0f};
 
                 printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
@@ -197,6 +197,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     sdata[sidx].y += g_idata[brow].y + g_idata[brow + blockSize].y; 
                     sdata[sidx].z += g_idata[brow].z + g_idata[brow + blockSize].z; 
                     i += gridSize; 
+                    brow += gridSize; 
                 }
 
                 __syncthreads();
