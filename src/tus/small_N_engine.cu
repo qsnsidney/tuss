@@ -161,6 +161,7 @@ template <unsigned int blockSize>
 __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int n, int bn, int blkn, float4 *o) {
     extern __shared__ float4 sdata[];
     unsigned int tid = threadIdx.x;
+    unsigned int col = blockDim.x*blockIdx.x + threadIdx.x;
     int ii = blockIdx.x*(blockSize*2) + threadIdx.x;
     // i = blockIdx.x*(blockSize*2) + threadIdx.x;
     unsigned int vi = blockIdx.y*ilen*bn;
@@ -168,63 +169,67 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int gridSize = blockSize*2*gridDim.x;
     //printf("tid: %d, i: %d, n: %d\n", tid, ii, n);
 
-    for (int j = 0; j < bn && j < n; j++)
+    if (col < n)
     {
-        int i = ii;
-        sdata[tid] = {0.0f, 0.0f, 0.0f};
-
-        while (i < n) 
-        { 
-            printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
-            //sdata[tid].x += g_idata[vi + ilen*j + i].x + g_idata[vi + ilen*j + i+blockSize].x; 
-            //sdata[tid].y += g_idata[vi + ilen*j + i].y + g_idata[vi + ilen*j + i+blockSize].y; 
-            //sdata[tid].z += g_idata[vi + ilen*j + i].z + g_idata[vi + ilen*j + i+blockSize].z; 
-            //i += gridSize; 
-        }
-        __syncthreads();
-
-        if (blockSize >= 512) 
-        { 
-            if ((tid < 256) && (tid + 256 < n)) 
-            { 
-                sdata[tid].x += sdata[tid + 256].x; 
-                sdata[tid].y += sdata[tid + 256].y; 
-                sdata[tid].z += sdata[tid + 256].z; 
-            } 
-            __syncthreads(); 
-        }
-        if (blockSize >= 256) 
-        { 
-            if ((tid < 128) && (tid + 128 < n)) 
-            { 
-                sdata[tid].x += sdata[tid + 128].x; 
-                sdata[tid].y += sdata[tid + 128].y; 
-                sdata[tid].z += sdata[tid + 128].z; 
-            } 
-            __syncthreads();
-        }
-        if (blockSize >= 128) 
-        { 
-            if ((tid < 64) && (tid + 64 < n)) 
-            { 
-                sdata[tid].x += sdata[tid + 64].x; 
-                sdata[tid].y += sdata[tid + 64].y; 
-                sdata[tid].z += sdata[tid + 64].z; 
-            } 
-            __syncthreads(); 
-        }
-
-        if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
-        if (tid == 0) 
+        for (int j = 0; j < bn && j < n; j++)
         {
-            //g_odata[vo + olen*j] = sdata[0];
-            printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
-            if (blkn == 1)
-            {
-                //o[blockIdx.y*bn+j] = sdata[0];
+            int i = ii;
+            sdata[tid] = {0.0f, 0.0f, 0.0f};
+
+            while (i < n) 
+            { 
+                printf("i: %d, j: %d, ilen: %d, vi: %d, index: %d", i, j, ilen, vi, vi + ilen*j + i);
+                printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
+                //sdata[tid].x += g_idata[vi + ilen*j + i].x + g_idata[vi + ilen*j + i+blockSize].x; 
+                //sdata[tid].y += g_idata[vi + ilen*j + i].y + g_idata[vi + ilen*j + i+blockSize].y; 
+                //sdata[tid].z += g_idata[vi + ilen*j + i].z + g_idata[vi + ilen*j + i+blockSize].z; 
+                //i += gridSize; 
             }
+            __syncthreads();
+
+            if (blockSize >= 512) 
+            { 
+                if ((tid < 256) && (tid + 256 < n)) 
+                { 
+                    sdata[tid].x += sdata[tid + 256].x; 
+                    sdata[tid].y += sdata[tid + 256].y; 
+                    sdata[tid].z += sdata[tid + 256].z; 
+                } 
+                __syncthreads(); 
+            }
+            if (blockSize >= 256) 
+            { 
+                if ((tid < 128) && (tid + 128 < n)) 
+                { 
+                    sdata[tid].x += sdata[tid + 128].x; 
+                    sdata[tid].y += sdata[tid + 128].y; 
+                    sdata[tid].z += sdata[tid + 128].z; 
+                } 
+                __syncthreads();
+            }
+            if (blockSize >= 128) 
+            { 
+                if ((tid < 64) && (tid + 64 < n)) 
+                { 
+                    sdata[tid].x += sdata[tid + 64].x; 
+                    sdata[tid].y += sdata[tid + 64].y; 
+                    sdata[tid].z += sdata[tid + 64].z; 
+                } 
+                __syncthreads(); 
+            }
+
+            if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
+            if (tid == 0) 
+            {
+                //g_odata[vo + olen*j] = sdata[0];
+                printf("%d block %d has data %f\n", j, blockIdx.x, sdata[0]);
+                if (blkn == 1)
+                {
+                    //o[blockIdx.y*bn+j] = sdata[0];
+                }
+            }
+            __syncthreads(); 
         }
-        __syncthreads(); 
     }
 }
 
