@@ -241,7 +241,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
-                /*
+                
                 if (tid == 0) 
                 {
                     //g_odata[vo + olen*j] = sdata[0];
@@ -252,7 +252,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     }
                 }
                 __syncthreads(); 
-                */
+                
 
             }
         }
