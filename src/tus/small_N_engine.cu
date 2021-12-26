@@ -176,7 +176,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int gridSize = blockSize*2*gridDim.x;
     int i, max_i, min_i, g_offset, s_offset, sidx;
     max_i = blockIdx.x*(blockSize*2) + bnh;
-    min_i = (blockIdx.x+1)*blockSize;
+    min_i = (2*blockIdx.x-1)*blockSize;
 
 
     if (col < n)
