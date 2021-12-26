@@ -200,14 +200,14 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if (i + blockSize < n && i + blockSize < max_i)
                     {
-                        printf("if writing into (%d, %d)\n sidx: %d, g_offset: %d, i: %d, i+blockSize: %d - x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, i+blockSize, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
+                        printf("if writing into (%d, %d) sidx: %d, g_offset: %d, i: %d, i+blockSize: %d\n x: %f, y: %f, z: %f\nx: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, i+blockSize, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z, );
                         sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
                         sdata[sidx].y += g_idata[g_offset].y + g_idata[g_offset + blockSize].y; 
                         sdata[sidx].z += g_idata[g_offset].z + g_idata[g_offset + blockSize].z; 
                     }
                     else
                     {
-                        printf("else writing into (%d, %d)\n sidx: %d, g_offset: %d, i: %d - x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
+                        printf("else writing into (%d, %d) sidx: %d, g_offset: %d, i: %d\n x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                         sdata[sidx].x += g_idata[g_offset].x;
                         sdata[sidx].y += g_idata[g_offset].y; 
                         sdata[sidx].z += g_idata[g_offset].z;
