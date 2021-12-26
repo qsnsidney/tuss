@@ -182,7 +182,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         {
             // determine which row to look at
             i = blockIdx.x*(blockSize*2) + threadIdx.x;
-            max_i = i + bnh;
+            max_i = blockIdx.x*(blockSize*2) + bnh;
             
             g_offset = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
             s_offset = bnh*j;
