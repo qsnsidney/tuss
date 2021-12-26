@@ -182,7 +182,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             // determine which row to look at
             i = blockIdx.x*(blockSize*2) + threadIdx.x;
             brow = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
-            vs = blockIdx.y*n*bn + n*j;
+            vs = blockIdx.y*blockSize*bn + blockSize*j;
             sidx = vs + threadIdx.x;
 
             if (brow < bnt)
