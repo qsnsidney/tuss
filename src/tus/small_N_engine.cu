@@ -174,7 +174,10 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     //unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn + blockIdx.x;
     unsigned int gridSize = blockSize*2*gridDim.x;
-    int i, max_i, g_offset, s_offset, sidx;
+    int i, max_i, min_i, g_offset, s_offset, sidx;
+    max_i = blockIdx.x*(blockSize*2) + bnh;
+    min_i = blockIdx.x*blockSize + bnh;
+
 
     if (col < n)
     {
@@ -182,7 +185,6 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
         {
             // determine which row to look at
             i = blockIdx.x*(blockSize*2) + threadIdx.x;
-            max_i = blockIdx.x*(blockSize*2) + bnh;
             
             g_offset = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
             s_offset = bnh*j;
@@ -194,7 +196,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 //printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, g_offset: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                 
-                while (i < n && i < max_i) 
+                while (i < n && i < min_i) 
                 { 
                     if (i + blockSize < n && i + blockSize < max_i)
                     {
