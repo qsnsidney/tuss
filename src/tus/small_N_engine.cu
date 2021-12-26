@@ -182,9 +182,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             i = blockIdx.x*(blockSize*2) + threadIdx.x;
             sdata[tid] = {0.0f, 0.0f, 0.0f};
 
-            printf("tid: %d, bx: %d, by: %d\n", tid, blockIdx.x, blockIdx.y);
-            printf("tid: %d, j: %d, bn: %d, ilen: %d, vi: %d, index: %d, olen: %d\n", tid, j, bn, ilen, vi, vi + ilen*j + i, olen);
-            printf("tid: %d, idata i x: %f, y: %f, z: %f\n", tid, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
+            printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, vi + ilen*j + i, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
             
             /*
             while (i < n) 
