@@ -262,13 +262,11 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 }
                 __syncthreads(); 
 
-                /*
 
                 if (tid == 0 && blkn == 1) 
                 {
-                    printf("%d block (%d, %d) output x: %f, y: %f, z: %f\n", j, blockIdx.x, blockIdx.y, o[blockIdx.y*bn+j].x, o[blockIdx.y*bn+j].y, o[blockIdx.y*bn+j].z);
+                    printf("%d block (%d, %d) output x: %f, y: %f, z: %f\n", blockIdx.y*ilen*bn + ilen*j + i, blockIdx.x, blockIdx.y, o[blockIdx.y*bn+j].x, o[blockIdx.y*bn+j].y, o[blockIdx.y*bn+j].z);
                 }
-                */
 
             }
         }
@@ -581,7 +579,7 @@ namespace TUS
         printf("debug 1\n");
         
         const int bs = 32; //block_size_;
-        int body_per_block = 100;
+        int body_per_block = 2;
         int h_blockNum = (summation_result_per_body + bs-1)/bs;
         int v_blockNum = (nBody + body_per_block-1)/body_per_block;
         //int blockNum = h_blockNum * v_blockNum;
