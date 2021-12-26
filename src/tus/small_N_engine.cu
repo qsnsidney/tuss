@@ -198,7 +198,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if (i + blockSize < n && i + blockSize < max_i)
                     {
-                        printf("if writing into (%d, %d)\n sidx: %d, g_offset: %d, i: %d, i+blockSize: %d - x: %f, y: %f, z: %f\n", sidx, g_offset, i, i+blockSize, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
+                        printf("if writing into (%d, %d)\n sidx: %d, g_offset: %d, i: %d, i+blockSize: %d - x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, sidx, g_offset, i, i+blockSize, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
                         sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
                         sdata[sidx].y += g_idata[g_offset].y + g_idata[g_offset + blockSize].y; 
                         sdata[sidx].z += g_idata[g_offset].z + g_idata[g_offset + blockSize].z; 
@@ -617,7 +617,7 @@ namespace TUS
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
-            printf("debug 4 shared memory size: %d\n", body_per_block*summation_result_per_body);
+            printf("debug 4 shared memory size: %d\n", body_per_block*h_body_per_block;
             reduce<bs><<<rgrid, h_body_per_block, body_per_block*h_body_per_block*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_body_per_block, h_blockNum, d_A[src_index] ) ;
             
             cudaDeviceSynchronize();
