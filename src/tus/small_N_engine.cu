@@ -187,7 +187,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             s_offset = blockSize*j;
             sidx = s_offset + threadIdx.x;
 
-            if (g_offset < bnt)
+            if (g_offset < bnt*ilen)
             {
                 sdata[sidx] = {0.0f, 0.0f, 0.0f};
 
