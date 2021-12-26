@@ -176,14 +176,15 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             int i = ii;
             sdata[tid] = {0.0f, 0.0f, 0.0f};
 
+            printf("i: %d, j: %d, ilen: %d, vi: %d, index: %d", i, j, ilen, vi, vi + ilen*j + i);
+            printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
+            
             while (i < n) 
             { 
-                printf("i: %d, j: %d, ilen: %d, vi: %d, index: %d", i, j, ilen, vi, vi + ilen*j + i);
-                printf("i: %d, n: %d; idata i x: %f, y: %f, z: %f\n", i, n, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
                 //sdata[tid].x += g_idata[vi + ilen*j + i].x + g_idata[vi + ilen*j + i+blockSize].x; 
                 //sdata[tid].y += g_idata[vi + ilen*j + i].y + g_idata[vi + ilen*j + i+blockSize].y; 
                 //sdata[tid].z += g_idata[vi + ilen*j + i].z + g_idata[vi + ilen*j + i+blockSize].z; 
-                //i += gridSize; 
+                i += gridSize; 
             }
             __syncthreads();
 
