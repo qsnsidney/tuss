@@ -118,38 +118,38 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
 }
 
 template <unsigned int blockSize>
-__device__ void warpReduce(volatile float4 *sdata, int sidx, unsigned int ii, int n) {
-    if ((blockSize >= 64) && (ii + 32 < n)) 
+__device__ void warpReduce(volatile float4 *sdata, int sidx, unsigned int ii, int n, int min_i) {
+    if ((blockSize >= 64) && (ii + 32 < n) && (ii + 32 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 32].x;
         sdata[sidx].y += sdata[sidx + 32].y;
         sdata[sidx].z += sdata[sidx + 32].z;
     }
-    if ((blockSize >= 32) && (ii + 16 < n)) 
+    if ((blockSize >= 32) && (ii + 16 < n) && (ii + 32 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 16].x;
         sdata[sidx].y += sdata[sidx + 16].y;
         sdata[sidx].z += sdata[sidx + 16].z;
     }
-    if ((blockSize >= 16) && (ii + 8 < n)) 
+    if ((blockSize >= 16) && (ii + 8 < n) && (ii + 32 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 8].x;
         sdata[sidx].y += sdata[sidx + 8].y;
         sdata[sidx].z += sdata[sidx + 8].z;
     }
-    if ((blockSize >= 8) && (ii + 4 < n)) 
+    if ((blockSize >= 8) && (ii + 4 < n) && (ii + 32 < min_i)) 
     {
         sdata[sidx].x += sdata[sidx + 4].x;
         sdata[sidx].y += sdata[sidx + 4].y;
         sdata[sidx].z += sdata[sidx + 4].z;
     }
-    if ((blockSize >= 4) && (ii + 2 < n))
+    if ((blockSize >= 4) && (ii + 2 < n) && (ii + 32 < min_i))
     {
         sdata[sidx].x += sdata[sidx + 2].x;
         sdata[sidx].y += sdata[sidx + 2].y;
         sdata[sidx].z += sdata[sidx + 2].z;
     }
-    if ((blockSize >= 2) && (ii + 1 < n)) 
+    if ((blockSize >= 2) && (ii + 1 < n) && (ii + 32 < min_i)) 
     {
         printf("ii: %d, n: %d, sidx: %d, sdata[sidx + 1] x: %f, y: %f, z: %f\n", ii, n, sidx, sdata[sidx + 1].x, sdata[sidx + 1].y, sdata[sidx + 1].z);
         sdata[sidx].x += sdata[sidx + 1].x;
@@ -255,7 +255,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 printf("2 - (%d, %d) index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.x, blockIdx.y, blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
-                if (tid < 32) warpReduce<blockSize>(sdata, sidx, ii, min_i);
+                if (tid < 32) warpReduce<blockSize>(sdata, sidx, ii, n, min_i);
 
                 __syncthreads(); 
 
