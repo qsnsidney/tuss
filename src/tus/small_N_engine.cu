@@ -196,14 +196,14 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if (false)//(i + blockSize < n)
                     {
-                        printf("if writing into sidx: %d, g_offset: %d 0 - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
+                        printf("if writing into sidx: %d, g_offset: %d - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x + g_idata[g_offset + blockSize].x, g_idata[g_offset].y + g_idata[g_offset + blockSize].y, g_idata[g_offset].z + g_idata[g_offset + blockSize].z);
                         sdata[sidx].x += g_idata[g_offset].x + g_idata[g_offset + blockSize].x; 
                         sdata[sidx].y += g_idata[g_offset].y + g_idata[g_offset + blockSize].y; 
                         sdata[sidx].z += g_idata[g_offset].z + g_idata[g_offset + blockSize].z; 
                     }
                     else
                     {
-                        printf("else writing into sidx: %d, g_offset: %d 0 - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
+                        printf("else writing into sidx: %d, g_offset: %d - x: %f, y: %f, z: %f\n", sidx, g_offset, g_idata[g_offset].x, g_idata[g_offset].y, g_idata[g_offset].z);
                         sdata[sidx].x += g_idata[g_offset].x;
                         sdata[sidx].y += g_idata[g_offset].y; 
                         sdata[sidx].z += g_idata[g_offset].z;
@@ -616,6 +616,8 @@ namespace TUS
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
             printf("debug 4 shared memory size: %d\n", body_per_block*summation_result_per_body);
             reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
+            
+            cudaDeviceSynchronize();
             printf("debug 5\n");
             printf("rgrid 1 - x: %d, y: %d\n", rgrid.x, rgrid.y);
 
@@ -631,6 +633,8 @@ namespace TUS
                 rgrid = {h_blockNum, v_blockNum};
 
                 reduce<bs><<<rgrid, bs, body_per_block*bs*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
+                
+                cudaDeviceSynchronize();
                 printf("%d debug 6-2\n", count);
                 printf("rgrid 2 - x: %d, y: %d\n", rgrid.x, rgrid.y);
 
