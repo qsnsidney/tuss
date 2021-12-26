@@ -108,7 +108,7 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
         float3 accumulated_accer = make_float3(output_A[tid].x, output_A[tid].y, output_A[tid].z);
         for (int i = 0; i < summation_res_per_body; i++)
         {
-            printf("i: %d, x: %f, y: %f, z: %f\n", i, intermidiate_A[tid * summation_res_per_body + i].x, intermidiate_A[tid * summation_res_per_body + i].y, intermidiate_A[tid * summation_res_per_body + i].z);
+            printf("tid: %d, x: %f, y: %f, z: %f\n", tid, intermidiate_A[tid * summation_res_per_body + i].x, intermidiate_A[tid * summation_res_per_body + i].y, intermidiate_A[tid * summation_res_per_body + i].z);
             accumulated_accer.x += intermidiate_A[tid * summation_res_per_body + i].x;
             accumulated_accer.y += intermidiate_A[tid * summation_res_per_body + i].y;
             accumulated_accer.z += intermidiate_A[tid * summation_res_per_body + i].z;
