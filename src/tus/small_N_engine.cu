@@ -189,7 +189,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
             {
                 sdata[sidx] = {0.0f, 0.0f, 0.0f};
 
-                printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
+                //printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[brow].x, g_idata[brow].y, g_idata[brow].z);
                 
                 while (i < n) 
                 { 
@@ -211,7 +211,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads();
 
-                printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (blockSize >= 512) 
                 { 
@@ -248,13 +248,13 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads(); 
 
-                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 
                 if (tid == 0) 
                 {
                     g_odata[vo + olen*j] = sdata[sidx];
-                    printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                    //printf("(%d, %d) block (%d, %d)- sidx: %d has data x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, j, blockIdx.x, blockIdx.y, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
                     if (blkn == 1)
                     {
                         o[blockIdx.y*bn+j] = sdata[sidx];
@@ -262,11 +262,12 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 }
                 __syncthreads(); 
 
-
+                /*
                 if (tid == 0 && blkn == 1) 
                 {
                     printf("%d block (%d, %d) output x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, blockIdx.x, blockIdx.y, o[blockIdx.y*bn+j].x, o[blockIdx.y*bn+j].y, o[blockIdx.y*bn+j].z);
                 }
+                */
 
             }
         }
