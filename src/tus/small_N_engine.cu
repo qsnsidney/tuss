@@ -118,42 +118,42 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
 }
 
 template <unsigned int blockSize>
-__device__ void warpReduce(volatile float4 *sdata, unsigned int tid, int n) {
+__device__ void warpReduce(volatile float4 *sdata, unsigned int sidx, unsigned int tid, int n) {
     if ((blockSize >= 64) && (tid + 32 < n)) 
     {
-        sdata[tid].x += sdata[tid + 32].x;
-        sdata[tid].y += sdata[tid + 32].y;
-        sdata[tid].z += sdata[tid + 32].z;
+        sdata[sidx].x += sdata[sidx + 32].x;
+        sdata[sidx].y += sdata[sidx + 32].y;
+        sdata[sidx].z += sdata[sidx + 32].z;
     }
     if ((blockSize >= 32) && (tid + 16 < n)) 
     {
-        sdata[tid].x += sdata[tid + 16].x;
-        sdata[tid].y += sdata[tid + 16].y;
-        sdata[tid].z += sdata[tid + 16].z;
+        sdata[sidx].x += sdata[sidx + 16].x;
+        sdata[sidx].y += sdata[sidx + 16].y;
+        sdata[sidx].z += sdata[sidx + 16].z;
     }
     if ((blockSize >= 16) && (tid + 8 < n)) 
     {
-        sdata[tid].x += sdata[tid + 8].x;
-        sdata[tid].y += sdata[tid + 8].y;
-        sdata[tid].z += sdata[tid + 8].z;
+        sdata[sidx].x += sdata[sidx + 8].x;
+        sdata[sidx].y += sdata[sidx + 8].y;
+        sdata[sidx].z += sdata[sidx + 8].z;
     }
     if ((blockSize >= 8) && (tid + 4 < n)) 
     {
-        sdata[tid].x += sdata[tid + 4].x;
-        sdata[tid].y += sdata[tid + 4].y;
-        sdata[tid].z += sdata[tid + 4].z;
+        sdata[sidx].x += sdata[sidx + 4].x;
+        sdata[sidx].y += sdata[sidx + 4].y;
+        sdata[sidx].z += sdata[sidx + 4].z;
     }
     if ((blockSize >= 4) && (tid + 2 < n))
     {
-        sdata[tid].x += sdata[tid + 2].x;
-        sdata[tid].y += sdata[tid + 2].y;
-        sdata[tid].z += sdata[tid + 2].z;
+        sdata[sidx].x += sdata[sidx + 2].x;
+        sdata[sidx].y += sdata[sidx + 2].y;
+        sdata[sidx].z += sdata[sidx + 2].z;
     }
     if ((blockSize >= 2) && (tid + 1 < n)) 
     {
-        sdata[tid].x += sdata[tid + 1].x;
-        sdata[tid].y += sdata[tid + 1].y;
-        sdata[tid].z += sdata[tid + 1].z;
+        sdata[sidx].x += sdata[sidx + 1].x;
+        sdata[sidx].y += sdata[sidx + 1].y;
+        sdata[sidx].z += sdata[sidx + 1].z;
     }
 }
 
@@ -170,29 +170,32 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
     unsigned int tid = threadIdx.x;
     unsigned int col = blockDim.x*blockIdx.x + threadIdx.x;
     // i = blockIdx.x*(blockSize*2) + threadIdx.x;
-    unsigned int vi = blockIdx.y*ilen*bn;
+    //unsigned int vi = blockIdx.y*ilen*bn;
     unsigned int vo = blockIdx.y*olen*bn;
     unsigned int gridSize = blockSize*2*gridDim.x;
-    int i, brow;
+    int i, brow, vs, sidx;
 
     if (col < n)
     {
         for (int j = 0; j < bn; j++)
         {
             // determine which row to look at
-            brow = vi + ilen*j + i;
+            brow = blockIdx.y*ilen*bn + ilen*j + i; // vi + ilen*j + i
+            vs = blockIdx.y*n*bn + n*j;
+            sidx = vs + threadIdx.x;
+
             if (brow < bnt)
             {
                 i = blockIdx.x*(blockSize*2) + threadIdx.x;
-                sdata[tid] = {0.0f, 0.0f, 0.0f};
+                sdata[sidx] = {0.0f, 0.0f, 0.0f};
 
                 printf("col: %d, bx: %d, by: %d, j: %d, tid: %d, index: %d\nidata i x: %f, y: %f, z: %f\n", col, blockIdx.x, blockIdx.y, j, tid, brow, g_idata[vi + ilen*j + i].x, g_idata[vi + ilen*j + i].y, g_idata[vi + ilen*j + i].z);
                 
                 while (i < n) 
                 { 
-                    sdata[tid].x += g_idata[brow].x + g_idata[brow + blockSize].x; 
-                    sdata[tid].y += g_idata[brow].y + g_idata[brow + blockSize].y; 
-                    sdata[tid].z += g_idata[brow].z + g_idata[brow + blockSize].z; 
+                    sdata[sidx].x += g_idata[brow].x + g_idata[brow + blockSize].x; 
+                    sdata[sidx].y += g_idata[brow].y + g_idata[brow + blockSize].y; 
+                    sdata[sidx].z += g_idata[brow].z + g_idata[brow + blockSize].z; 
                     i += gridSize; 
                 }
 
@@ -204,9 +207,9 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if ((tid < 256) && (tid + 256 < n)) 
                     { 
-                        sdata[tid].x += sdata[tid + 256].x; 
-                        sdata[tid].y += sdata[tid + 256].y; 
-                        sdata[tid].z += sdata[tid + 256].z; 
+                        sdata[sidx].x += sdata[sidx + 256].x; 
+                        sdata[sidx].y += sdata[sidx + 256].y; 
+                        sdata[sidx].z += sdata[sidx + 256].z; 
                     } 
                     __syncthreads(); 
                 }
@@ -214,9 +217,9 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if ((tid < 128) && (tid + 128 < n)) 
                     { 
-                        sdata[tid].x += sdata[tid + 128].x; 
-                        sdata[tid].y += sdata[tid + 128].y; 
-                        sdata[tid].z += sdata[tid + 128].z; 
+                        sdata[sidx].x += sdata[sidx + 128].x; 
+                        sdata[sidx].y += sdata[sidx + 128].y; 
+                        sdata[sidx].z += sdata[sidx + 128].z; 
                     } 
                     __syncthreads();
                 }
@@ -224,18 +227,18 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 { 
                     if ((tid < 64) && (tid + 64 < n)) 
                     { 
-                        sdata[tid].x += sdata[tid + 64].x; 
-                        sdata[tid].y += sdata[tid + 64].y; 
-                        sdata[tid].z += sdata[tid + 64].z; 
+                        sdata[sidx].x += sdata[sidx + 64].x; 
+                        sdata[sidx].y += sdata[sidx + 64].y; 
+                        sdata[sidx].z += sdata[sidx + 64].z; 
                     } 
                     __syncthreads(); 
                 }
 
-                if (tid < 32) warpReduce<blockSize>(sdata, tid, n);
+                if (tid < 32) warpReduce<blockSize>(sdata, sidx, tid, n);
 
                 __syncthreads(); 
 
-                printf("2 - index: %d, tid: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sdata[tid].x, sdata[tid].y, sdata[tid].z);
+                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (tid == 0) 
                 {
@@ -592,7 +595,7 @@ namespace TUS
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
             printf("debug 4\n");
-            reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
+            reduce<bs><<<rgrid, bs, body_per_block*summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
             printf("debug 5\n");
 
             int count = 0;
@@ -606,7 +609,7 @@ namespace TUS
 
                 rgrid = {h_blockNum, v_blockNum};
 
-                reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
+                reduce<bs><<<rgrid, bs, body_per_block*total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[src_index] ) ;
                 printf("%d debug 6-2\n", count);
 
                 tmp = d_Z1;
@@ -653,7 +656,7 @@ namespace TUS
                     s1 = z1s;
                     s2 = z2s;
 
-                    reduce<bs><<<rgrid, bs, summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
+                    reduce<bs><<<rgrid, bs, body_per_block*summation_result_per_body*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, s1, summation_result_per_body, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
 
                     while (h_blockNum >= 1)
                     {
@@ -662,7 +665,7 @@ namespace TUS
                         h_blockNum = (h_blockNum + bs-1)/bs;
                         rgrid = {h_blockNum, v_blockNum};
 
-                        reduce<bs><<<rgrid, bs, total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
+                        reduce<bs><<<rgrid, bs, body_per_block*total*sizeof(float4)>>>( d_Z1, d_Z2, s1, s2, total, nBody, body_per_block, h_blockNum, d_A[dest_index] ) ;
 
                         tmp = d_Z1;
                         d_Z1 = d_Z2;
