@@ -251,7 +251,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                     __syncthreads(); 
                 }
 
-                if (tid < 32) warpReduce<blockSize>(sdata, sidx, tid, n);
+                if (tid < 32) warpReduce<blockSize>(sdata, sidx, tid, min_i);
 
                 __syncthreads(); 
 
