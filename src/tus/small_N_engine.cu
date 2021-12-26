@@ -617,7 +617,7 @@ namespace TUS
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
             //simple_accumulate_intermidate_acceleration<<<nblocks, block_size_>>>(nBody, d_intermidiate_A, d_A[src_index], summation_result_per_body);
-            printf("debug 4 shared memory size: %d\n", body_per_block*h_body_per_block;
+            printf("debug 4 shared memory size: %d\n", body_per_block*h_body_per_block);
             reduce<bs><<<rgrid, h_body_per_block, body_per_block*h_body_per_block*sizeof(float4)>>>( d_intermidiate_A, d_Z1, summation_result_per_body, z1s, summation_result_per_body, nBody, body_per_block, h_body_per_block, h_blockNum, d_A[src_index] ) ;
             
             cudaDeviceSynchronize();
