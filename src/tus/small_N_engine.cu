@@ -213,7 +213,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads();
 
-                //printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", blockIdx.y*bn + j, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (blockSize >= 512) 
                 { 
@@ -581,7 +581,7 @@ namespace TUS
         printf("debug 1\n");
         
         const int bs = 32; //block_size_;
-        int body_per_block = 2;
+        int body_per_block = 1;
         int h_blockNum = (summation_result_per_body + bs-1)/bs;
         int v_blockNum = (nBody + body_per_block-1)/body_per_block;
         //int blockNum = h_blockNum * v_blockNum;
