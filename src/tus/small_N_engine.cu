@@ -193,9 +193,9 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 
                 while (i < n) 
                 { 
-                    sdata[sidx].x += g_idata[brow].x + g_idata[brow + blockSize].x; 
-                    sdata[sidx].y += g_idata[brow].y + g_idata[brow + blockSize].y; 
-                    sdata[sidx].z += g_idata[brow].z + g_idata[brow + blockSize].z; 
+                    sdata[sidx].x += g_idata[brow].x;// + g_idata[brow + blockSize].x; 
+                    sdata[sidx].y += g_idata[brow].y;// + g_idata[brow + blockSize].y; 
+                    sdata[sidx].z += g_idata[brow].z;// + g_idata[brow + blockSize].z; 
                     i += gridSize; 
                     brow += gridSize; 
                 }
@@ -239,13 +239,13 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads(); 
 
-                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 
                 if (tid == 0) 
                 {
                     //g_odata[vo + olen*j] = sdata[0];
-                    printf("%d block %d has data: %f\n", j, blockIdx.x, sdata[sidx]);
+                    printf("%d block %d has data x: %f, y: %f, z: %f\n", j, blockIdx.x, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
                     if (blkn == 1)
                     {
                         //o[blockIdx.y*bn+j] = sdata[0];
