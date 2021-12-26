@@ -193,9 +193,18 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
                 
                 while (i < n) 
                 { 
-                    sdata[sidx].x += g_idata[brow].x;// + g_idata[brow + blockSize].x; 
-                    sdata[sidx].y += g_idata[brow].y;// + g_idata[brow + blockSize].y; 
-                    sdata[sidx].z += g_idata[brow].z;// + g_idata[brow + blockSize].z; 
+                    if (i + blockSize < n)
+                    {
+                        sdata[sidx].x += g_idata[brow].x; + g_idata[brow + blockSize].x; 
+                        sdata[sidx].y += g_idata[brow].y; + g_idata[brow + blockSize].y; 
+                        sdata[sidx].z += g_idata[brow].z; + g_idata[brow + blockSize].z; 
+                    }
+                    else
+                    {
+                        sdata[sidx].x += g_idata[brow].x;
+                        sdata[sidx].y += g_idata[brow].y; 
+                        sdata[sidx].z += g_idata[brow].z;
+                    }
                     i += gridSize; 
                     brow += gridSize; 
                 }
