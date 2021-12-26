@@ -201,7 +201,7 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads();
 
-                printf("1 - index: %d, tid: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sdata[tid].x, sdata[tid].y, sdata[tid].z);
+                //printf("1 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
                 if (blockSize >= 512) 
                 { 
@@ -238,18 +238,20 @@ __global__ void reduce(float4 *g_idata, float4 *g_odata, int ilen, int olen, int
 
                 __syncthreads(); 
 
-                printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
+                //printf("2 - index: %d, tid: %d, sidx: %d, sdata x: %f, y: %f, z: %f\n", brow, tid, sidx, sdata[sidx].x, sdata[sidx].y, sdata[sidx].z);
 
+                /*
                 if (tid == 0) 
                 {
                     //g_odata[vo + olen*j] = sdata[0];
-                    printf("%d block %d has data\n", j, blockIdx.x);
+                    printf("%d block %d has data: %f\n", j, blockIdx.x, sdata[sidx]);
                     if (blkn == 1)
                     {
                         //o[blockIdx.y*bn+j] = sdata[0];
                     }
                 }
                 __syncthreads(); 
+                */
 
             }
         }
