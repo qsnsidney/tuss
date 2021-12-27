@@ -92,11 +92,10 @@ simple_accumulate_intermidate_acceleration(int N, float4 *intermidiate_A, float4
 }
 
 __global__ void
-calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
+calculate_forces_2d(int N, size_t offset, float4 *globalX, void *outputA, int luf, int summation_res_per_body)
 {
     extern __shared__ float4 shPosition[];
     float4 myPosition;
-
     int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
     int row_id = blockDim.y * blockIdx.y + threadIdx.y;    // row
 
@@ -135,12 +134,16 @@ calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int 
     // note that the block will end execution after the loop, so no syncthread is needed.
     if (row_id < N && column_id < summation_res_per_body)
     {
+        float* ptr = (float *)outputA;
         for (int k = 0; k < luf; k++)
         {
             //printf("shared mem location :%d, value: %f\n", shared_mem_read_offset + k, shPosition[shared_mem_read_offset + k]);
             acc = AccumulateBodyInteraction(myPosition, shPosition[shared_mem_read_offset + k], acc);
         }
-        globalA[row_id * summation_res_per_body + column_id] = {acc.x, acc.y, acc.z, 0.0f};
+        ptr[row_id * summation_res_per_body * 4 + column_id] = acc.x;
+        ptr[row_id * summation_res_per_body * 4 + column_id + summation_res_per_body] = acc.y;
+        ptr[row_id * summation_res_per_body * 4 + column_id + 2 * summation_res_per_body] = acc.z;
+        ptr[row_id * summation_res_per_body * 4 + column_id + 3 * summation_res_per_body] = 0;
     }
     // I decided to leave this code to profile how many threads are in idle along x dimension
     // if (row_id < N && column_id >= summation_res_per_body) {
@@ -149,11 +152,10 @@ calculate_forces_2d(int N, size_t offset, float4 *globalX, float4 *globalA, int 
 }
 
 __global__ void
-calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, float4 *globalA, int luf, int summation_res_per_body)
+calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, void *globalA, int luf, int summation_res_per_body)
 {
     extern __shared__ float4 shPosition[];
     float4 myPosition;
-
     int column_id = blockDim.x * blockIdx.x + threadIdx.x; // col
     int row_id = blockDim.y * blockIdx.y + threadIdx.y;    // row
 
@@ -192,6 +194,7 @@ calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, float4 *g
 
     // if the body is in the range. and the summation result is also in range
     // note that the block will end execution after the loop, so no syncthread is needed.
+    float* ptr = (float *)globalA;
     if (row_id < N && column_id < summation_res_per_body)
     {
         for (int k = 0; k < luf; k++)
@@ -201,7 +204,10 @@ calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, float4 *g
             //   t1      t2     t3     t4
             acc = AccumulateBodyInteraction(myPosition, shPosition[k * blockDim.x + threadIdx.x], acc);
         }
-        globalA[row_id * summation_res_per_body + column_id] = {acc.x, acc.y, acc.z, 0.0f};
+        ptr[row_id * summation_res_per_body * 4 + column_id] = acc.x;
+        ptr[row_id * summation_res_per_body * 4 + column_id + summation_res_per_body] = acc.y;
+        ptr[row_id * summation_res_per_body * 4 + column_id + 2 * summation_res_per_body] = acc.z;
+        ptr[row_id * summation_res_per_body * 4 + column_id + 3 * summation_res_per_body] = 0;
     }
 }
 
@@ -325,7 +331,7 @@ namespace TUS
          *   host side memory allocation
          */
         data_t_3d *h_V, *h_output_V;
-        float4 *h_X, *h_A, *h_output_X;
+        float4 *h_X, *h_output_X, *h_A;
 
         host_malloc_helper((void **)&h_V, vector_size_3d);
         host_malloc_helper((void **)&h_output_V, vector_size_3d);
@@ -403,13 +409,13 @@ namespace TUS
         int Ncols = summation_result_per_body;
         float alpha = 1.f;
         float beta  = 0.f;
-        float4 *d_column_one_matrix, *h_column_one_matrix;
-        host_malloc_helper((void **)&h_column_one_matrix, sizeof(float4) * summation_result_per_body);
-        for(int i = 0; i < summation_result_per_body; i++) {
-            h_column_one_matrix[i] = make_float4(1.0f, 1.0f, 1.0f, 0.0f);
+        float *d_column_one_matrix, *h_column_one_matrix;
+        host_malloc_helper((void **)&h_column_one_matrix, sizeof(float) * Ncols);
+        for(int i = 0; i < Ncols; i++) {
+            h_column_one_matrix[i] = 1.0f;
         }
-        gpuErrchk(cudaMalloc((void **)&d_column_one_matrix, sizeof(float4) * summation_result_per_body));
-        cudaMemcpy(d_column_one_matrix, h_column_one_matrix, sizeof(float4) * summation_result_per_body, cudaMemcpyHostToDevice);
+        gpuErrchk(cudaMalloc((void **)&d_column_one_matrix, sizeof(float) * Ncols));
+        cudaMemcpy(d_column_one_matrix, h_column_one_matrix, sizeof(float) * Ncols, cudaMemcpyHostToDevice);
 
         for (int i = 0; i < num_loop; i++)
         {
@@ -422,8 +428,24 @@ namespace TUS
             {
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
-            cublasSgemv(handle, CUBLAS_OP_N, Nrows, Ncols, &alpha, (float *)d_intermidiate_A, Nrows, 
-                               (float *)d_column_one_matrix, Ncols, &beta, (float *) d_A[src_index], 1);
+
+            // int num_column = summation_result_per_body;
+            // //                                                            y dim     x dim
+            // float * h_intermidiate_A = (float*)malloc(sizeof(float4) * nBody * num_column);
+            // cudaMemcpy(h_intermidiate_A, d_intermidiate_A, sizeof(float4) * nBody * num_column, cudaMemcpyDeviceToHost);
+            // for(int i = 0; i < nBody * 4; i++) {
+            //     float accum = 0;
+            //     for (int j = 0; j < num_column; j++) {
+            //         accum += h_intermidiate_A[j + i * num_column];
+            //         printf("%f ", h_intermidiate_A[j + i * num_column]);
+            //     }
+            //     printf("accum = %f\n", accum);
+            // }
+
+            cublasSgemv(handle, CUBLAS_OP_T, Ncols, Nrows, &alpha, (float *)d_intermidiate_A, Ncols, 
+                               (float *)d_column_one_matrix, 1, &beta, (float *) d_A[src_index], 1);
+            //cublasSgemv(handle, CUBLAS_OP_N, Nrows, Ncols, &alpha, (float *)d_intermidiate_A, Nrows, 
+                               //(float *)d_column_one_matrix, 1, &beta, (float *) d_A[src_index], 1);
         }
         timer.elapsed_previous("Calculated initial acceleration");
 
@@ -447,8 +469,8 @@ namespace TUS
                     {
                         calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[dest_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
                     }
-                    cublasSgemv(handle, CUBLAS_OP_N, Nrows, Ncols, &alpha, (float *)d_intermidiate_A, Nrows, 
-                               (float *)d_column_one_matrix, Ncols, &beta, (float *) d_A[dest_index], 1);
+                    cublasSgemv(handle, CUBLAS_OP_T, Ncols, Nrows, &alpha, (float *)d_intermidiate_A, Ncols, 
+                               (float *)d_column_one_matrix, 1, &beta, (float *) d_A[dest_index], 1);
                 }
                 cudaDeviceSynchronize();
 
