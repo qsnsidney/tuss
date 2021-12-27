@@ -12,7 +12,7 @@ file(GLOB_RECURSE tus_exe_SRC
 add_executable(tus_exe ${tus_exe_SRC})
 target_include_directories(tus_exe PUBLIC ${CMAKE_SOURCE_DIR})
 target_include_directories(tus_exe PRIVATE ../)
-target_link_libraries(tus_exe core cpusim)
+target_link_libraries(tus_exe core cpusim -lcublas -lcurand -lcusolver)
 
 # set(CMAKE_CUDA_STANDARD 17)
 # set(CMAKE_CUDA_STANDARD_REQUIRED True)
