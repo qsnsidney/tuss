@@ -52,9 +52,9 @@ def main(args):
     print(' ')
     print('RESULT')
     with open(data_output_file_path, 'w') as f_data:
-        for exe_arg_line, avg_time in result:
+        for exe_arg_line, avg_time, iter_time in result:
             line = str(exe_arg_line) + ': ' + \
-                ('{:.6f}'.format(avg_time) if avg_time is not None else 'None')
+                ('{:.6f}'.format(avg_time) if avg_time is not None else 'None') + ', ' + ('{:.6f}'.format(iter_time) if avg_time is not None else 'None')
             f_data.write(line + '\n')
             print(line)
 

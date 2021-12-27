@@ -115,8 +115,10 @@ def schedule_run(args: SchedulerParams):
 
             if total_time is not None:
                 avg_time = total_time / args.num_trials_per_run
+                iter_time = avg_time / (num_iterations + 1)
             else:
                 avg_time = None
-            suite_result.append((exe_arg_line, avg_time))
+                iter_time = None
+            suite_result.append((exe_arg_line, avg_time, iter_time))
 
     return suite_result
