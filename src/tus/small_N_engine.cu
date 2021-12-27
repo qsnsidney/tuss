@@ -763,9 +763,9 @@ namespace TUS
         std::ofstream X_file;
         std::ofstream V_file;
         std::ofstream A_file;
-        X_file.open("smallX.output");
-        V_file.open("smallV.output");
-        A_file.open("smallA.output");
+        X_file.open("smallX_debug.output");
+        V_file.open("smallV_debug.output");
+        A_file.open("smallA_debug.output");
         for (int i = 0; i < nBody; i++)
         {
             X_file << h_output_X[i].x << "\n";
