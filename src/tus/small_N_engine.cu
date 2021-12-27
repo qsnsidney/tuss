@@ -15,7 +15,7 @@
 
 #include <cublas_v2.h>
 
-__global__ void update_step_pos_f4(unsigned nbody, data_t step_size, float4 *i_location, data_t_3d *i_velocity, float4 *i_accer, // new accer is accer at i+1 iteration
+__global__ void update_step_pos_f4(unsigned nbody, data_t step_size, float4 *i_location, data_t_3d *i_velocity, float3 *i_accer, // new accer is accer at i+1 iteration
                                           float4 *o_location, data_t_3d *velocity_half)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
@@ -35,7 +35,7 @@ __global__ void update_step_pos_f4(unsigned nbody, data_t step_size, float4 *i_l
     }
 }
 
-__global__ void update_step_vel_f4(unsigned nbody, data_t step_size, float4 *new_accer, data_t_3d *velocity_half, // new accer is accer at i+1 iteration
+__global__ void update_step_vel_f4(unsigned nbody, data_t step_size, float3 *new_accer, data_t_3d *velocity_half, // new accer is accer at i+1 iteration
                                           data_t_3d *o_velocity)
 {
     unsigned tid = threadIdx.x + blockDim.x * blockIdx.x;
@@ -140,10 +140,9 @@ calculate_forces_2d(int N, size_t offset, float4 *globalX, void *outputA, int lu
             //printf("shared mem location :%d, value: %f\n", shared_mem_read_offset + k, shPosition[shared_mem_read_offset + k]);
             acc = AccumulateBodyInteraction(myPosition, shPosition[shared_mem_read_offset + k], acc);
         }
-        ptr[row_id * summation_res_per_body * 4 + column_id] = acc.x;
-        ptr[row_id * summation_res_per_body * 4 + column_id + summation_res_per_body] = acc.y;
-        ptr[row_id * summation_res_per_body * 4 + column_id + 2 * summation_res_per_body] = acc.z;
-        ptr[row_id * summation_res_per_body * 4 + column_id + 3 * summation_res_per_body] = 0;
+        ptr[row_id * summation_res_per_body * 3 + column_id] = acc.x;
+        ptr[row_id * summation_res_per_body * 3 + column_id + summation_res_per_body] = acc.y;
+        ptr[row_id * summation_res_per_body * 3 + column_id + 2 * summation_res_per_body] = acc.z;
     }
     // I decided to leave this code to profile how many threads are in idle along x dimension
     // if (row_id < N && column_id >= summation_res_per_body) {
@@ -204,10 +203,9 @@ calculate_forces_2d_no_conflict(int N, size_t offset, float4 *globalX, void *glo
             //   t1      t2     t3     t4
             acc = AccumulateBodyInteraction(myPosition, shPosition[k * blockDim.x + threadIdx.x], acc);
         }
-        ptr[row_id * summation_res_per_body * 4 + column_id] = acc.x;
-        ptr[row_id * summation_res_per_body * 4 + column_id + summation_res_per_body] = acc.y;
-        ptr[row_id * summation_res_per_body * 4 + column_id + 2 * summation_res_per_body] = acc.z;
-        ptr[row_id * summation_res_per_body * 4 + column_id + 3 * summation_res_per_body] = 0;
+        ptr[row_id * summation_res_per_body * 3 + column_id] = acc.x;
+        ptr[row_id * summation_res_per_body * 3 + column_id + summation_res_per_body] = acc.y;
+        ptr[row_id * summation_res_per_body * 3 + column_id + 2 * summation_res_per_body] = acc.z;
     }
 }
 
@@ -331,13 +329,14 @@ namespace TUS
          *   host side memory allocation
          */
         data_t_3d *h_V, *h_output_V;
-        float4 *h_X, *h_output_X, *h_A;
+        float4 *h_X, *h_output_X;
+        float3 *h_A;
 
         host_malloc_helper((void **)&h_V, vector_size_3d);
         host_malloc_helper((void **)&h_output_V, vector_size_3d);
 
         host_malloc_helper((void **)&h_X, vector_size_4d_qtzed);
-        host_malloc_helper((void **)&h_A, vector_size_4d);
+        host_malloc_helper((void **)&h_A, vector_size_3d);
         host_malloc_helper((void **)&h_output_X, vector_size_4d);
 
         timer.elapsed_previous("allocated host side memory");
@@ -355,7 +354,8 @@ namespace TUS
         /*
          * create double buffer on device side
          */
-        float4 **d_X, **d_A;
+        float4 **d_X;
+        float3 **d_A;
         unsigned src_index = 0;
         unsigned dest_index = 1;
 
@@ -363,15 +363,15 @@ namespace TUS
         int summation_result_per_body = (AccumBody + unroll_factor_ - 1) / unroll_factor_;
         std::cout << "summation result per body is " << summation_result_per_body << std::endl;
         float4 *d_intermidiate_A;
-        gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float4) * nBody * summation_result_per_body));
+        gpuErrchk(cudaMalloc((void **)&d_intermidiate_A, sizeof(float3) * nBody * summation_result_per_body));
 
         d_X = (float4 **)malloc(2 * sizeof(float4 *));
         gpuErrchk(cudaMalloc((void **)&d_X[src_index], vector_size_4d_qtzed));
         gpuErrchk(cudaMalloc((void **)&d_X[dest_index], vector_size_4d_qtzed));
 
-        d_A = (float4 **)malloc(2 * sizeof(float4 *));
-        gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size_4d));
-        gpuErrchk(cudaMalloc((void **)&d_A[dest_index], vector_size_4d));
+        d_A = (float3 **)malloc(2 * sizeof(float3 *));
+        gpuErrchk(cudaMalloc((void **)&d_A[src_index], vector_size_3d));
+        gpuErrchk(cudaMalloc((void **)&d_A[dest_index], vector_size_3d));
 
         data_t_3d **d_V;
         d_V = (data_t_3d **)malloc(2 * sizeof(data_t_3d *));
@@ -398,17 +398,17 @@ namespace TUS
         // I would highly recommend be careful about setting shared mem > 16384
         assert(column_per_block * sizeof(float4) <= 16384);
         // calculate the initialia acceleration
-        cudaMemset(d_A[src_index], 0, vector_size_4d);
+        cudaMemset(d_A[src_index], 0, vector_size_3d);
 
         /***************/
         /* APPROACH #4 */
         /***************/
         cublasHandle_t handle;
         cublasCreate(&handle);
-        int Nrows = nBody * 4;
+        int Nrows = nBody * 3;
         int Ncols = summation_result_per_body;
         float alpha = 1.f;
-        float beta  = 0.f;
+        float beta  = 1.f;
         float *d_column_one_matrix, *h_column_one_matrix;
         host_malloc_helper((void **)&h_column_one_matrix, sizeof(float) * Ncols);
         for(int i = 0; i < Ncols; i++) {
@@ -457,7 +457,7 @@ namespace TUS
                                                                d_X[dest_index], d_V_half);                                          // output
 
                 cudaDeviceSynchronize();
-                cudaMemset(d_A[dest_index], 0, vector_size_4d);
+                cudaMemset(d_A[dest_index], 0, vector_size_3d);
                 for (int i = 0; i < num_loop; i++)
                 {
                     size_t offset = i * AccumBody;
@@ -509,7 +509,7 @@ namespace TUS
         cudaMemcpy(h_output_V, d_V[src_index], vector_size_3d, cudaMemcpyDeviceToHost);
 
         // Hack Hack Hack. dump out the data
-        cudaMemcpy(h_A, d_A[src_index], vector_size_4d, cudaMemcpyDeviceToHost);
+        cudaMemcpy(h_A, d_A[src_index], vector_size_3d, cudaMemcpyDeviceToHost);
 
         std::ofstream X_file;
         std::ofstream V_file;
