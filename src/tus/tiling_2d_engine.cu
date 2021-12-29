@@ -498,7 +498,7 @@ namespace TUS
         // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size_3d, cudaMemcpyDeviceToHost);
 
-        write_debug_output(name(), h_output_X, h_output_V, h_A, nBody);
+        //write_debug_output(name(), h_output_X, h_output_V, h_A, nBody);
 
         timer.elapsed_previous("copied output back to host");
 
