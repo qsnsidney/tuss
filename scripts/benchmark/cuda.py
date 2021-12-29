@@ -21,42 +21,51 @@ class CudaEngine(Enum):
 
 
 def init(parser):
-    general.init_parser_parent(parser, CudaEngine.NVDA_IMPROVED)
+    general.init_parser_parent(parser,  path.join(
+        general.get_script_path(), 'build/tus/tus_exe'), CudaEngine.NVDA_IMPROVED)
 
 
 def main(args):
-    script_path = path.join(path.dirname(path.realpath(__file__)),
-                            '../../')
     project_home_dir = path.join(
         args.output, core.utils.get_pf_timestamp_str())
     core.fileio.create_dir_if_necessary(project_home_dir)
 
     print(f'Using {project_home_dir} as working directory')
 
+    exe_args_sweep = determine_exe_args_sweep(CudaEngine(args.version))
+    exe_args_sweep['--num_bodies'] = [20_000, 100_000, 200_000]
+
     scheduler_args = scheduler.SchedulerParams(
         'GPU',
         args.version,
         CudaEngine(args.version).name,
-        path.join(script_path, 'build/tus/tus_exe'),
-        {'--num_bodies': [50000, 100000],
-         '--block_size': [16, 64, 256]},
+        args.exe,
+        exe_args_sweep,
         args.trials,
         project_home_dir,
         'Profile \[all_iters\]: (([0-9]*[.])?[0-9]+)',
-        args.input)
+        args.input,
+        args.dt,
+        args.iterations)
 
     result = scheduler.schedule_run(scheduler_args)
 
     BENCHMARK_OUTPUT_FILE = f'{scheduler_args.suite_name.lower()}_benchmark_{CudaEngine(scheduler_args.engine_version).name}.csv'
     data_output_file_path = path.join(project_home_dir, BENCHMARK_OUTPUT_FILE)
     print(' ')
-    print('RESULT')
-    with open(data_output_file_path, 'w') as f_data:
-        for exe_arg_line, avg_time, iter_time in result:
-            line = str(exe_arg_line) + ': ' + \
-                ('{:.6f}'.format(avg_time) if avg_time is not None else 'None') + ', ' + ('{:.6f}'.format(iter_time) if avg_time is not None else 'None')
-            f_data.write(line + '\n')
-            print(line)
+    scheduler.write_suite_result_to_file(
+        result, data_output_file_path, args.iterations)
+
+
+def determine_exe_args_sweep(version: CudaEngine):
+    if version == CudaEngine.BASIC or version == CudaEngine.NVDA_REFERENCE:
+        return {'--block_size': [16, 64, 256]}
+    elif version == CudaEngine.TILING_2D:
+        return {'--len': [1, 2, 4],
+                '--wid': [64, 128, 256, 512],
+                '--lur': [256, 512, 1024]}
+    else:
+        raise Exception('Even god cannot help you on this, sorry')
 
 
 def main_deprecated(args):

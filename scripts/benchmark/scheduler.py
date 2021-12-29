@@ -14,6 +14,8 @@ class SchedulerParams(NamedTuple):
     wdir: str
     timer_pattern: str
     benchmark_data_path: str
+    dt: float
+    num_iterations: int
 
 
 def validate_exe_args(original_exe_args_sweep: dict):
@@ -52,6 +54,9 @@ def permutate_exe_args(exe_args_sweep: dict, exe_arg_names: list = None):
 
 
 def schedule_run(args: SchedulerParams):
+    '''
+    suite_result = [(exe_arg_line, avg_time)]
+    '''
     suite_result = list()
     STDOUT_OUTPUT = 'benchmark.stdout'
 
@@ -62,25 +67,22 @@ def schedule_run(args: SchedulerParams):
         validate_exe_args(args.exe_args_sweep))
 
     stdout_file_path = path.join(args.wdir, STDOUT_OUTPUT)
+    print(f'Creating file for stdout {stdout_file_path}')
     with open(stdout_file_path, 'w') as f_stdout:
         for exe_arg_line in exe_args_sweep:
             total_time = 0
             assert args.num_trials_per_run > 0
             for itrial in range(args.num_trials_per_run):
-                info_msg = f'Running {exe_arg_line}, trial {itrial}'
-                f_stdout.write(info_msg + '\n')
-                print(info_msg)
-
-                # hardcode now, fixit
-                dt = 1
-                num_iterations = 10
-                # end fixit
-
                 command = [args.executable] + exe_arg_line + [
                     '--ic_file', args.benchmark_data_path,
-                    '--dt', str(dt),
-                    '--num_iterations', str(num_iterations),
+                    '--dt', str(args.dt),
+                    '--num_iterations', str(args.num_iterations),
                     '--version', str(args.engine_version)]
+
+                command_str = ' '.join(command)
+                info_msg = f'Running {command_str}, trial {itrial}'
+                f_stdout.write(info_msg + '\n')
+                print(info_msg)
 
                 result = None
                 try:
@@ -107,18 +109,34 @@ def schedule_run(args: SchedulerParams):
                 f_stdout.write(info_msg + '\n')
                 print(info_msg)
                 f_stdout.write(ret + '\n')
+                f_stdout.write(
+                    '=========================================================\n\n')
 
                 if time_elapsed is not None and total_time is not None:
                     total_time += time_elapsed
                 else:
                     total_time = None
 
+                f_stdout.flush()
+
             if total_time is not None:
                 avg_time = total_time / args.num_trials_per_run
-                iter_time = avg_time / (num_iterations + 1)
             else:
                 avg_time = None
-                iter_time = None
-            suite_result.append((exe_arg_line, avg_time, iter_time))
+            suite_result.append((exe_arg_line, avg_time))
 
     return suite_result
+
+
+def write_suite_result_to_file(suite_result, data_output_file_path, num_iterations):
+    print('RESULT')
+    with open(data_output_file_path, 'w') as f_data:
+        for exe_arg_line, avg_time in suite_result:
+            iter_time = (
+                avg_time / num_iterations) if avg_time is not None else None
+            line = str(exe_arg_line) + ': '
+            line += '{:.6f}'.format(avg_time) if avg_time is not None else 'None'
+            line += ', ' + ('{:.6f}'.format(iter_time)
+                            if iter_time is not None else 'None')
+            f_data.write(line + '\n')
+            print(line)
