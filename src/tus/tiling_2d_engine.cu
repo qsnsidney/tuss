@@ -1,4 +1,4 @@
-#include "small_N_engine.cuh"
+#include "tiling_2d_engine.cuh"
 #include "core/timer.h"
 
 #include <stdlib.h>
@@ -272,7 +272,7 @@ namespace
 
 namespace TUS
 {
-    SMALL_N_ENGINE::SMALL_N_ENGINE(CORE::SYSTEM_STATE system_state_ic,
+    TILING_2D_ENGINE::TILING_2D_ENGINE(CORE::SYSTEM_STATE system_state_ic,
                                    CORE::DT dt,
                                    int block_size,
                                    int tb_len,
@@ -285,7 +285,7 @@ namespace TUS
     {
     }
 
-    CORE::SYSTEM_STATE SMALL_N_ENGINE::execute(int n_iter, CORE::TIMER &timer)
+    CORE::SYSTEM_STATE TILING_2D_ENGINE::execute(int n_iter, CORE::TIMER &timer)
     {
 
         // number of body for the problem
@@ -514,9 +514,9 @@ namespace TUS
         std::ofstream X_file;
         std::ofstream V_file;
         std::ofstream A_file;
-        X_file.open("smallX.output");
-        V_file.open("smallV.output");
-        A_file.open("smallA.output");
+        X_file.open("tiling_2d.output");
+        V_file.open("tiling_2d.output");
+        A_file.open("tiling_2d.output");
         for (int i = 0; i < nBody; i++)
         {
             X_file << h_output_X[i].x << "\n";

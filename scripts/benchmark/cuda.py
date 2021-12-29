@@ -15,7 +15,7 @@ class CudaEngine(Enum):
     NVDA_REFERENCE = 1
     COALESCED_BASIC = 2
     TILED_BASIC = 3
-    SMALL_N = 4
+    TILING_2D = 4
     MAT_MUL = 5
     NVDA_IMPROVED = 6
 

@@ -11,7 +11,7 @@
 #include "core/utility.hpp"
 #include "simple_engine.cuh"
 #include "nvda_reference_engine.cuh"
-#include "small_N_engine.cuh"
+#include "tiling_2d_engine.cuh"
 #include "coalesced_simple_engine.cuh"
 #include "tiled_simple_engine.cuh"
 #include "mat_mul_engine.cuh"
@@ -29,7 +29,7 @@ namespace
         NVDA_REFERENCE,
         COALESCED_BASIC,
         TILED_BASIC,
-        SMALL_N,
+        TILING_2D,
         MAT_MUL,
         NVDA_IMPROVED,
     };
@@ -175,9 +175,9 @@ int main(int argc, const char *argv[])
         engine = std::make_unique<TUS::NVDA_IMPROVED_ENGINE>(
             system_state_ic, dt, block_size, system_state_engine_log_dir_opt);
     }
-    else if (version == VERSION::SMALL_N) 
+    else if (version == VERSION::TILING_2D) 
     {
-            engine.reset(new TUS::SMALL_N_ENGINE(
+            engine.reset(new TUS::TILING_2D_ENGINE(
             system_state_ic, dt, block_size, tb_len,tb_wid, unroll_factor, tpb, system_state_engine_log_dir_opt));
     }
     else 
