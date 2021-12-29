@@ -38,18 +38,20 @@ git clone https://github.com/qsnsidney/tuss.git
 echo "> Building exe_repo"
 make -C $exe_repo -j8
 
-echo "> Running benchmark script for CPU-GPU Cross-Comparison"
-echo "! Results will be in $w_repo/tmp"
 
-echo "> You can now add in more benchmark scripts after here in the bash script"
+
+echo "> You can now add in benchmark scripts after here in the bash script"
 # I am the fen ge xian, please notice me
 # Yo, here ==============================|
 #                                        v
 cd $w_repo
+
+echo "> Running benchmark script for CPU-GPU Cross-Comparison"
+echo "! Results will be in $w_repo/tmp"
+
 # You only need to provide --version argument
-python3 -m scripts.benchmark cuda --version=0 --exe="$exe_repo/build/tus/tus_exe" -m "gpu0, id0, main~head"
-# Slow running
-# python3 -m scripts.benchmark cpu --version=0 --exe="$exe_repo/build/cpusim/cpusim_exe" -m "cpu0"
+# python3 -m scripts.benchmark cuda --version=0 --exe="$exe_repo/build/tus/tus_exe" -m "gpu0, id0, main~head"
+python3 -m scripts.benchmark cpu --version=0 --exe="$exe_repo/build/cpusim/cpusim_exe" -m "cpu0"
 
 
 
