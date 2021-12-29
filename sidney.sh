@@ -40,7 +40,7 @@ make
 echo "< $(pwd)"
 
 echo "> Running benchmark script for CPU-GPU Cross-Comparison"
-echo "! Results will be in $w_repo/tmp !"
+echo "! Results will be in $w_repo/tmp"
 
 echo "> You can now add in more benchmark scripts after here in the bash script"
 # I am the fen ge xian, please notice me
