@@ -401,7 +401,8 @@ namespace TUS
         cudaMemset(d_A[src_index], 0, vector_size_3d);
 
         /***************/
-        /* APPROACH #4 */
+        /* The idea is taken from https://stackoverflow.com/questions/17862078/reduce-matrix-rows-with-cuda 
+        /* with necessary modifications to make it work for float3
         /***************/
         cublasHandle_t handle;
         cublasCreate(&handle);
@@ -429,23 +430,8 @@ namespace TUS
                 calculate_forces_2d_no_conflict<<<grid, block, column_per_block * sizeof(float4)>>>(nBody, offset, d_X[src_index], d_intermidiate_A, unroll_factor_, summation_result_per_body);
             }
 
-            // int num_column = summation_result_per_body;
-            // //                                                            y dim     x dim
-            // float * h_intermidiate_A = (float*)malloc(sizeof(float4) * nBody * num_column);
-            // cudaMemcpy(h_intermidiate_A, d_intermidiate_A, sizeof(float4) * nBody * num_column, cudaMemcpyDeviceToHost);
-            // for(int i = 0; i < nBody * 4; i++) {
-            //     float accum = 0;
-            //     for (int j = 0; j < num_column; j++) {
-            //         accum += h_intermidiate_A[j + i * num_column];
-            //         printf("%f ", h_intermidiate_A[j + i * num_column]);
-            //     }
-            //     printf("accum = %f\n", accum);
-            // }
-
             cublasSgemv(handle, CUBLAS_OP_T, Ncols, Nrows, &alpha, (float *)d_intermidiate_A, Ncols, 
                                (float *)d_column_one_matrix, 1, &beta, (float *) d_A[src_index], 1);
-            //cublasSgemv(handle, CUBLAS_OP_N, Nrows, Ncols, &alpha, (float *)d_intermidiate_A, Nrows, 
-                               //(float *)d_column_one_matrix, 1, &beta, (float *) d_A[src_index], 1);
         }
         timer.elapsed_previous("Calculated initial acceleration");
 
