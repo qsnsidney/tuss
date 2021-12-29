@@ -61,12 +61,12 @@ AccumulateBodyInteraction(float4 bi, float4 bj, float3 ai)
     float z_diff = bj.z - bi.z;
     // distSqr = dot(r_ij, r_ij) + EPS^2 [6 FLOPS]
     float distSqr = x_diff * x_diff + y_diff * y_diff + z_diff * z_diff + CORE::UNIVERSE::epislon_square;
-    // invDistCube =1/distSqr^(3/2) [4 FLOPS (2 mul, 1 sqrt, 1 inv)]
+    // invDistCube =1/distSqr^(3/2) [6 FLOPS (2 mul, 1rqsrt which is 4 flop)]
     float distSixth = distSqr * distSqr * distSqr;
     float invDistCube = rsqrtf(distSixth);
     // s = m_j * invDistCube [1 FLOP]
     float s = bj.w * invDistCube;
-    // a_i = a_i + s * r_ij [6 FLOPS]
+    // a_i = a_i + s * r_ij [3 FLOPS]
     ai.x += x_diff * s;
     ai.y += y_diff * s;
     ai.z += z_diff * s;
