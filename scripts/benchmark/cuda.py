@@ -32,7 +32,6 @@ def main(args):
 
     print(f'Using {project_home_dir} as working directory')
 
-    exe_args_sweep['--num_bodies'] = [20_000, 100_000, 200_000]
     exe_args_sweep = determine_exe_args_sweep(CudaEngine(args.version))
 
     scheduler_args = scheduler.SchedulerParams(
@@ -59,9 +58,10 @@ def main(args):
 
 def determine_exe_args_sweep(version: CudaEngine):
     if version == CudaEngine.BASIC or version == CudaEngine.NVDA_REFERENCE:
-        return {'--block_size': [16, 64, 256]}
+        return {'--num_bodies': [20_000, 100_000, 200_000], '--block_size': [16, 64, 256]}
     elif version == CudaEngine.TILING_2D:
-        return {'--len': [1, 2, 4],
+        return {'--num_bodies': [20_000, 100_000, 200_000],
+                '--len': [1, 2, 4],
                 '--wid': [64, 128, 256, 512],
                 '--lur': [256, 512, 1024]}
     else:
