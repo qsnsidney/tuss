@@ -35,8 +35,7 @@ rm -rv ./*
 git clone https://github.com/qsnsidney/tuss.git
 
 echo "> Making"
-cd $exe_repo
-make
+make -C $exe_repo -j8
 echo "< $(pwd)"
 
 echo "> Running benchmark script for CPU-GPU Cross-Comparison"
