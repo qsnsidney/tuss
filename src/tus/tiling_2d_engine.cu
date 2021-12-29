@@ -498,27 +498,7 @@ namespace TUS
         // Hack Hack Hack. dump out the data
         cudaMemcpy(h_A, d_A[src_index], vector_size_3d, cudaMemcpyDeviceToHost);
 
-        std::ofstream X_file;
-        std::ofstream V_file;
-        std::ofstream A_file;
-        X_file.open("tiling_2d.output");
-        V_file.open("tiling_2d.output");
-        A_file.open("tiling_2d.output");
-        for (int i = 0; i < nBody; i++)
-        {
-            X_file << h_output_X[i].x << "\n";
-            X_file << h_output_X[i].y << "\n";
-            X_file << h_output_X[i].z << "\n";
-            V_file << h_output_V[i].x << "\n";
-            V_file << h_output_V[i].y << "\n";
-            V_file << h_output_V[i].z << "\n";
-            A_file << h_A[i].x << "\n";
-            A_file << h_A[i].y << "\n";
-            A_file << h_A[i].z << "\n";
-        }
-        X_file.close();
-        V_file.close();
-        A_file.close();
+        write_debug_output(name(), h_output_X, h_output_V, h_A, nBody);
 
         timer.elapsed_previous("copied output back to host");
 
