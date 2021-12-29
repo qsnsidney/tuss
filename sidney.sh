@@ -24,7 +24,7 @@ rm -rv ./*
 git clone https://github.com/qsnsidney/tuss.git
 
 echo "> Making"
-cd ../../exe_repo/tuss
+cd ../exe_repo/tuss
 make
 echo "< $(pwd)"
 
