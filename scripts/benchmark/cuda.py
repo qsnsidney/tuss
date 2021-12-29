@@ -32,8 +32,8 @@ def main(args):
 
     print(f'Using {project_home_dir} as working directory')
 
-    exe_args_sweep = determine_exe_args_sweep(CudaEngine(args.version))
     exe_args_sweep['--num_bodies'] = [20_000, 100_000, 200_000]
+    exe_args_sweep = determine_exe_args_sweep(CudaEngine(args.version))
 
     scheduler_args = scheduler.SchedulerParams(
         'GPU',
