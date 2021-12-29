@@ -433,6 +433,7 @@ namespace TUS
             cublasSgemv(handle, CUBLAS_OP_T, Ncols, Nrows, &alpha, (float *)d_intermidiate_A, Ncols, 
                                (float *)d_column_one_matrix, 1, &beta, (float *) d_A[src_index], 1);
         }
+        cudaDeviceSynchronize();
         timer.elapsed_previous("Calculated initial acceleration");
 
         {
