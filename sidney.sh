@@ -34,9 +34,9 @@ echo "< $(pwd)"
 rm -rv ./*
 git clone https://github.com/qsnsidney/tuss.git
 
-echo "> Making"
+# Here is how you can quick rebuild 
+echo "> Building exe_repo"
 make -C $exe_repo -j8
-echo "< $(pwd)"
 
 echo "> Running benchmark script for CPU-GPU Cross-Comparison"
 echo "! Results will be in $w_repo/tmp"
