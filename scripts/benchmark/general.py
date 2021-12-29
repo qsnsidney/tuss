@@ -21,3 +21,5 @@ def init_parser_parent(parser, default_exe, default_engine_enum):
     parser.add_argument('--iterations', type=int, default=20)
     parser.add_argument('--exe', type=str, default=default_exe,
                         help=f'engine executable. default = {default_exe}')
+    parser.add_argument('-m', '--message', type=str, default=None,
+                        help=f'Labels/messages for this experiment run')

@@ -123,14 +123,22 @@ def schedule_run(args: SchedulerParams):
                 avg_time = total_time / args.num_trials_per_run
             else:
                 avg_time = None
-            suite_result.append((exe_arg_line, avg_time))
+            suite_result.append((command, avg_time))
 
     return suite_result
 
 
-def write_suite_result_to_file(suite_result, data_output_file_path, num_iterations):
+def write_suite_result_to_file(suite_result, data_output_file_path, num_iterations, message=None):
+    print(f'Creating file for result {data_output_file_path}')
     print('RESULT')
     with open(data_output_file_path, 'w') as f_data:
+        f_data.write('Message:\n')
+        if message is not None:
+            f_data.write(message)
+        else:
+            f_data.write('None')
+        f_data.write('\n\n')
+
         for exe_arg_line, avg_time in suite_result:
             iter_time = (
                 avg_time / num_iterations) if avg_time is not None else None

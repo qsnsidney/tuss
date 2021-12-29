@@ -46,7 +46,10 @@ echo "> You can now add in more benchmark scripts after here in the bash script"
 # Yo, here ==============================|
 #                                        v
 cd $w_repo
-python3 -m scripts.benchmark cpu --version=0 --exe="$exe_repo/build/cpusim/cpusim_exe"
+# You only need to provide --version argument
+python3 -m scripts.benchmark cuda --version=0 --exe="$exe_repo/build/tus/tus_exe" -m "gpu0, id0, main~head"
+# Slow running
+# python3 -m scripts.benchmark cpu --version=0 --exe="$exe_repo/build/cpusim/cpusim_exe" -m "cpu0"
 
 
 

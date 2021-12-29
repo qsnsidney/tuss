@@ -54,7 +54,7 @@ def main(args):
     data_output_file_path = path.join(project_home_dir, BENCHMARK_OUTPUT_FILE)
     print(' ')
     scheduler.write_suite_result_to_file(
-        result, data_output_file_path, args.iterations)
+        result, data_output_file_path, args.iterations, args.message)
 
 
 def determine_exe_args_sweep(version: CudaEngine):
