@@ -1,13 +1,13 @@
 #!/bin/bash
 
-exe_root_repo="~/ece1782proj/exe_repo"
+exe_root_repo="$HOME/ece1782proj/exe_repo"
 # Use this variable
 # =============================
 exe_repo="$exe_root_repo/tuss"
 # =============================
 echo "exe_repo(git) is $exe_repo"
 
-w_root_repo="~/ece1782proj/repo"
+w_root_repo="$HOME/ece1782proj/repo"
 # Use this variable
 # =============================
 w_repo="$w_root_repo/tuss"
