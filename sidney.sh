@@ -1,5 +1,19 @@
 #!/bin/bash
 
+exe_root_repo="~/ece1782proj/exe_repo"
+# Use this variable
+# =============================
+exe_repo="$exe_root_repo/tuss"
+# =============================
+echo "exe_repo(git) is $exe_repo"
+
+w_root_repo="~/ece1782proj/repo"
+# Use this variable
+# =============================
+w_repo="$w_root_repo/tuss"
+# =============================
+echo "w_repo(git) is $w_repo"
+
 echo "> Hello Sidney, are you ready to continue?"
 echo "No, you are not ready. To be ready, check this script"
 exit
@@ -9,34 +23,31 @@ cd ~
 echo "< $(pwd)"
 
 echo "> Preparing repo.."
-mkdir -p ece1782proj
-cd ece1782proj
-mkdir -p exe_repo
-cd exe_repo
+mkdir -p $exe_root_repo
+cd $exe_root_repo
 echo "< $(pwd)"
 rm -rv ./*
 git clone https://github.com/qsnsidney/tuss.git
-cd ..
-mkdir -p repo
-cd repo
+mkdir -p $w_root_repo
+cd $w_root_repo
 echo "< $(pwd)"
 rm -rv ./*
 git clone https://github.com/qsnsidney/tuss.git
 
 echo "> Making"
-cd ../exe_repo/tuss
+cd $exe_repo
 make
 echo "< $(pwd)"
 
 echo "> Running benchmark script for CPU-GPU Cross-Comparison"
-cd ../../repo/tuss
-echo "! Results will be in $(pwd)/tmp !"
+echo "! Results will be in $w_repo/tmp !"
 
 echo "> You can now add in more benchmark scripts after here in the bash script"
 # I am the fen ge xian, please notice me
 # Yo, here ==============================|
 #                                        v
-python3 -m scripts.benchmark cpu --version=0 --exe=../../exe_repo/tuss/build/cpusim/cpusim_exe
+cd $w_repo
+python3 -m scripts.benchmark cpu --version=0 --exe="$exe_repo/build/cpusim/cpusim_exe"
 
 
 
