@@ -83,7 +83,7 @@ inline __host__ void parse_ic_f4(float4 *input_x, data_t_3d *input_v, const CORE
 }
 
 inline __host__ void write_debug_output(std::string engine_name, float4 * X_output, data_t_3d * V_output, float4 * A_output, size_t nBody) {
-#if 1
+#if 0
     std::ofstream X_file;
     std::ofstream V_file;
     std::ofstream A_file;
