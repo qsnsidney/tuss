@@ -36,7 +36,7 @@ git clone https://github.com/qsnsidney/tuss.git
 
 # Here is how you can quick rebuild 
 echo "> Building exe_repo"
-make -C $exe_repo -j8
+make -C $exe_repo
 
 
 
