@@ -100,10 +100,10 @@ def main_deprecated(args):
     for i in NBODY:
         f_data.write(',' + str(i))
 
-    for block_size in THREAD_PER_BLOCK:
+    for num_body in NBODY:
         f_data.write('\n')
         f_data.write(str(block_size) + ',')
-        for num_body in NBODY:
+        for block_size in THREAD_PER_BLOCK:
             total_time = 0
             for count in range(AVG_ITERATION):
                 info_msg = 'RUNNING NUMBLOCK : ' + \
