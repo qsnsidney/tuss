@@ -58,12 +58,12 @@ def main(args):
 
 def determine_exe_args_sweep(version: CudaEngine):
     if version == CudaEngine.BASIC or version == CudaEngine.NVDA_REFERENCE:
-        return {'--num_bodies': [20_000, 100_000, 200_000], '--block_size': [16, 64, 256]}
+        return {'--block_size': [16, 64, 128, 256], '--num_bodies': [20_000, 100_000, 200_000]}
     elif version == CudaEngine.TILING_2D:
-        return {'--num_bodies': [20_000, 100_000, 200_000],
-                '--len': [1, 2, 4],
+        return {'--len': [1, 2, 4],
                 '--wid': [64, 128, 256, 512],
-                '--lur': [256, 512, 1024]}
+                '--lur': [256, 512, 1024],
+                '--num_bodies': [20_000, 100_000, 200_000]}
     else:
         raise Exception('Even god cannot help you on this, sorry')
 
