@@ -30,7 +30,7 @@ def main(args):
         args.version,
         CpuEngine(args.version).name,
         args.exe,
-        {'--num_bodies': [20_000, 100_000, 200_000],
+        {'--num_bodies': [100_000, 200_000], #[20_000, 100_000, 200_000],
          '--num_threads': [1, 4]},
         args.trials,
         project_home_dir,
