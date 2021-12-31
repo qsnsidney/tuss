@@ -143,6 +143,14 @@ python3 -m scripts.tussgui trajectory_live ./tmp/solar_sys_tus_log
 rm -rf ./tmp/solar_sys_tus_log
 ```
 
+Galaxy
+```
+mkdir -p ./tmp/g
+make run_tus ARGS="-i ./data/ic/one_galaxy_138410.bin -d 0.001 -n10000 -o ./tmp/g --snapshot -V4 --len=1 --wid=512 --luf=1024"
+python3 -m scripts.tussgui snapshot ./data/ic/one_galaxy_138410.bin
+python3 -m scripts.tussgui snapshot ./tmp/g/one_galaxy_138410*
+```
+
 ### Performance
 
 #### cpusim
